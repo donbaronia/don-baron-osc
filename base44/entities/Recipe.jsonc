@@ -16,6 +16,12 @@
     "category": {
       "type": "string"
     },
+    "subcategory": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
     "production_center": {
       "type": "string",
       "description": "Centro de producao (blend, molhos, batata, etc)"
@@ -35,20 +41,67 @@
     "yield_unit": {
       "type": "string"
     },
+    "final_weight": {
+      "type": "number",
+      "default": 0,
+      "description": "Peso final esperado (g)"
+    },
+    "gross_weight": {
+      "type": "number",
+      "default": 0,
+      "description": "Peso bruto (g)"
+    },
+    "net_weight": {
+      "type": "number",
+      "default": 0,
+      "description": "Peso liquido (g)"
+    },
+    "loss_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Perda prevista (%)"
+    },
+    "shrinkage_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Encolhimento (%)"
+    },
+    "evaporation_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Evaporacao (%)"
+    },
+    "yield_history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Historico de rendimento: {date, gross, net, loss_pct, production_id}"
+    },
     "ingredients": {
       "type": "array",
       "items": {
         "type": "object"
       },
-      "description": "Lista de ingredientes: {ingredient_id, product_id, name, quantity, unit, unit_cost, total_cost}"
+      "description": "Lista de ingredientes: {ingredient_id, product_id, name, quantity, unit, weight, volume, correction_factor, expected_loss_pct, unit_cost, total_cost, optional, notes}"
     },
     "preparation_time": {
       "type": "number",
       "description": "Tempo de preparo em minutos"
     },
+    "assembly_time": {
+      "type": "number",
+      "default": 0,
+      "description": "Tempo de montagem em minutos"
+    },
     "temperature": {
       "type": "string",
       "description": "Temperatura de preparo"
+    },
+    "shelf_life_days": {
+      "type": "number",
+      "default": 0,
+      "description": "Validade em dias"
     },
     "instructions": {
       "type": "string",
@@ -76,6 +129,63 @@
       "default": 0,
       "description": "Custo por unidade calculado"
     },
+    "sale_price": {
+      "type": "number",
+      "default": 0,
+      "description": "Preco de venda"
+    },
+    "gross_profit": {
+      "type": "number",
+      "default": 0,
+      "description": "Lucro bruto (preco - custo)"
+    },
+    "net_profit": {
+      "type": "number",
+      "default": 0,
+      "description": "Lucro liquido"
+    },
+    "margin_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Margem (%)"
+    },
+    "markup": {
+      "type": "number",
+      "default": 0,
+      "description": "Markup"
+    },
+    "contribution": {
+      "type": "number",
+      "default": 0,
+      "description": "Contribuicao marginal"
+    },
+    "cmv_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "CMV (%) = custo / preco * 100"
+    },
+    "is_combo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a receita e um combo"
+    },
+    "combo_items": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Itens do combo: {recipe_id, name, quantity, unit_cost, total_cost}"
+    },
+    "is_addition": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a receita e um adicional"
+    },
+    "addition_price": {
+      "type": "number",
+      "default": 0,
+      "description": "Preco do adicional"
+    },
     "active": {
       "type": "boolean",
       "default": true
@@ -93,12 +203,20 @@
       "type": "number",
       "default": 1
     },
+    "change_reason": {
+      "type": "string",
+      "description": "Motivo da ultima alteracao"
+    },
+    "last_calculated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "history": {
       "type": "array",
       "items": {
         "type": "object"
       },
-      "description": "Historico de alteracoes da receita"
+      "description": "Historico de alteracoes da receita: {action, date, user, reason, version, snapshot}"
     },
     "deleted_at": {
       "type": "string",
