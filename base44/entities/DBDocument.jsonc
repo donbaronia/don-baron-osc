@@ -10,18 +10,48 @@
       "enum": [
         "nota_fiscal",
         "boleto",
-        "planilha",
+        "comprovante_pix",
+        "comprovante_bancario",
         "contrato",
+        "relatorio_ifood",
+        "relatorio_financeiro",
+        "pedido_compra",
+        "orcamento",
         "recibo",
-        "relatorio",
-        "outro"
+        "outros"
       ],
-      "default": "outro"
+      "default": "outros"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "recebido",
+        "em_analise",
+        "aguardando_confirmacao",
+        "processado",
+        "arquivado",
+        "rejeitado"
+      ],
+      "default": "recebido"
     },
     "supplier": {
       "type": "string"
     },
+    "cnpj": {
+      "type": "string"
+    },
+    "document_number": {
+      "type": "string"
+    },
+    "value": {
+      "type": "number",
+      "default": 0
+    },
     "document_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "due_date": {
       "type": "string",
       "format": "date"
     },
@@ -34,20 +64,112 @@
     "file_type": {
       "type": "string"
     },
-    "status": {
-      "type": "string",
-      "enum": [
-        "pendente",
-        "processado",
-        "arquivado"
-      ],
-      "default": "pendente"
+    "thumbnail_url": {
+      "type": "string"
     },
     "tags": {
       "type": "array",
       "items": {
         "type": "string"
       }
+    },
+    "extracted_data": {
+      "type": "object"
+    },
+    "annotations": {
+      "type": "string"
+    },
+    "sent_by": {
+      "type": "string"
+    },
+    "confirmed_by": {
+      "type": "string"
+    },
+    "edited_by": {
+      "type": "string"
+    },
+    "rejected_by": {
+      "type": "string"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "confirmed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    },
+    "bank": {
+      "type": "string"
+    },
+    "linha_digitavel": {
+      "type": "string"
+    },
+    "codigo_barras": {
+      "type": "string"
+    },
+    "pix_copia_cola": {
+      "type": "string"
+    },
+    "beneficiario": {
+      "type": "string"
+    },
+    "products": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "taxes": {
+      "type": "number",
+      "default": 0
+    },
+    "freight": {
+      "type": "number",
+      "default": 0
+    },
+    "gross_sales": {
+      "type": "number",
+      "default": 0
+    },
+    "net_sales": {
+      "type": "number",
+      "default": 0
+    },
+    "discounts": {
+      "type": "number",
+      "default": 0
+    },
+    "campaigns": {
+      "type": "number",
+      "default": 0
+    },
+    "fees": {
+      "type": "number",
+      "default": 0
+    },
+    "order_count": {
+      "type": "number",
+      "default": 0
+    },
+    "average_ticket": {
+      "type": "number",
+      "default": 0
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date"
     }
   },
   "required": [

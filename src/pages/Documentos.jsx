@@ -1,152 +1,202 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
+import { logAudit } from "@/lib/audit";
+import { searchDocuments, DOCUMENT_CATEGORIES } from "@/lib/documentUtils";
 import PageHeader from "@/components/shared/PageHeader";
 import Toolbar from "@/components/shared/Toolbar";
-import DataTable from "@/components/shared/DataTable";
-import StatusBadge from "@/components/shared/StatusBadge";
-import { exportToCsv } from "@/lib/exportCsv";
-import { logAudit } from "@/lib/audit";
-import { Button } from "@/components/ui/button";
+import DocumentUpload from "@/components/documentos/DocumentUpload";
+import DocumentList from "@/components/documentos/DocumentList";
+import DocumentConfirmDialog from "@/components/documentos/DocumentConfirmDialog";
+import DocumentViewer from "@/components/documentos/DocumentViewer";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
-} from "@/components/ui/dialog";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Upload, Plus, ExternalLink } from "lucide-react";
-
-const CATEGORIES = [
-  { value: "nota_fiscal", label: "Nota Fiscal" },
-  { value: "boleto", label: "Boleto" },
-  { value: "planilha", label: "Planilha" },
-  { value: "contrato", label: "Contrato" },
-  { value: "recibo", label: "Recibo" },
-  { value: "relatorio", label: "Relatório" },
-  { value: "outro", label: "Outro" },
-];
 
 export default function Documentos() {
   const { user } = useAuth();
-  const [rows, setRows] = useState([]);
+  const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("entrada");
   const [search, setSearch] = useState("");
-  const [open, setOpen] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [form, setForm] = useState({ title: "", category: "outro", supplier: "", document_date: "", notes: "", file_url: "" });
+  const [catFilter, setCatFilter] = useState("all");
+  const [confirmDoc, setConfirmDoc] = useState(null);
+  const [viewerDoc, setViewerDoc] = useState(null);
 
-  const load = () => {
-    base44.entities.DBDocument.list("-created_date", 300).then((r) => {
-      setRows(r);
-      setLoading(false);
+  const load = useCallback(async () => {
+    const docs = await base44.entities.DBDocument.list("-created_date", 500);
+    setDocuments(docs);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const notDeleted = documents.filter((d) => !d.deleted_at);
+  const inTrash = documents.filter((d) => d.deleted_at);
+
+  const getFiltered = () => {
+    switch (activeTab) {
+      case "entrada":
+        return notDeleted.filter((d) => ["recebido", "em_analise", "aguardando_confirmacao"].includes(d.status));
+      case "pendentes":
+        return notDeleted.filter((d) => d.status === "aguardando_confirmacao");
+      case "processados":
+        return notDeleted.filter((d) => d.status === "processado");
+      case "arquivados":
+        return notDeleted.filter((d) => d.status === "arquivado");
+      case "pesquisa": {
+        let results = searchDocuments(notDeleted, search);
+        if (catFilter !== "all") results = results.filter((d) => d.category === catFilter);
+        return results;
+      }
+      case "lixeira":
+        return inTrash;
+      default:
+        return notDeleted;
+    }
+  };
+
+  const handleDelete = async (doc) => {
+    await base44.entities.DBDocument.update(doc.id, {
+      deleted_at: new Date().toISOString(),
+      deleted_by: user?.full_name || "Sistema",
     });
-  };
-  useEffect(load, []);
-
-  const handleFile = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setForm((f) => ({ ...f, file_url, title: f.title || file.name }));
-    setUploading(false);
-  };
-
-  const save = async () => {
-    if (!form.title) return;
-    setSaving(true);
-    await base44.entities.DBDocument.create({ ...form, status: form.file_url ? "processado" : "pendente" });
-    await logAudit({ user, module: "Documentos", action: "Criou documento", details: form.title });
-    setSaving(false);
-    setOpen(false);
-    setForm({ title: "", category: "outro", supplier: "", document_date: "", notes: "", file_url: "" });
+    await logAudit({ user, module: "Documentos", action: "Moveu documento para lixeira", details: doc.title });
     load();
   };
 
-  const filtered = rows.filter((r) => !search || (r.title || "").toLowerCase().includes(search.toLowerCase()) || (r.supplier || "").toLowerCase().includes(search.toLowerCase()));
+  const handleRestore = async (doc) => {
+    await base44.entities.DBDocument.update(doc.id, { deleted_at: null, deleted_by: null });
+    await logAudit({ user, module: "Documentos", action: "Restaurou documento da lixeira", details: doc.title });
+    load();
+  };
 
-  const columns = [
-    { key: "title", label: "Documento", render: (r) => <span className="font-medium text-neutral-900">{r.title}</span> },
-    { key: "category", label: "Categoria", render: (r) => CATEGORIES.find((c) => c.value === r.category)?.label || r.category },
-    { key: "supplier", label: "Fornecedor", render: (r) => r.supplier || "—" },
-    { key: "document_date", label: "Data", render: (r) => (r.document_date ? new Date(r.document_date).toLocaleDateString("pt-BR") : "—") },
-    { key: "status", label: "Status", render: (r) => <StatusBadge status={r.status} /> },
-    {
-      key: "file", label: "Arquivo",
-      render: (r) => r.file_url ? (
-        <a href={r.file_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-medium text-amber-600 hover:text-amber-700">
-          Abrir <ExternalLink className="h-3.5 w-3.5" />
-        </a>
-      ) : "—",
-    },
-  ];
+  const handleArchive = async (doc) => {
+    await base44.entities.DBDocument.update(doc.id, { status: "arquivado" });
+    await logAudit({ user, module: "Documentos", action: "Arquivou documento", details: doc.title });
+    load();
+  };
+
+  const handleReject = async (doc) => {
+    await base44.entities.DBDocument.update(doc.id, {
+      status: "rejeitado",
+      rejected_by: user?.full_name || "Sistema",
+    });
+    await logAudit({ user, module: "Documentos", action: "Rejeitou documento", details: doc.title });
+    load();
+  };
+
+  const filtered = getFiltered();
+  const pendingCount = notDeleted.filter((d) => d.status === "aguardando_confirmacao").length;
+  const trashCount = inTrash.length;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
       <PageHeader
         emoji="📄"
-        title="Centro de Documentos"
-        subtitle="Repositório único: notas fiscais, boletos, planilhas, contratos e relatórios."
-        actions={
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2 bg-neutral-900 hover:bg-neutral-800"><Plus className="h-4 w-4" /> Novo Documento</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader><DialogTitle>Novo Documento</DialogTitle></DialogHeader>
-              <div className="space-y-4 py-2">
-                <div>
-                  <Label>Título</Label>
-                  <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: NF Fornecedor XYZ" className="mt-1.5" />
-                </div>
-                <div>
-                  <Label>Categoria</Label>
-                  <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                    <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label>Fornecedor</Label>
-                    <Input value={form.supplier} onChange={(e) => setForm({ ...form, supplier: e.target.value })} className="mt-1.5" />
-                  </div>
-                  <div>
-                    <Label>Data</Label>
-                    <Input type="date" value={form.document_date} onChange={(e) => setForm({ ...form, document_date: e.target.value })} className="mt-1.5" />
-                  </div>
-                </div>
-                <div>
-                  <Label>Observações</Label>
-                  <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="mt-1.5" rows={2} />
-                </div>
-                <div>
-                  <Label>Arquivo (PDF, imagem, Excel, CSV, XML)</Label>
-                  <label className="mt-1.5 flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 px-4 py-3 text-sm text-neutral-600 hover:border-neutral-400">
-                    <Upload className="h-4 w-4" />
-                    {uploading ? "Enviando..." : form.file_url ? "Arquivo anexado ✓" : "Selecionar arquivo"}
-                    <input type="file" className="hidden" onChange={handleFile} />
-                  </label>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button onClick={save} disabled={saving || !form.title} className="bg-neutral-900 hover:bg-neutral-800">{saving ? "Salvando..." : "Salvar"}</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        }
+        title="Centro de Documentos Inteligente"
+        subtitle="Receba documentos, a IA extrai os dados automaticamente, você confere e confirma. Nenhum documento é perdido."
       />
-      <div className="mt-6 space-y-4">
-        <Toolbar search={search} onSearch={setSearch} onExport={() => exportToCsv("documentos.csv", filtered)} placeholder="Pesquisar documento..." />
-        <DataTable columns={columns} rows={filtered} loading={loading} emptyTitle="Nenhum documento" emptyDescription="Envie notas, boletos e planilhas — a IA poderá interpretá-los futuramente." />
-      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+        <TabsList className="flex-wrap">
+          <TabsTrigger value="entrada">Entrada</TabsTrigger>
+          <TabsTrigger value="pendentes">
+            Pendentes {pendingCount > 0 && <span className="ml-1.5 rounded-full bg-amber-500 px-1.5 py-0.5 text-xs font-bold text-white">{pendingCount}</span>}
+          </TabsTrigger>
+          <TabsTrigger value="processados">Processados</TabsTrigger>
+          <TabsTrigger value="arquivados">Arquivados</TabsTrigger>
+          <TabsTrigger value="pesquisa">Pesquisa</TabsTrigger>
+          <TabsTrigger value="lixeira">
+            Lixeira {trashCount > 0 && <span className="ml-1.5 rounded-full bg-neutral-400 px-1.5 py-0.5 text-xs font-bold text-white">{trashCount}</span>}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="entrada" className="mt-4 space-y-4">
+          <DocumentUpload onUploaded={load} />
+          <DocumentList
+            documents={filtered}
+            loading={loading}
+            onView={setViewerDoc}
+            onConfirm={setConfirmDoc}
+            onReject={handleReject}
+            onDelete={handleDelete}
+          />
+        </TabsContent>
+
+        <TabsContent value="pendentes" className="mt-4">
+          <DocumentList
+            documents={filtered}
+            loading={loading}
+            onView={setViewerDoc}
+            onConfirm={setConfirmDoc}
+            onReject={handleReject}
+            onDelete={handleDelete}
+          />
+        </TabsContent>
+
+        <TabsContent value="processados" className="mt-4">
+          <DocumentList
+            documents={filtered}
+            loading={loading}
+            onView={setViewerDoc}
+            onArchive={handleArchive}
+            onDelete={handleDelete}
+          />
+        </TabsContent>
+
+        <TabsContent value="arquivados" className="mt-4">
+          <DocumentList
+            documents={filtered}
+            loading={loading}
+            onView={setViewerDoc}
+            onArchive={handleArchive}
+            onDelete={handleDelete}
+          />
+        </TabsContent>
+
+        <TabsContent value="pesquisa" className="mt-4 space-y-4">
+          <Toolbar search={search} onSearch={setSearch} placeholder="Pesquisar por fornecedor, valor, número, categoria, data, tags, texto...">
+            <Select value={catFilter} onValueChange={setCatFilter}>
+              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas categorias</SelectItem>
+                {DOCUMENT_CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.emoji} {c.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Toolbar>
+          <DocumentList
+            documents={filtered}
+            loading={loading}
+            onView={setViewerDoc}
+            onConfirm={setConfirmDoc}
+            onArchive={handleArchive}
+            onDelete={handleDelete}
+          />
+        </TabsContent>
+
+        <TabsContent value="lixeira" className="mt-4">
+          <DocumentList
+            documents={filtered}
+            loading={loading}
+            onRestore={handleRestore}
+          />
+        </TabsContent>
+      </Tabs>
+
+      <DocumentConfirmDialog
+        open={!!confirmDoc}
+        document={confirmDoc}
+        onClose={() => setConfirmDoc(null)}
+        onConfirmed={load}
+      />
+      <DocumentViewer
+        open={!!viewerDoc}
+        document={viewerDoc}
+        onClose={() => setViewerDoc(null)}
+      />
     </div>
   );
 }
