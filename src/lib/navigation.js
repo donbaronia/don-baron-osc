@@ -10,6 +10,7 @@ import {
   Bot,
   Settings,
   PieChart,
+  Brain,
 } from "lucide-react";
 
 // Centros de Operação do Don Baron OS.
@@ -76,6 +77,13 @@ export const NAV_ITEMS = [
     icon: BarChart3,
     path: "/indicadores",
     emoji: "📊",
+    roles: ["administrador", "financeiro", "gerencia"],
+  },
+  {
+    label: "Inteligência de Negócios",
+    icon: Brain,
+    path: "/inteligencia",
+    emoji: "🧠",
     roles: ["administrador", "financeiro", "gerencia"],
   },
   {

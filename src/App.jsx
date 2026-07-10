@@ -16,6 +16,7 @@ import Compras from '@/pages/Compras';
 import Documentos from '@/pages/Documentos';
 import Indicadores from '@/pages/Indicadores';
 import BaronAI from '@/pages/BaronAI';
+import Inteligencia from '@/pages/Inteligencia';
 import Administracao from '@/pages/Administracao';
 import CadastroMestre from '@/pages/CadastroMestre';
 // Add page imports here
@@ -56,6 +57,7 @@ const AuthenticatedApp = () => {
         <Route path="/documentos" element={<Documentos />} />
         <Route path="/indicadores" element={<Indicadores />} />
         <Route path="/ia" element={<BaronAI />} />
+        <Route path="/inteligencia" element={<Inteligencia />} />
         <Route path="/administracao" element={<Administracao />} />
         <Route path="/cadastro" element={<CadastroMestre />} />
       </Route>
