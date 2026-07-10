@@ -1,0 +1,178 @@
+{
+  "name": "Decision",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "title": {
+      "type": "string",
+      "description": "Titulo da decisao ou recomendacao"
+    },
+    "decision_type": {
+      "type": "string",
+      "enum": [
+        "comprar_agora",
+        "esperar_compra",
+        "trocar_fornecedor",
+        "aumentar_preco",
+        "fazer_promocao",
+        "contratar",
+        "demitir",
+        "abrir_unidade",
+        "aumentar_estoque",
+        "reduzir_producao",
+        "simulacao",
+        "outra"
+      ],
+      "default": "outra"
+    },
+    "question": {
+      "type": "string",
+      "description": "Pergunta que originou a analise (ex: Vale comprar agora?)"
+    },
+    "score": {
+      "type": "number",
+      "default": 0,
+      "description": "Nota 0-100 da recomendacao"
+    },
+    "recommendation": {
+      "type": "string",
+      "enum": [
+        "recomendado",
+        "recomendado_com_reservas",
+        "neutro",
+        "nao_recomendado"
+      ],
+      "default": "neutro"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "baixo",
+        "medio",
+        "alto",
+        "muito_alto"
+      ],
+      "default": "medio"
+    },
+    "probability": {
+      "type": "number",
+      "default": 0,
+      "description": "Probabilidade de sucesso 0-100"
+    },
+    "financial_impact": {
+      "type": "number",
+      "default": 0,
+      "description": "Impacto financeiro estimado em R$"
+    },
+    "operational_impact": {
+      "type": "string",
+      "enum": [
+        "positivo",
+        "neutro",
+        "negativo"
+      ],
+      "default": "neutro"
+    },
+    "commercial_impact": {
+      "type": "string",
+      "enum": [
+        "positivo",
+        "neutro",
+        "negativo"
+      ],
+      "default": "neutro"
+    },
+    "reasoning": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Motivos que levaram a recomendacao"
+    },
+    "data_sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Modulos consultados para a analise"
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Riscos identificados"
+    },
+    "alternatives": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Alternativas a recomendacao"
+    },
+    "calculations": {
+      "type": "object",
+      "description": "Detalhes dos calculos realizados"
+    },
+    "simulation_params": {
+      "type": "object",
+      "description": "Parametros usados na simulacao (ex: {price_increase: 10, product: 'Combo Don Baron'})"
+    },
+    "ai_explanation": {
+      "type": "string",
+      "description": "Explicacao da IA sobre por que sugeriu"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "aceita",
+        "rejeitada",
+        "arquivada",
+        "simulada"
+      ],
+      "default": "pendente"
+    },
+    "decided_by": {
+      "type": "string"
+    },
+    "decided_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "result_predicted": {
+      "type": "object",
+      "description": "Resultado previsto no momento da decisao"
+    },
+    "result_actual": {
+      "type": "object",
+      "description": "Resultado real apos implementacao"
+    },
+    "result_measured_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "accuracy_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Acuracia previsto vs real 0-100"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}
