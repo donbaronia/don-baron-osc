@@ -32,6 +32,11 @@
       "type": "number",
       "default": 0
     },
+    "issue_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de emissao"
+    },
     "due_date": {
       "type": "string",
       "format": "date"
@@ -47,12 +52,14 @@
       "type": "string"
     },
     "document_id": {
+      "type": "string"
+    },
+    "document_number": {
       "type": "string",
-      "description": "Documento vinculado"
+      "description": "Numero do documento"
     },
     "purchase_id": {
-      "type": "string",
-      "description": "Compra vinculada"
+      "type": "string"
     },
     "payment_method": {
       "type": "string",
@@ -66,6 +73,21 @@
         "outros"
       ],
       "default": "pix"
+    },
+    "bank": {
+      "type": "string"
+    },
+    "pix_key": {
+      "type": "string",
+      "description": "Chave PIX"
+    },
+    "barcode": {
+      "type": "string",
+      "description": "Codigo de barras / linha digitavel"
+    },
+    "attachment_url": {
+      "type": "string",
+      "description": "Anexo"
     },
     "installments": {
       "type": "number",

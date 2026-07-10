@@ -17,6 +17,11 @@ const MAP = {
   planejada: "bg-neutral-100 text-neutral-600",
   em_producao: "bg-blue-100 text-blue-700",
   concluida: "bg-emerald-100 text-emerald-700",
+  parcial: "bg-blue-100 text-blue-700",
+  conciliado: "bg-emerald-100 text-emerald-700",
+  divergente: "bg-rose-100 text-rose-700",
+  ativo: "bg-emerald-100 text-emerald-700",
+  inativo: "bg-neutral-100 text-neutral-600",
 };
 
 export default function StatusBadge({ status }) {

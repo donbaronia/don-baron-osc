@@ -1,0 +1,83 @@
+{
+  "name": "IFoodReceipt",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "week": {
+      "type": "string",
+      "description": "Identificador da semana (ex: 2026-W28)"
+    },
+    "gross_value": {
+      "type": "number",
+      "default": 0
+    },
+    "fees": {
+      "type": "number",
+      "default": 0
+    },
+    "campaigns": {
+      "type": "number",
+      "default": 0
+    },
+    "chargebacks": {
+      "type": "number",
+      "default": 0,
+      "description": "Estornos"
+    },
+    "refunds": {
+      "type": "number",
+      "default": 0,
+      "description": "Reembolsos"
+    },
+    "net_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Calculado: bruto - taxas - estornos - reembolsos + campanhas"
+    },
+    "expected_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "receipt_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "difference": {
+      "type": "number",
+      "default": 0,
+      "description": "Diferenca: recebido - liquido previsto"
+    },
+    "document_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "recebido",
+        "cancelado"
+      ],
+      "default": "pendente"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "week"
+  ]
+}

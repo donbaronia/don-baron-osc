@@ -32,6 +32,19 @@
       "type": "number",
       "default": 0
     },
+    "origin": {
+      "type": "string",
+      "enum": [
+        "ifood",
+        "site",
+        "balcao",
+        "delivery",
+        "marketplace",
+        "outros"
+      ],
+      "default": "balcao",
+      "description": "Origem do recebimento"
+    },
     "expected_date": {
       "type": "string",
       "format": "date"
@@ -67,6 +80,26 @@
         "outros"
       ],
       "default": "pix"
+    },
+    "fees": {
+      "type": "number",
+      "default": 0,
+      "description": "Taxas"
+    },
+    "discounts": {
+      "type": "number",
+      "default": 0,
+      "description": "Descontos"
+    },
+    "commissions": {
+      "type": "number",
+      "default": 0,
+      "description": "Comissoes"
+    },
+    "net_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Liquido: amount - fees - discounts - commissions"
     },
     "installments": {
       "type": "number",
