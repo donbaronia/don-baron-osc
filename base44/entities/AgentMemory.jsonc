@@ -1,0 +1,96 @@
+{
+  "name": "AgentMemory",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "agent_key": {
+      "type": "string"
+    },
+    "agent_name": {
+      "type": "string"
+    },
+    "memory_type": {
+      "type": "string",
+      "enum": [
+        "decision",
+        "learning",
+        "best_practice",
+        "error",
+        "result",
+        "pattern",
+        "corporate_change"
+      ],
+      "default": "decision"
+    },
+    "title": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string",
+      "description": "Conteudo da memoria"
+    },
+    "context": {
+      "type": "object",
+      "description": "Contexto adicional"
+    },
+    "validity_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "validity_end": {
+      "type": "string",
+      "format": "date",
+      "description": "Validade temporal \u2014 Null = sem expiracao"
+    },
+    "is_valid": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se a memoria ainda e valida"
+    },
+    "impact_observed": {
+      "type": "string",
+      "description": "Impacto observado da decisao/aprendizado"
+    },
+    "related_entity_type": {
+      "type": "string"
+    },
+    "related_entity_id": {
+      "type": "string"
+    },
+    "importance": {
+      "type": "string",
+      "enum": [
+        "alta",
+        "media",
+        "baixa"
+      ],
+      "default": "media"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "Conversa de origem"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "agent_key",
+    "title",
+    "content"
+  ]
+}

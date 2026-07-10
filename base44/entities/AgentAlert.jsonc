@@ -1,0 +1,100 @@
+{
+  "name": "AgentAlert",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "agent_key": {
+      "type": "string"
+    },
+    "agent_name": {
+      "type": "string"
+    },
+    "directorate": {
+      "type": "string"
+    },
+    "alert_type": {
+      "type": "string",
+      "enum": [
+        "price_change",
+        "margin_drop",
+        "stock_critical",
+        "cashflow_negative",
+        "opportunity",
+        "risk",
+        "supplier_change",
+        "recipe_change",
+        "schedule_change",
+        "performance_drop"
+      ],
+      "default": "risk"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critica",
+        "alta",
+        "media",
+        "baixa"
+      ],
+      "default": "media"
+    },
+    "title": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "action_suggested": {
+      "type": "string"
+    },
+    "related_entity_type": {
+      "type": "string"
+    },
+    "related_entity_id": {
+      "type": "string"
+    },
+    "data_context": {
+      "type": "object",
+      "description": "Dados que motivaram o alerta"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "acknowledged",
+        "dismissed",
+        "resolved"
+      ],
+      "default": "active"
+    },
+    "acknowledged_by": {
+      "type": "string"
+    },
+    "acknowledged_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "agent_key",
+    "title",
+    "message"
+  ]
+}

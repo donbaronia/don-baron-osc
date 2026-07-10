@@ -24,6 +24,7 @@ import Administracao from '@/pages/Administracao';
 import CadastroMestre from '@/pages/CadastroMestre';
 import Integracoes from '@/pages/Integracoes';
 import Kernel from '@/pages/Kernel';
+import BaronBrain from '@/pages/BaronBrain';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -70,6 +71,7 @@ const AuthenticatedApp = () => {
         <Route path="/cadastro" element={<CadastroMestre />} />
         <Route path="/integracoes" element={<Integracoes />} />
         <Route path="/kernel" element={<Kernel />} />
+        <Route path="/brain" element={<BaronBrain />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

@@ -1,0 +1,105 @@
+{
+  "name": "Agent",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria (vazio = global)"
+    },
+    "agent_key": {
+      "type": "string",
+      "description": "Identificador unico (ex: ceo_ai, fin_fluxo_caixa)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nome de exibicao"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "ceo",
+        "director",
+        "specialist"
+      ],
+      "default": "specialist"
+    },
+    "directorate": {
+      "type": "string",
+      "enum": [
+        "kernel",
+        "financeira",
+        "operacional",
+        "pessoas",
+        "comercial",
+        "dados"
+      ],
+      "default": "financeira"
+    },
+    "specialization": {
+      "type": "string"
+    },
+    "system_prompt": {
+      "type": "string",
+      "description": "Prompt do LLM para o agente"
+    },
+    "data_access": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tipos de entidade que o agente pode ler"
+    },
+    "event_subscriptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Eventos que o agente reage"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Capacidades: analyze, recommend, alert, forecast, simulate"
+    },
+    "avatar_emoji": {
+      "type": "string",
+      "default": "\ud83e\udd16"
+    },
+    "description": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_active_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "conversations_count": {
+      "type": "number",
+      "default": 0
+    },
+    "memory_count": {
+      "type": "number",
+      "default": 0
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "agent_key",
+    "name"
+  ]
+}

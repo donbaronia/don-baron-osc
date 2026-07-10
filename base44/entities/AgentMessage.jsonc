@@ -1,0 +1,81 @@
+{
+  "name": "AgentMessage",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "Conversa de origem"
+    },
+    "agent_key": {
+      "type": "string"
+    },
+    "agent_name": {
+      "type": "string"
+    },
+    "directorate": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "user",
+        "ceo",
+        "specialist",
+        "consolidated",
+        "system"
+      ],
+      "default": "specialist"
+    },
+    "content": {
+      "type": "string",
+      "description": "Conteudo da mensagem"
+    },
+    "confidence_level": {
+      "type": "string",
+      "enum": [
+        "alta",
+        "media",
+        "baixa"
+      ]
+    },
+    "data_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tipos de entidade referenciados"
+    },
+    "response_time_ms": {
+      "type": "number",
+      "default": 0
+    },
+    "position": {
+      "type": "number",
+      "default": 0,
+      "description": "Ordem da mensagem na conversa"
+    },
+    "avatar_emoji": {
+      "type": "string",
+      "default": "\ud83e\udd16"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "conversation_id",
+    "agent_key"
+  ]
+}

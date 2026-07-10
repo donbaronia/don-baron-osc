@@ -1,0 +1,128 @@
+{
+  "name": "AgentConversation",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "title": {
+      "type": "string"
+    },
+    "question": {
+      "type": "string",
+      "description": "Pergunta do usuario"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "is_council": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se convocou um conselho (multiplos agentes)"
+    },
+    "conversation_type": {
+      "type": "string",
+      "enum": [
+        "question",
+        "simulation",
+        "alert_response"
+      ],
+      "default": "question"
+    },
+    "agents_consulted": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "[{agent_key, agent_name, directorate, avatar_emoji}]"
+    },
+    "specialist_responses": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "[{agent_key, agent_name, directorate, avatar_emoji, content, confidence_level, confidence_reason, data_used, recommendation, response_time_ms}]"
+    },
+    "consolidated_response": {
+      "type": "string",
+      "description": "Resposta consolidada pelo CEO AI"
+    },
+    "confidence_level": {
+      "type": "string",
+      "enum": [
+        "alta",
+        "media",
+        "baixa"
+      ],
+      "default": "media"
+    },
+    "confidence_reason": {
+      "type": "string",
+      "description": "Motivo do nivel de confianca"
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "[{topic, position_a, agent_a, position_b, agent_b, recommendation}]"
+    },
+    "data_used": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "[{agent_key, entity_types, record_count}]"
+    },
+    "total_response_time_ms": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "completed",
+        "failed"
+      ],
+      "default": "active"
+    },
+    "user_feedback": {
+      "type": "string",
+      "enum": [
+        "positive",
+        "negative",
+        "neutral",
+        "pending"
+      ],
+      "default": "pending"
+    },
+    "feedback_comment": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "question"
+  ]
+}

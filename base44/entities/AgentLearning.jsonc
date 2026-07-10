@@ -1,0 +1,78 @@
+{
+  "name": "AgentLearning",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "Conversa de origem"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "agent_key": {
+      "type": "string"
+    },
+    "agent_name": {
+      "type": "string"
+    },
+    "decision": {
+      "type": "string",
+      "description": "Decisao tomada"
+    },
+    "predicted_outcome": {
+      "type": "string",
+      "description": "Resultado previsto"
+    },
+    "actual_outcome": {
+      "type": "string",
+      "description": "Resultado real observado"
+    },
+    "learned_lesson": {
+      "type": "string",
+      "description": "Licao aprendida"
+    },
+    "improvement_suggestion": {
+      "type": "string",
+      "description": "Sugestao de melhoria para futuras recomendacoes"
+    },
+    "feedback_positive": {
+      "type": "boolean",
+      "default": false
+    },
+    "impact_metric": {
+      "type": "number",
+      "default": 0,
+      "description": "Metrica de impacto (opcional)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "resolved"
+      ],
+      "default": "pending"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "decision"
+  ]
+}
