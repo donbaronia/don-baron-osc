@@ -1,0 +1,118 @@
+{
+  "name": "WorkflowProcess",
+  "type": "object",
+  "properties": {
+    "definition_id": {
+      "type": "string"
+    },
+    "definition_name": {
+      "type": "string"
+    },
+    "process_code": {
+      "type": "string",
+      "description": "Identificador unico (ex: WF-2026-0001)"
+    },
+    "trigger_event": {
+      "type": "string"
+    },
+    "origin": {
+      "type": "string",
+      "description": "Origem (frontend, backend, workflow, ia)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "em_andamento",
+        "aguardando_aprovacao",
+        "aguardando_documento",
+        "concluido",
+        "cancelado",
+        "erro"
+      ],
+      "default": "pendente"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta",
+        "critica"
+      ],
+      "default": "media"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Entidade de origem do processo"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID do registro de origem"
+    },
+    "entity_description": {
+      "type": "string",
+      "description": "Descricao amigavel do registro de origem"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Etapas do processo: name, description, responsible_role, responsible_name, status, created_at, due_date, completed_at, priority, dependencies, notes, history"
+    },
+    "current_step": {
+      "type": "string",
+      "description": "Nome da etapa atual"
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Historico completo de alteracoes"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "processing_time_ms": {
+      "type": "number",
+      "default": 0
+    },
+    "result": {
+      "type": "string",
+      "description": "Resultado final do processo"
+    },
+    "error": {
+      "type": "string",
+      "description": "Motivo do erro, se houver"
+    },
+    "retry_count": {
+      "type": "number",
+      "default": 0
+    },
+    "max_retries": {
+      "type": "number",
+      "default": 3
+    },
+    "initiated_by_name": {
+      "type": "string"
+    },
+    "initiated_by_email": {
+      "type": "string"
+    },
+    "ia_suggested": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o processo foi sugerido pela BARON AI"
+    }
+  },
+  "required": [
+    "trigger_event"
+  ]
+}

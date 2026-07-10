@@ -1,0 +1,61 @@
+{
+  "name": "WorkflowApproval",
+  "type": "object",
+  "properties": {
+    "process_id": {
+      "type": "string"
+    },
+    "process_code": {
+      "type": "string"
+    },
+    "step_name": {
+      "type": "string"
+    },
+    "approver_role": {
+      "type": "string",
+      "description": "Role exigido para aprovacao (administrador, financeiro, compras, gerencia, etc)"
+    },
+    "approver_name": {
+      "type": "string"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Nome de quem aprovou/rejeitou"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Motivo da aprovacao ou rejeicao"
+    },
+    "comment": {
+      "type": "string"
+    },
+    "audit_logged": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a auditoria foi registrada"
+    },
+    "entity_type": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "process_id",
+    "approver_role"
+  ]
+}

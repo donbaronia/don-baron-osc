@@ -1,0 +1,47 @@
+{
+  "name": "WorkflowDefinition",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome do fluxo"
+    },
+    "description": {
+      "type": "string"
+    },
+    "trigger_event": {
+      "type": "string",
+      "description": "Evento que dispara o fluxo (ex: documento_recebido, compra_registrada)"
+    },
+    "conditions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Condicoes para o fluxo executar (ex: boleto > 5000)"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Etapa templates: name, description, responsible_role, priority, dependencies, requires_approval, due_hours"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "auto_notify": {
+      "type": "boolean",
+      "default": true,
+      "description": "Criar notificacoes automaticamente para etapas humanas"
+    },
+    "created_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "trigger_event"
+  ]
+}
