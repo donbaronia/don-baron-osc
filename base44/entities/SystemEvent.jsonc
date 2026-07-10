@@ -1,0 +1,47 @@
+{
+  "name": "SystemEvent",
+  "type": "object",
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "description": "Tipo do evento (ex: documento_recebido, compra_registrada)"
+    },
+    "module": {
+      "type": "string",
+      "description": "Modulo que emitiu o evento"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Tipo de entidade afetada"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID do registro afetado"
+    },
+    "payload": {
+      "type": "object",
+      "description": "Dados do evento"
+    },
+    "dispatched_to": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Modulos notificados pelo dispatcher"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "origin": {
+      "type": "string",
+      "description": "Origem do evento (frontend, backend, workflow, etc)"
+    }
+  },
+  "required": [
+    "event_type",
+    "module"
+  ]
+}

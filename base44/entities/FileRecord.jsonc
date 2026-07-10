@@ -1,0 +1,60 @@
+{
+  "name": "FileRecord",
+  "type": "object",
+  "properties": {
+    "file_name": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL publica do arquivo"
+    },
+    "file_type": {
+      "type": "string"
+    },
+    "file_size": {
+      "type": "number",
+      "default": 0
+    },
+    "module": {
+      "type": "string",
+      "description": "Modulo que registrou o arquivo"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Entidade vinculada"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID do registro vinculado"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "uploaded_by_name": {
+      "type": "string"
+    },
+    "is_private": {
+      "type": "boolean",
+      "default": false
+    },
+    "file_uri": {
+      "type": "string",
+      "description": "URI para arquivos privados (gera signed URL)"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "file_name",
+    "file_url"
+  ]
+}

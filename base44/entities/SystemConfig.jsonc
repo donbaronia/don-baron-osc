@@ -1,0 +1,31 @@
+{
+  "name": "SystemConfig",
+  "type": "object",
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Chave unica da configuracao (ex: empresa.nome, ia.modelo)"
+    },
+    "value": {
+      "type": "object",
+      "description": "Valor da configuracao (flexivel)"
+    },
+    "category": {
+      "type": "string",
+      "description": "Categoria (empresa, sistema, ia, alertas, etc)"
+    },
+    "description": {
+      "type": "string"
+    },
+    "editable": {
+      "type": "boolean",
+      "default": true
+    },
+    "updated_by_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "key"
+  ]
+}

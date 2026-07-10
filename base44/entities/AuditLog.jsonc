@@ -22,6 +22,42 @@
     },
     "device": {
       "type": "string"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Tabela/entidade alterada"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID do registro alterado"
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "create",
+        "update",
+        "delete",
+        "confirm",
+        "reject",
+        "login",
+        "logout",
+        "export",
+        "import",
+        "other"
+      ],
+      "default": "other"
+    },
+    "before_value": {
+      "type": "object",
+      "description": "Estado anterior do registro"
+    },
+    "after_value": {
+      "type": "object",
+      "description": "Estado novo do registro"
+    },
+    "origin": {
+      "type": "string",
+      "description": "Origem da acao (frontend, backend, workflow, ia)"
     }
   },
   "required": [

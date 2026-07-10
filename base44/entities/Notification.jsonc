@@ -1,0 +1,55 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "info",
+        "warning",
+        "urgent",
+        "error",
+        "success",
+        "system"
+      ],
+      "default": "info"
+    },
+    "module": {
+      "type": "string",
+      "description": "Modulo de origem"
+    },
+    "target_role": {
+      "type": "string",
+      "description": "Role alvo (vazio = broadcast para todos)"
+    },
+    "target_user_id": {
+      "type": "string",
+      "description": "Usuario especifico (vazio = broadcast)"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false
+    },
+    "action_url": {
+      "type": "string",
+      "description": "URL para resolver a notificacao"
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "event_id": {
+      "type": "string",
+      "description": "ID do SystemEvent que gerou esta notificacao"
+    }
+  },
+  "required": [
+    "title",
+    "category"
+  ]
+}

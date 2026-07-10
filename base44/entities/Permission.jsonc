@@ -1,0 +1,40 @@
+{
+  "name": "Permission",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "description": "Perfil do usuario (administrador, financeiro, compras, etc)"
+    },
+    "module": {
+      "type": "string",
+      "description": "Modulo ao qual a permissao se aplica"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Entidade alvo (Product, Supplier, FinancialTransaction, etc)"
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "create",
+          "read",
+          "update",
+          "delete"
+        ]
+      },
+      "description": "Operacoes permitidas"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "role",
+    "module",
+    "entity_type",
+    "operations"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "TechLog",
+  "type": "object",
+  "properties": {
+    "level": {
+      "type": "string",
+      "enum": [
+        "error",
+        "warn",
+        "info",
+        "debug"
+      ],
+      "default": "info"
+    },
+    "module": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "stack": {
+      "type": "string",
+      "description": "Stack trace para erros"
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "level",
+    "message"
+  ]
+}
