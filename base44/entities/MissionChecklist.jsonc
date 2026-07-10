@@ -1,0 +1,63 @@
+{
+  "name": "MissionChecklist",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "mission_id": {
+      "type": "string",
+      "description": "Missao de origem"
+    },
+    "task_id": {
+      "type": "string",
+      "description": "Tarefa de origem (opcional)"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "automatico",
+        "ia",
+        "workflow"
+      ],
+      "default": "manual"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "concluido",
+        "em_andamento",
+        "falhou"
+      ],
+      "default": "pendente"
+    },
+    "completed_by": {
+      "type": "string"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "order": {
+      "type": "number",
+      "default": 0
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "mission_id",
+    "title"
+  ]
+}

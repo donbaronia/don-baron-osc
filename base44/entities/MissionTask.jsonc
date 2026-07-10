@@ -1,0 +1,109 @@
+{
+  "name": "MissionTask",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "mission_id": {
+      "type": "string",
+      "description": "Missao de origem"
+    },
+    "mission_name": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "compras",
+        "financeiro",
+        "producao",
+        "estoque",
+        "rh",
+        "logistica",
+        "comercial",
+        "auditoria",
+        "estrategia"
+      ]
+    },
+    "responsible_name": {
+      "type": "string"
+    },
+    "assigned_worker_key": {
+      "type": "string",
+      "description": "Funcionario digital responsavel"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "em_andamento",
+        "concluida",
+        "bloqueada",
+        "cancelada"
+      ],
+      "default": "pendente"
+    },
+    "progress_pct": {
+      "type": "number",
+      "default": 0
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "depends_on": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs de tarefas que precisam ser concluidas primeiro"
+    },
+    "depends_on_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "checklist_type": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "automatico",
+        "ia",
+        "workflow"
+      ],
+      "default": "manual"
+    },
+    "order": {
+      "type": "number",
+      "default": 0
+    },
+    "notes": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "mission_id",
+    "name"
+  ]
+}

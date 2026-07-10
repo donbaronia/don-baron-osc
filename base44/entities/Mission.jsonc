@@ -1,0 +1,173 @@
+{
+  "name": "Mission",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "objective": {
+      "type": "string"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "compras",
+        "financeiro",
+        "producao",
+        "estoque",
+        "rh",
+        "logistica",
+        "comercial",
+        "auditoria",
+        "estrategia"
+      ]
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "diaria",
+        "semanal",
+        "mensal",
+        "especial",
+        "emergencial",
+        "estrategica"
+      ],
+      "default": "diaria"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta",
+        "critica"
+      ],
+      "default": "media"
+    },
+    "responsible_name": {
+      "type": "string"
+    },
+    "team": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "digital_workers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Prazo final"
+    },
+    "progress_pct": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planejada",
+        "em_andamento",
+        "concluida",
+        "atrasada",
+        "cancelada",
+        "pausada"
+      ],
+      "default": "planejada"
+    },
+    "expected_result": {
+      "type": "string"
+    },
+    "actual_result": {
+      "type": "string"
+    },
+    "indicators": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "score": {
+      "type": "object",
+      "properties": {
+        "efficiency": {
+          "type": "number"
+        },
+        "deadline": {
+          "type": "number"
+        },
+        "quality": {
+          "type": "number"
+        },
+        "savings": {
+          "type": "number"
+        },
+        "financial_impact": {
+          "type": "number"
+        },
+        "overall": {
+          "type": "number"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "learning": {
+      "type": "string",
+      "description": "Licoes aprendidas comparando planejado vs resultado"
+    },
+    "is_auto_created": {
+      "type": "boolean",
+      "default": false
+    },
+    "created_by_worker_key": {
+      "type": "string"
+    },
+    "tasks_count": {
+      "type": "number",
+      "default": 0
+    },
+    "tasks_completed": {
+      "type": "number",
+      "default": 0
+    },
+    "checklist_total": {
+      "type": "number",
+      "default": 0
+    },
+    "checklist_completed": {
+      "type": "number",
+      "default": 0
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

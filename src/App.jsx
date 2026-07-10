@@ -26,6 +26,7 @@ import Integracoes from '@/pages/Integracoes';
 import Kernel from '@/pages/Kernel';
 import BaronBrain from '@/pages/BaronBrain';
 import FuncionariosDigitais from '@/pages/FuncionariosDigitais';
+import MissionControl from '@/pages/MissionControl';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -74,6 +75,7 @@ const AuthenticatedApp = () => {
         <Route path="/kernel" element={<Kernel />} />
         <Route path="/brain" element={<BaronBrain />} />
         <Route path="/workforce" element={<FuncionariosDigitais />} />
+        <Route path="/missions" element={<MissionControl />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
