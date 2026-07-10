@@ -1,0 +1,58 @@
+{
+  "name": "TimelineEntry",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "event_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "origin": {
+      "type": "string",
+      "description": "Origem (frontend, backend, workflow, ia)"
+    },
+    "responsible_name": {
+      "type": "string"
+    },
+    "module": {
+      "type": "string",
+      "description": "Modulo que gerou o evento"
+    },
+    "entity_type": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string"
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Entidades relacionadas no evento"
+    },
+    "event_type": {
+      "type": "string",
+      "description": "Tipo do evento (compra, pagamento, producao, etc)"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "info",
+        "warning",
+        "success",
+        "critical"
+      ],
+      "default": "info"
+    }
+  },
+  "required": [
+    "title",
+    "event_date"
+  ]
+}

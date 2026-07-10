@@ -1,0 +1,49 @@
+{
+  "name": "DataSnapshot",
+  "type": "object",
+  "properties": {
+    "dataset": {
+      "type": "string",
+      "description": "Nome do dataset (produtos, financeiro, cmv, dre, etc)"
+    },
+    "period_type": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "annual"
+      ],
+      "default": "daily"
+    },
+    "period_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "data": {
+      "type": "object",
+      "description": "Dados consolidados do snapshot"
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Metricas calculadas no momento do snapshot"
+    },
+    "record_count": {
+      "type": "number",
+      "default": 0
+    },
+    "calculated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "triggered_by": {
+      "type": "string",
+      "description": "Origem do snapshot (schedule, manual, workflow)"
+    }
+  },
+  "required": [
+    "dataset",
+    "period_type",
+    "period_date"
+  ]
+}
