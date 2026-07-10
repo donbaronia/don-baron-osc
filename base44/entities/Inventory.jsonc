@@ -15,9 +15,27 @@
       "enum": [
         "completo",
         "parcial",
-        "rotativo"
+        "rotativo",
+        "por_categoria",
+        "por_localizacao",
+        "por_fornecedor"
       ],
       "default": "completo"
+    },
+    "filter_category": {
+      "type": "string",
+      "description": "Filtro de categoria (inventario por categoria)"
+    },
+    "filter_location": {
+      "type": "string",
+      "description": "Filtro de localizacao (inventario por localizacao)"
+    },
+    "filter_supplier_id": {
+      "type": "string",
+      "description": "Filtro de fornecedor (inventario por fornecedor)"
+    },
+    "filter_supplier_name": {
+      "type": "string"
     },
     "inventory_date": {
       "type": "string",
@@ -26,12 +44,15 @@
     "responsible_name": {
       "type": "string"
     },
+    "counted_by": {
+      "type": "string"
+    },
     "items": {
       "type": "array",
       "items": {
         "type": "object"
       },
-      "description": "Itens contados: {product_id, name, counted_quantity, system_quantity, difference, unit_cost, total_difference}"
+      "description": "Itens contados: {product_id, name, counted_quantity, system_quantity, difference, unit_cost, total_difference, reason, photos}"
     },
     "total_items": {
       "type": "number",
@@ -48,6 +69,32 @@
     "total_difference": {
       "type": "number",
       "default": 0
+    },
+    "divergence_count": {
+      "type": "number",
+      "default": 0
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "aprovado",
+        "rejeitado"
+      ],
+      "default": "pendente"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "status": {
       "type": "string",

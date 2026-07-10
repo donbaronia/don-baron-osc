@@ -18,6 +18,9 @@
     "barcode": {
       "type": "string"
     },
+    "qr_code": {
+      "type": "string"
+    },
     "category": {
       "type": "string"
     },
@@ -26,6 +29,14 @@
     },
     "unit": {
       "type": "string"
+    },
+    "weight": {
+      "type": "number",
+      "default": 0
+    },
+    "volume": {
+      "type": "number",
+      "default": 0
     },
     "primary_supplier_id": {
       "type": "string"
@@ -84,7 +95,27 @@
       "type": "number",
       "default": 0
     },
+    "coverage_days": {
+      "type": "number",
+      "default": 0,
+      "description": "Dias de cobertura calculados"
+    },
     "physical_location": {
+      "type": "string"
+    },
+    "location_rua": {
+      "type": "string"
+    },
+    "location_prateleira": {
+      "type": "string"
+    },
+    "location_coluna": {
+      "type": "string"
+    },
+    "location_nivel": {
+      "type": "string"
+    },
+    "location_posicao": {
       "type": "string"
     },
     "notes": {

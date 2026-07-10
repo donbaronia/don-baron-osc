@@ -1,48 +1,42 @@
-import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import React, { useState } from "react";
 import PageHeader from "@/components/shared/PageHeader";
-import Toolbar from "@/components/shared/Toolbar";
-import DataTable from "@/components/shared/DataTable";
-import { exportToCsv } from "@/lib/exportCsv";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import InventoryDashboard from "@/components/estoque/InventoryDashboard";
+import StockList from "@/components/estoque/StockList";
+import MovementManagement from "@/components/estoque/MovementManagement";
+import InventoryCount from "@/components/estoque/InventoryCount";
+import BatchExpiryControl from "@/components/estoque/BatchExpiryControl";
+import ABCCurve from "@/components/estoque/ABCCurve";
+import SmartSuggestions from "@/components/estoque/SmartSuggestions";
+import InventoryReports from "@/components/estoque/InventoryReports";
 
-const brl = (n) => (n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const TABS = [
+  { v: "dashboard", l: "Painel Operacional", C: InventoryDashboard },
+  { v: "estoque", l: "Estoque Atual", C: StockList },
+  { v: "movimentacoes", l: "Movimentações", C: MovementManagement },
+  { v: "inventario", l: "Inventário", C: InventoryCount },
+  { v: "validade", l: "Lotes & Validade", C: BatchExpiryControl },
+  { v: "abc", l: "Curva ABC", C: ABCCurve },
+  { v: "sugestoes", l: "Compras Sugeridas", C: SmartSuggestions },
+  { v: "relatorios", l: "Relatórios", C: InventoryReports },
+];
 
 export default function Estoque() {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-
-  useEffect(() => {
-    base44.entities.Product.list("-created_date", 300).then((r) => {
-      setRows(r);
-      setLoading(false);
-    });
-  }, []);
-
-  const filtered = rows.filter((r) => !search || (r.name || "").toLowerCase().includes(search.toLowerCase()) || (r.sku || "").toLowerCase().includes(search.toLowerCase()));
-
-  const columns = [
-    { key: "name", label: "Produto", render: (r) => <span className="font-medium text-neutral-900">{r.name}</span> },
-    { key: "sku", label: "SKU", render: (r) => r.sku || "—" },
-    { key: "category", label: "Categoria", render: (r) => r.category || "—" },
-    { key: "stock_quantity", label: "Estoque", render: (r) => `${r.stock_quantity || 0} ${r.unit || "un"}` },
-    { key: "min_quantity", label: "Mínimo", render: (r) => `${r.min_quantity || 0} ${r.unit || "un"}` },
-    { key: "cost_price", label: "Custo", render: (r) => brl(r.cost_price) },
-    {
-      key: "alert", label: "Situação",
-      render: (r) =>
-        (r.stock_quantity || 0) <= (r.min_quantity || 0)
-          ? <span className="inline-flex items-center rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-medium text-rose-700">Crítico</span>
-          : <span className="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">Normal</span>,
-    },
-  ];
+  const [tab, setTab] = useState("dashboard");
+  const Active = TABS.find(t => t.v === tab)?.C || InventoryDashboard;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
-      <PageHeader emoji="📦" title="Centro de Estoque" subtitle="Controle de produtos, níveis mínimos e itens críticos." />
-      <div className="mt-6 space-y-4">
-        <Toolbar search={search} onSearch={setSearch} onExport={() => exportToCsv("estoque.csv", filtered)} placeholder="Pesquisar produto..." />
-        <DataTable columns={columns} rows={filtered} loading={loading} emptyTitle="Nenhum produto cadastrado" emptyDescription="Cadastre produtos ou importe uma planilha para começar." />
+      <PageHeader emoji="📦" title="Centro de Estoque Inteligente" subtitle="Controle patrimonial de itens físicos — toda movimentação passa pelo Inventory Engine." />
+      <div className="mt-6 space-y-6">
+        <div className="overflow-x-auto -mx-1 px-1">
+          <Tabs value={tab} onValueChange={setTab}>
+            <TabsList>
+              {TABS.map(t => <TabsTrigger key={t.v} value={t.v}>{t.l}</TabsTrigger>)}
+            </TabsList>
+          </Tabs>
+        </div>
+        <Active />
       </div>
     </div>
   );

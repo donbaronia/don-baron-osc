@@ -18,10 +18,15 @@
         "transferencia",
         "producao",
         "perda",
-        "compra",
-        "venda",
+        "quebra",
+        "vencimento",
+        "ajuste",
         "inventario",
-        "ajuste"
+        "consumo",
+        "doacao",
+        "bonificacao",
+        "compra",
+        "venda"
       ],
       "default": "entrada"
     },
@@ -52,6 +57,10 @@
       "type": "number",
       "default": 0
     },
+    "reason": {
+      "type": "string",
+      "description": "Motivo da movimentacao"
+    },
     "origin_type": {
       "type": "string",
       "description": "Tipo de origem (compra, producao, inventario, etc)"
@@ -66,18 +75,56 @@
     "destination_id": {
       "type": "string"
     },
+    "from_stock_type": {
+      "type": "string",
+      "description": "Estoque de origem (transferencia)"
+    },
+    "to_stock_type": {
+      "type": "string",
+      "description": "Estoque de destino (transferencia)"
+    },
     "batch": {
+      "type": "string"
+    },
+    "batch_number": {
       "type": "string"
     },
     "expiry_date": {
       "type": "string",
       "format": "date"
     },
+    "document_id": {
+      "type": "string",
+      "description": "Documento vinculado"
+    },
+    "document_number": {
+      "type": "string",
+      "description": "Numero do documento (NF, boleto, etc)"
+    },
+    "supplier_id": {
+      "type": "string"
+    },
+    "supplier_name": {
+      "type": "string"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "notes": {
       "type": "string"
     },
     "responsible_name": {
       "type": "string"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
     },
     "movement_date": {
       "type": "string",

@@ -18,10 +18,27 @@
     "ingredient_name": {
       "type": "string"
     },
+    "stock_type": {
+      "type": "string",
+      "enum": [
+        "materia_prima",
+        "producao",
+        "produto_acabado",
+        "em_transito",
+        "perdas",
+        "consumo_interno",
+        "marketing",
+        "manutencao",
+        "limpeza",
+        "escritorio"
+      ],
+      "default": "materia_prima",
+      "description": "Tipo de estoque independente"
+    },
     "quantity": {
       "type": "number",
       "default": 0,
-      "description": "Quantidade atual (calculada via movimentos)"
+      "description": "Quantidade atual (calculada via movimentos pelo Inventory Engine)"
     },
     "unit": {
       "type": "string"
@@ -29,7 +46,12 @@
     "average_cost": {
       "type": "number",
       "default": 0,
-      "description": "Preco medio calculado via movimentos"
+      "description": "Custo medio calculado via movimentos"
+    },
+    "last_cost": {
+      "type": "number",
+      "default": 0,
+      "description": "Ultimo custo de aquisicao"
     },
     "total_value": {
       "type": "number",
@@ -51,16 +73,84 @@
     "physical_location": {
       "type": "string"
     },
-    "last_movement_date": {
-      "type": "string",
-      "format": "date-time"
+    "location_rua": {
+      "type": "string"
+    },
+    "location_prateleira": {
+      "type": "string"
+    },
+    "location_coluna": {
+      "type": "string"
+    },
+    "location_nivel": {
+      "type": "string"
+    },
+    "location_posicao": {
+      "type": "string"
     },
     "batches": {
       "type": "array",
       "items": {
         "type": "object"
       },
-      "description": "Controle de lotes: {batch, quantity, expiry_date}"
+      "description": "Controle de lotes: {batch_number, supplier_id, supplier_name, nf_number, manufacture_date, expiry_date, quantity, unit_cost, location, status, history}"
+    },
+    "coverage_days": {
+      "type": "number",
+      "default": 0,
+      "description": "Dias de cobertura calculados automaticamente"
+    },
+    "average_daily_consumption": {
+      "type": "number",
+      "default": 0,
+      "description": "Consumo medio diario calculado"
+    },
+    "abc_class": {
+      "type": "string",
+      "enum": [
+        "A",
+        "B",
+        "C"
+      ],
+      "default": "C",
+      "description": "Classificacao ABC automatica"
+    },
+    "abc_criteria": {
+      "type": "string",
+      "description": "Criterio usado para ABC (valor, quantidade, consumo)"
+    },
+    "rotation_status": {
+      "type": "string",
+      "enum": [
+        "alto_giro",
+        "medio_giro",
+        "baixo_giro",
+        "parado",
+        "critico",
+        "estrategico"
+      ],
+      "default": "medio_giro"
+    },
+    "expiry_alert_level": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "alerta_60",
+        "alerta_30",
+        "alerta_15",
+        "alerta_7",
+        "alerta_3",
+        "alerta_1",
+        "vencido"
+      ],
+      "default": "normal"
+    },
+    "last_movement_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_movement_type": {
+      "type": "string"
     },
     "status": {
       "type": "string",
