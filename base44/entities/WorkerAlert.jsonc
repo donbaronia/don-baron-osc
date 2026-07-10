@@ -1,0 +1,77 @@
+{
+  "name": "WorkerAlert",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "worker_key": {
+      "type": "string"
+    },
+    "worker_name": {
+      "type": "string"
+    },
+    "alert_type": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critica",
+        "alta",
+        "media",
+        "baixa"
+      ],
+      "default": "media"
+    },
+    "title": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string"
+    },
+    "action_suggested": {
+      "type": "string"
+    },
+    "data_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "savings_potential": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "acknowledged",
+        "dismissed",
+        "resolved"
+      ],
+      "default": "active"
+    },
+    "acknowledged_by": {
+      "type": "string"
+    },
+    "acknowledged_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "activity_id": {
+      "type": "string",
+      "description": "Atividade que gerou este alerta"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "worker_key",
+    "title"
+  ]
+}

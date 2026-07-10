@@ -1,0 +1,107 @@
+{
+  "name": "WorkerActivity",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "worker_key": {
+      "type": "string"
+    },
+    "worker_name": {
+      "type": "string"
+    },
+    "activity_type": {
+      "type": "string",
+      "enum": [
+        "analysis",
+        "suggestion",
+        "alert",
+        "report",
+        "routine_check",
+        "cross_analysis"
+      ],
+      "default": "analysis"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "confidence_level": {
+      "type": "string",
+      "enum": [
+        "alta",
+        "media",
+        "baixa"
+      ]
+    },
+    "entities_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "savings_identified": {
+      "type": "number",
+      "default": 0
+    },
+    "time_saved_min": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "pending_approval",
+        "approved",
+        "rejected"
+      ],
+      "default": "completed"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rejected_by": {
+      "type": "string"
+    },
+    "rejected_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "routine_action": {
+      "type": "string",
+      "description": "Rotina que gerou esta atividade"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "worker_key",
+    "title"
+  ]
+}

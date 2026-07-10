@@ -25,6 +25,7 @@ import CadastroMestre from '@/pages/CadastroMestre';
 import Integracoes from '@/pages/Integracoes';
 import Kernel from '@/pages/Kernel';
 import BaronBrain from '@/pages/BaronBrain';
+import FuncionariosDigitais from '@/pages/FuncionariosDigitais';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -72,6 +73,7 @@ const AuthenticatedApp = () => {
         <Route path="/integracoes" element={<Integracoes />} />
         <Route path="/kernel" element={<Kernel />} />
         <Route path="/brain" element={<BaronBrain />} />
+        <Route path="/workforce" element={<FuncionariosDigitais />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

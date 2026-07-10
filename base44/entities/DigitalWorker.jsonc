@@ -1,0 +1,170 @@
+{
+  "name": "DigitalWorker",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "worker_key": {
+      "type": "string",
+      "description": "Identificador unico"
+    },
+    "name": {
+      "type": "string"
+    },
+    "role": {
+      "type": "string",
+      "description": "Cargo"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "compras",
+        "financeiro",
+        "producao",
+        "estoque",
+        "rh",
+        "logistica",
+        "comercial",
+        "auditoria",
+        "estrategia"
+      ]
+    },
+    "objective": {
+      "type": "string"
+    },
+    "specialty": {
+      "type": "string"
+    },
+    "avatar_emoji": {
+      "type": "string",
+      "default": "\ud83e\udd16"
+    },
+    "description": {
+      "type": "string"
+    },
+    "indicators_monitored": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "autonomy_level": {
+      "type": "string",
+      "enum": [
+        "baixo",
+        "medio",
+        "alto"
+      ],
+      "default": "baixo"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "data_access": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Nomes das entidades acessadas"
+    },
+    "routines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "day_of_week": {
+            "type": "string"
+          },
+          "last_executed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "last_result": {
+            "type": "string"
+          },
+          "execution_count": {
+            "type": "number",
+            "default": 0
+          }
+        }
+      }
+    },
+    "analyses_count": {
+      "type": "number",
+      "default": 0
+    },
+    "suggestions_count": {
+      "type": "number",
+      "default": 0
+    },
+    "approvals_count": {
+      "type": "number",
+      "default": 0
+    },
+    "rejections_count": {
+      "type": "number",
+      "default": 0
+    },
+    "precision_pct": {
+      "type": "number",
+      "default": 0
+    },
+    "savings_generated": {
+      "type": "number",
+      "default": 0
+    },
+    "time_saved_hours": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "idle",
+        "working",
+        "waiting_approval",
+        "offline"
+      ],
+      "default": "idle"
+    },
+    "current_task": {
+      "type": "string"
+    },
+    "last_activity_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "worker_key",
+    "name"
+  ]
+}
