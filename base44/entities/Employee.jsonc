@@ -1,0 +1,224 @@
+{
+  "name": "Employee",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Vinculo com usuario do sistema (se aplicavel)"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Nome completo"
+    },
+    "short_name": {
+      "type": "string",
+      "description": "Nome de guerra / como e chamado"
+    },
+    "cpf": {
+      "type": "string",
+      "description": "CPF"
+    },
+    "rg": {
+      "type": "string",
+      "description": "RG"
+    },
+    "ctps": {
+      "type": "string",
+      "description": "Carteira de Trabalho (numero/serie)"
+    },
+    "pis": {
+      "type": "string",
+      "description": "PIS/PASEP"
+    },
+    "birth_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "masculino",
+        "feminino",
+        "outros"
+      ]
+    },
+    "phone": {
+      "type": "string"
+    },
+    "whatsapp": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "pix_key": {
+      "type": "string",
+      "description": "Chave PIX para pagamentos"
+    },
+    "pix_type": {
+      "type": "string",
+      "enum": [
+        "cpf",
+        "email",
+        "telefone",
+        "aleatoria"
+      ],
+      "description": "Tipo da chave PIX"
+    },
+    "photo_url": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "postal_code": {
+      "type": "string"
+    },
+    "position": {
+      "type": "string",
+      "description": "Cargo"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "administracao",
+        "financeiro",
+        "compras",
+        "estoque",
+        "producao",
+        "rh",
+        "delivery",
+        "operacao",
+        "limpeza",
+        "manutencao",
+        "outros"
+      ],
+      "description": "Departamento"
+    },
+    "salary": {
+      "type": "number",
+      "default": 0,
+      "description": "Salario base mensal"
+    },
+    "salary_type": {
+      "type": "string",
+      "enum": [
+        "mensal",
+        "quinzenal",
+        "semanal",
+        "diaria",
+        "hora"
+      ],
+      "default": "mensal"
+    },
+    "hire_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de admissao"
+    },
+    "termination_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de demissao"
+    },
+    "schedule_type": {
+      "type": "string",
+      "enum": [
+        "fixo",
+        "escala",
+        "flexivel",
+        "plantao"
+      ],
+      "default": "fixo",
+      "description": "Tipo de escala"
+    },
+    "work_schedule": {
+      "type": "string",
+      "description": "Horario de trabalho (ex: 08:00-17:00)"
+    },
+    "work_days": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dias de trabalho (seg, ter, qua, etc)"
+    },
+    "bank_hours_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Saldo do banco de horas (positivo = credito)"
+    },
+    "vacation_days_remaining": {
+      "type": "number",
+      "default": 30,
+      "description": "Dias de ferias restantes"
+    },
+    "vacation_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "vacation_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Documentos: {type, name, file_url, upload_date}"
+    },
+    "emergency_contact_name": {
+      "type": "string"
+    },
+    "emergency_contact_phone": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Historico: {date, event, description, user}"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "inativo",
+        "ferias",
+        "afastado",
+        "demitido",
+        "suspendso"
+      ],
+      "default": "ativo"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "full_name"
+  ]
+}

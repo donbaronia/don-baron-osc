@@ -1,0 +1,184 @@
+{
+  "name": "Payroll",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "payroll_code": {
+      "type": "string",
+      "description": "Codigo unico (ex: FOL-2026-07-001)"
+    },
+    "employee_id": {
+      "type": "string",
+      "description": "Funcionario vinculado"
+    },
+    "employee_name": {
+      "type": "string"
+    },
+    "period_month": {
+      "type": "number",
+      "description": "Mes de referencia (1-12)"
+    },
+    "period_year": {
+      "type": "number",
+      "description": "Ano de referencia"
+    },
+    "period_type": {
+      "type": "string",
+      "enum": [
+        "adiantamento",
+        "folha",
+        "decimo_terceiro",
+        "ferias",
+        "rescisao",
+        "participacao"
+      ],
+      "default": "folha"
+    },
+    "base_salary": {
+      "type": "number",
+      "default": 0,
+      "description": "Salario base"
+    },
+    "days_worked": {
+      "type": "number",
+      "default": 30
+    },
+    "hours_worked": {
+      "type": "number",
+      "default": 220,
+      "description": "Horas trabalhadas no periodo"
+    },
+    "overtime_hours": {
+      "type": "number",
+      "default": 0,
+      "description": "Horas extras"
+    },
+    "overtime_value": {
+      "type": "number",
+      "default": 0
+    },
+    "bank_hours_used": {
+      "type": "number",
+      "default": 0,
+      "description": "Horas do banco utilizadas"
+    },
+    "bank_hours_added": {
+      "type": "number",
+      "default": 0,
+      "description": "Horas creditadas ao banco"
+    },
+    "gross_salary": {
+      "type": "number",
+      "default": 0,
+      "description": "Salario bruto (base + extras + adicionais)"
+    },
+    "advances": {
+      "type": "number",
+      "default": 0,
+      "description": "Adiantamentos concedidos"
+    },
+    "vales": {
+      "type": "number",
+      "default": 0,
+      "description": "Vales descontados"
+    },
+    "loans": {
+      "type": "number",
+      "default": 0,
+      "description": "Emprestimos descontados"
+    },
+    "loan_installments": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Parcelas de emprestimo: {loan_id, installment_number, amount}"
+    },
+    "inss_discount": {
+      "type": "number",
+      "default": 0
+    },
+    "irrf_discount": {
+      "type": "number",
+      "default": 0,
+      "description": "Imposto de renda"
+    },
+    "fgts": {
+      "type": "number",
+      "default": 0,
+      "description": "FGTS depositado"
+    },
+    "other_discounts": {
+      "type": "number",
+      "default": 0
+    },
+    "total_discounts": {
+      "type": "number",
+      "default": 0,
+      "description": "Total de descontos"
+    },
+    "net_salary": {
+      "type": "number",
+      "default": 0,
+      "description": "Salario liquido"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "pix",
+        "dinheiro",
+        "transferencia",
+        "cheque"
+      ],
+      "default": "pix"
+    },
+    "pix_key": {
+      "type": "string"
+    },
+    "payment_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "transaction_id": {
+      "type": "string",
+      "description": "Transacao financeira vinculada"
+    },
+    "document_id": {
+      "type": "string",
+      "description": "Recibo/holerite"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "rascunho",
+        "calculada",
+        "aprovada",
+        "paga",
+        "cancelada"
+      ],
+      "default": "rascunho"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "employee_id",
+    "period_month",
+    "period_year"
+  ]
+}

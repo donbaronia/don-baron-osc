@@ -2,6 +2,10 @@
   "name": "Company",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "legal_name": {
       "type": "string",
       "description": "Razao social"
@@ -12,7 +16,15 @@
     },
     "document_number": {
       "type": "string",
-      "description": "CNPJ/CPF"
+      "description": "CNPJ"
+    },
+    "state_inscription": {
+      "type": "string",
+      "description": "Inscricao estadual"
+    },
+    "municipal_inscription": {
+      "type": "string",
+      "description": "Inscricao municipal"
     },
     "email": {
       "type": "string"
@@ -22,6 +34,16 @@
     },
     "address": {
       "type": "string"
+    },
+    "address_number": {
+      "type": "string"
+    },
+    "address_complement": {
+      "type": "string"
+    },
+    "district": {
+      "type": "string",
+      "description": "Bairro"
     },
     "city": {
       "type": "string"
@@ -45,9 +67,37 @@
       ],
       "default": "starter"
     },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativa",
+        "inativa",
+        "bloqueada",
+        "trial"
+      ],
+      "default": "ativa"
+    },
+    "timezone": {
+      "type": "string",
+      "default": "America/Fortaleza",
+      "description": "Fuso horario da empresa"
+    },
+    "currency": {
+      "type": "string",
+      "default": "BRL",
+      "description": "Moeda padrao"
+    },
+    "locale": {
+      "type": "string",
+      "default": "pt-BR"
+    },
     "settings": {
       "type": "object",
       "description": "Configuracoes especificas da empresa"
+    },
+    "trial_ends_at": {
+      "type": "string",
+      "format": "date-time"
     },
     "active": {
       "type": "boolean",

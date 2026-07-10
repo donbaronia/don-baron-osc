@@ -25,21 +25,88 @@
       "type": "string",
       "format": "date"
     },
+    "payment_date": {
+      "type": "string",
+      "format": "date"
+    },
     "status": {
       "type": "string",
       "enum": [
         "pendente",
         "pago",
         "recebido",
-        "vencido"
+        "vencido",
+        "cancelado"
       ],
       "default": "pendente"
+    },
+    "account_id": {
+      "type": "string",
+      "description": "Conta financeira vinculada"
+    },
+    "account_name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "description": "Categoria financeira"
+    },
+    "cost_center_id": {
+      "type": "string",
+      "description": "Centro de custo"
+    },
+    "cost_center_name": {
+      "type": "string"
+    },
+    "origin": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "compra",
+        "venda",
+        "ifood",
+        "producao",
+        "folha",
+        "imposto",
+        "transferencia",
+        "workflow",
+        "ia"
+      ],
+      "default": "manual",
+      "description": "Origem da transacao"
     },
     "supplier": {
       "type": "string"
     },
-    "category": {
+    "supplier_id": {
       "type": "string"
+    },
+    "customer": {
+      "type": "string"
+    },
+    "customer_id": {
+      "type": "string"
+    },
+    "document_id": {
+      "type": "string",
+      "description": "Documento vinculado (NF, boleto, recibo)"
+    },
+    "document_number": {
+      "type": "string"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "dinheiro",
+        "pix",
+        "boleto",
+        "cartao_credito",
+        "cartao_debito",
+        "transferencia",
+        "cheque",
+        "outros"
+      ],
+      "default": "dinheiro"
     },
     "payment_id": {
       "type": "string",
@@ -48,6 +115,9 @@
     "receipt_id": {
       "type": "string",
       "description": "Recebimento vinculado"
+    },
+    "notes": {
+      "type": "string"
     },
     "version": {
       "type": "number",

@@ -1,0 +1,163 @@
+{
+  "name": "Courier",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "employee_id": {
+      "type": "string",
+      "description": "Vinculo com funcionario (se aplicavel)"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "short_name": {
+      "type": "string"
+    },
+    "cpf": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "whatsapp": {
+      "type": "string"
+    },
+    "pix_key": {
+      "type": "string",
+      "description": "Chave PIX para pagamento de diarias"
+    },
+    "photo_url": {
+      "type": "string"
+    },
+    "vehicle_type": {
+      "type": "string",
+      "enum": [
+        "moto",
+        "bicicleta",
+        "carro",
+        "a_pe"
+      ],
+      "default": "moto"
+    },
+    "vehicle_plate": {
+      "type": "string"
+    },
+    "daily_pin": {
+      "type": "string",
+      "description": "PIN diario para check-in (gerado automaticamente)"
+    },
+    "pin_generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data de geracao do PIN atual"
+    },
+    "checkins_today": {
+      "type": "number",
+      "default": 0,
+      "description": "Check-ins realizados hoje"
+    },
+    "last_checkin_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_checkin_lat": {
+      "type": "number"
+    },
+    "last_checkin_lng": {
+      "type": "number"
+    },
+    "daily_rate": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor da diaria"
+    },
+    "total_earnings": {
+      "type": "number",
+      "default": 0,
+      "description": "Total ganho (historico)"
+    },
+    "pending_payment": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor pendente de pagamento"
+    },
+    "snacks_consumed": {
+      "type": "number",
+      "default": 0,
+      "description": "Lanches consumidos (periodo atual)"
+    },
+    "snacks_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor dos lanches consumidos"
+    },
+    "ranking_position": {
+      "type": "number",
+      "default": 0,
+      "description": "Posicao no ranking de entregadores"
+    },
+    "rating": {
+      "type": "number",
+      "default": 5,
+      "description": "Avaliacao media (0-5)"
+    },
+    "total_deliveries": {
+      "type": "number",
+      "default": 0
+    },
+    "total_distance_km": {
+      "type": "number",
+      "default": 0
+    },
+    "deliveries_today": {
+      "type": "number",
+      "default": 0
+    },
+    "average_delivery_time_min": {
+      "type": "number",
+      "default": 0
+    },
+    "pending_items": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Pendencias: {type, description, value, date, status}"
+    },
+    "payment_history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Historico de pagamentos: {date, amount, method, transaction_id}"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "inativo",
+        "em_entrega",
+        "offline",
+        "suspendso"
+      ],
+      "default": "ativo"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "full_name"
+  ]
+}

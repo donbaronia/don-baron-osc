@@ -1,0 +1,116 @@
+{
+  "name": "AIMemory",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "memory_type": {
+      "type": "string",
+      "enum": [
+        "pergunta",
+        "resposta",
+        "aprendizado",
+        "contexto",
+        "insight",
+        "correcao"
+      ],
+      "default": "pergunta",
+      "description": "Tipo de registro na memoria da IA"
+    },
+    "question": {
+      "type": "string",
+      "description": "Pergunta feita pelo gestor"
+    },
+    "answer": {
+      "type": "string",
+      "description": "Resposta gerada pela IA"
+    },
+    "context": {
+      "type": "object",
+      "description": "Contexto utilizado (dados, periodo, modulos consultados)"
+    },
+    "data_sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Modulos consultados para gerar a resposta"
+    },
+    "learning": {
+      "type": "string",
+      "description": "Aprendizado extraido (ex: gestor prefere relatorios concisos)"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags para categorizar a memoria"
+    },
+    "confidence_score": {
+      "type": "number",
+      "default": 0,
+      "description": "Confianca da IA na resposta (0-100)"
+    },
+    "user_feedback": {
+      "type": "string",
+      "enum": [
+        "positivo",
+        "neutro",
+        "negativo",
+        null
+      ],
+      "default": null,
+      "description": "Feedback do gestor sobre a resposta"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "embedding": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "Estrutura futura: embeddings para busca semantica"
+    },
+    "embedding_model": {
+      "type": "string",
+      "description": "Modelo usado para gerar o embedding (futuro)"
+    },
+    "related_entity_type": {
+      "type": "string"
+    },
+    "related_entity_id": {
+      "type": "string"
+    },
+    "is_recurring": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se e uma pergunta/situacao recorrente"
+    },
+    "times_accessed": {
+      "type": "number",
+      "default": 0,
+      "description": "Vezes que esta memoria foi acessada"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "memory_type"
+  ]
+}
