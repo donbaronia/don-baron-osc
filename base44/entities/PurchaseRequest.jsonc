@@ -1,0 +1,96 @@
+{
+  "name": "PurchaseRequest",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "request_code": {
+      "type": "string",
+      "description": "Codigo unico (ex: SOL-2026-0001)"
+    },
+    "product_name": {
+      "type": "string"
+    },
+    "product_id": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "number",
+      "default": 0
+    },
+    "unit": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Motivo da solicitacao"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta",
+        "critica"
+      ],
+      "default": "media"
+    },
+    "requester_name": {
+      "type": "string"
+    },
+    "cost_center_name": {
+      "type": "string"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "em_cotacao",
+        "cotada",
+        "aprovada",
+        "rejeitada",
+        "convertida",
+        "cancelada"
+      ],
+      "default": "pendente"
+    },
+    "quotation_count": {
+      "type": "number",
+      "default": 0
+    },
+    "purchase_id": {
+      "type": "string",
+      "description": "ID do pedido gerado"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "product_name",
+    "quantity"
+  ]
+}

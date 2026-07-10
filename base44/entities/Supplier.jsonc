@@ -55,9 +55,76 @@
       "enum": [
         "ativo",
         "inativo",
-        "arquivado"
+        "arquivado",
+        "bloqueado"
       ],
       "default": "ativo"
+    },
+    "blocked_reason": {
+      "type": "string"
+    },
+    "is_strategic": {
+      "type": "boolean",
+      "default": false,
+      "description": "Fornecedor estrategico"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "baixo",
+        "medio",
+        "alto"
+      ],
+      "default": "baixo"
+    },
+    "pontuality_score": {
+      "type": "number",
+      "default": 0,
+      "description": "0-100"
+    },
+    "price_score": {
+      "type": "number",
+      "default": 0,
+      "description": "0-100"
+    },
+    "quality_score": {
+      "type": "number",
+      "default": 0,
+      "description": "0-100"
+    },
+    "reliability_score": {
+      "type": "number",
+      "default": 0,
+      "description": "0-100"
+    },
+    "overall_score": {
+      "type": "number",
+      "default": 0,
+      "description": "0-100"
+    },
+    "total_purchases": {
+      "type": "number",
+      "default": 0
+    },
+    "total_amount_purchased": {
+      "type": "number",
+      "default": 0
+    },
+    "complaint_count": {
+      "type": "number",
+      "default": 0
+    },
+    "return_count": {
+      "type": "number",
+      "default": 0
+    },
+    "last_purchase_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "last_evaluation_date": {
+      "type": "string",
+      "format": "date"
     },
     "version": {
       "type": "number",

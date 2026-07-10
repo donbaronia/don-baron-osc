@@ -1,41 +1,42 @@
-import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import React, { useState } from "react";
 import PageHeader from "@/components/shared/PageHeader";
-import Toolbar from "@/components/shared/Toolbar";
-import DataTable from "@/components/shared/DataTable";
-import StatusBadge from "@/components/shared/StatusBadge";
-import { exportToCsv } from "@/lib/exportCsv";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PurchaseDashboard from "@/components/compras/PurchaseDashboard";
+import PurchaseRequests from "@/components/compras/PurchaseRequests";
+import Quotations from "@/components/compras/Quotations";
+import PurchaseOrders from "@/components/compras/PurchaseOrders";
+import ReceiptManagement from "@/components/compras/ReceiptManagement";
+import SupplierScorecard from "@/components/compras/SupplierScorecard";
+import PriceHistoryView from "@/components/compras/PriceHistoryView";
+import PurchaseReports from "@/components/compras/PurchaseReports";
 
-const brl = (n) => (n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const TABS = [
+  { v: "dashboard", l: "Dashboard", C: PurchaseDashboard },
+  { v: "solicitacoes", l: "Solicitações", C: PurchaseRequests },
+  { v: "cotacoes", l: "Cotações", C: Quotations },
+  { v: "pedidos", l: "Pedidos", C: PurchaseOrders },
+  { v: "recebimento", l: "Recebimento", C: ReceiptManagement },
+  { v: "fornecedores", l: "Fornecedores", C: SupplierScorecard },
+  { v: "precos", l: "Histórico de Preços", C: PriceHistoryView },
+  { v: "relatorios", l: "Relatórios", C: PurchaseReports },
+];
 
 export default function Compras() {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-
-  useEffect(() => {
-    base44.entities.Purchase.list("-order_date", 300).then((r) => {
-      setRows(r);
-      setLoading(false);
-    });
-  }, []);
-
-  const filtered = rows.filter((r) => !search || (r.supplier || "").toLowerCase().includes(search.toLowerCase()) || (r.description || "").toLowerCase().includes(search.toLowerCase()));
-
-  const columns = [
-    { key: "supplier", label: "Fornecedor", render: (r) => <span className="font-medium text-neutral-900">{r.supplier}</span> },
-    { key: "description", label: "Descrição", render: (r) => r.description || "—" },
-    { key: "total_amount", label: "Valor", render: (r) => brl(r.total_amount) },
-    { key: "order_date", label: "Data", render: (r) => (r.order_date ? new Date(r.order_date).toLocaleDateString("pt-BR") : "—") },
-    { key: "status", label: "Status", render: (r) => <StatusBadge status={r.status} /> },
-  ];
+  const [tab, setTab] = useState("dashboard");
+  const Active = TABS.find(t => t.v === tab)?.C || PurchaseDashboard;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
-      <PageHeader emoji="🛒" title="Centro de Compras" subtitle="Pedidos, aprovações e recebimento de mercadorias." />
-      <div className="mt-6 space-y-4">
-        <Toolbar search={search} onSearch={setSearch} onExport={() => exportToCsv("compras.csv", filtered)} placeholder="Pesquisar compra..." />
-        <DataTable columns={columns} rows={filtered} loading={loading} emptyTitle="Nenhuma compra registrada" emptyDescription="Os pedidos de compra aparecerão aqui." />
+      <PageHeader emoji="🛒" title="Centro de Compras Inteligente" subtitle="Solicitação → Cotação → Aprovação → Pedido → Recebimento → Conferência → Financeiro → Estoque → CMV." />
+      <div className="mt-6 space-y-6">
+        <div className="overflow-x-auto -mx-1 px-1">
+          <Tabs value={tab} onValueChange={setTab}>
+            <TabsList>
+              {TABS.map(t => <TabsTrigger key={t.v} value={t.v}>{t.l}</TabsTrigger>)}
+            </TabsList>
+          </Tabs>
+        </div>
+        <Active />
       </div>
     </div>
   );

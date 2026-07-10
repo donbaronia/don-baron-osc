@@ -8,7 +8,15 @@
     },
     "purchase_code": {
       "type": "string",
-      "description": "Codigo unico (ex: CMP-2026-0001)"
+      "description": "Codigo unico (ex: PED-2026-0001)"
+    },
+    "request_id": {
+      "type": "string",
+      "description": "ID da solicitacao de origem"
+    },
+    "quotation_id": {
+      "type": "string",
+      "description": "ID da cotacao vencedora"
     },
     "supplier_id": {
       "type": "string"
@@ -24,11 +32,52 @@
       "items": {
         "type": "object"
       },
-      "description": "Itens da compra: {product_id, name, quantity, unit, unit_price, total}"
+      "description": "Itens: {product_id, name, quantity, unit, unit_price, total}"
     },
     "total_amount": {
       "type": "number",
       "default": 0
+    },
+    "discounts": {
+      "type": "number",
+      "default": 0
+    },
+    "freight": {
+      "type": "number",
+      "default": 0
+    },
+    "taxes": {
+      "type": "number",
+      "default": 0
+    },
+    "payment_method": {
+      "type": "string"
+    },
+    "payment_terms": {
+      "type": "string"
+    },
+    "cost_center_name": {
+      "type": "string"
+    },
+    "requester_name": {
+      "type": "string"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta",
+        "critica"
+      ],
+      "default": "media"
     },
     "order_date": {
       "type": "string",
@@ -42,23 +91,76 @@
       "type": "string",
       "format": "date"
     },
+    "received_by": {
+      "type": "string"
+    },
+    "received_items": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Itens recebidos: {name, expected_qty, received_qty, difference}"
+    },
+    "missing_items": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "receipt_notes": {
+      "type": "string"
+    },
+    "receipt_photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "conference_status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "conferido",
+        "divergente"
+      ],
+      "default": "pendente"
+    },
+    "conference_notes": {
+      "type": "string"
+    },
+    "divergences": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Divergencias detectadas na conferencia"
+    },
     "document_id": {
       "type": "string",
-      "description": "Documento vinculado"
+      "description": "Documento vinculado (NF, boleto)"
     },
     "payment_id": {
       "type": "string",
       "description": "Pagamento vinculado"
     },
+    "lead_time_days": {
+      "type": "number",
+      "default": 0,
+      "description": "Dias entre pedido e recebimento"
+    },
     "status": {
       "type": "string",
       "enum": [
-        "pendente",
+        "rascunho",
+        "pendente_aprovacao",
         "aprovada",
+        "enviada",
+        "em_transito",
         "recebida",
+        "conferida",
         "cancelada"
       ],
-      "default": "pendente"
+      "default": "pendente_aprovacao"
     },
     "notes": {
       "type": "string"
