@@ -17,10 +17,10 @@ import {
 // "roles" define quais perfis têm acesso a cada centro.
 export const NAV_ITEMS = [
   {
-    label: "Dashboard Executivo",
+    label: "Central de Comando",
     icon: LayoutDashboard,
     path: "/",
-    emoji: "🏠",
+    emoji: "🧭",
     roles: ["administrador", "financeiro", "compras", "estoque", "producao", "gerencia", "operador"],
   },
   {

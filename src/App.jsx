@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 import AppLayout from '@/components/layout/AppLayout';
+import CommandCenter from '@/pages/CommandCenter';
 import Dashboard from '@/pages/Dashboard';
 import Financeiro from '@/pages/Financeiro';
 import Estoque from '@/pages/Estoque';
@@ -48,7 +49,8 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route element={<AppLayout />}>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<CommandCenter />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/financeiro" element={<Financeiro />} />
         <Route path="/estoque" element={<Estoque />} />
         <Route path="/producao" element={<Producao />} />

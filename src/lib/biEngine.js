@@ -577,6 +577,312 @@ export const BI = {
     const lines = [headers.join(","), ...rows.map(r => headers.map(h => r[h]).join(","))];
     return lines.join("\n");
   },
+
+  // ===== COMMAND CENTER (Documento 011) =====
+  async _collectRaw() {
+    const [sales, tx, products, purchases, productions, movements, stocks, recipes, customers, ifood, payments, receipts, accounts] = await Promise.all([
+      base44.entities.Sale.filter({ deleted_at: { $exists: false } }, "-sale_date", 500).catch(() => []),
+      base44.entities.FinancialTransaction.list("-created_date", 500).catch(() => []),
+      base44.entities.Product.filter({ deleted_at: { $exists: false } }, "name", 500).catch(() => []),
+      base44.entities.Purchase.filter({ deleted_at: { $exists: false } }, "-order_date", 500).catch(() => []),
+      base44.entities.ProductionRecord.filter({ deleted_at: { $exists: false } }, "-production_date", 500).catch(() => []),
+      base44.entities.Movement.filter({ deleted_at: { $exists: false } }, "-movement_date", 1000).catch(() => []),
+      base44.entities.Stock.filter({ deleted_at: { $exists: false } }, "product_name", 500).catch(() => []),
+      base44.entities.Recipe.filter({ active: true, deleted_at: { $exists: false } }, "name", 500).catch(() => []),
+      base44.entities.Customer.filter({ deleted_at: { $exists: false } }, "name", 500).catch(() => []),
+      base44.entities.IFoodReceipt.filter({ deleted_at: { $exists: false } }, "-created_date", 200).catch(() => []),
+      base44.entities.Payment.list("-due_date", 300).catch(() => []),
+      base44.entities.Receipt.list("-expected_date", 300).catch(() => []),
+      base44.entities.FinancialAccount.list("-created_date", 100).catch(() => []),
+    ]);
+    return {
+      sales: _safe(sales), transactions: _safe(tx), products: _safe(products),
+      purchases: _safe(purchases), productions: _safe(productions),
+      movements: _safe(movements), stocks: _safe(stocks), recipes: _safe(recipes),
+      customers: _safe(customers), ifood: _safe(ifood), payments: _safe(payments),
+      receipts: _safe(receipts), accounts: _safe(accounts),
+    };
+  },
+
+  _filterByPeriod(raw, start, end) {
+    return {
+      ...raw,
+      sales: raw.sales.filter(s => _inPeriod(s.sale_date, start, end) && s.status !== "cancelada"),
+      transactions: raw.transactions.filter(t => _inPeriod((t.created_date || "").slice(0, 10), start, end)),
+      ifood: raw.ifood.filter(r => _inPeriod(r.period_end || r.expected_date || r.week, start, end)),
+      payments: raw.payments.filter(p => _inPeriod(p.due_date, start, end)),
+      receipts: raw.receipts.filter(r => _inPeriod(r.expected_date, start, end)),
+      productions: raw.productions.filter(p => _inPeriod(p.production_date, start, end)),
+      movements: raw.movements.filter(m => _inPeriod((m.movement_date || "").slice(0, 10), start, end)),
+      purchases: raw.purchases.filter(p => _inPeriod(p.order_date, start, end)),
+    };
+  },
+
+  _getGreetingPeriod() {
+    const h = new Date().getHours();
+    if (h < 12) return "Bom dia";
+    if (h < 18) return "Boa tarde";
+    return "Boa noite";
+  },
+
+  _getDayOfWeek() {
+    const days = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+    return days[new Date().getDay()];
+  },
+
+  async getCommandCenter() {
+    const today = todayStr();
+    const week = weekRange();
+    const month = monthRange();
+    const prevMonth = _prevRange(month, "monthly");
+
+    const raw = await this._collectRaw();
+    const day = this._filterByPeriod(raw, today, today);
+    const wk = this._filterByPeriod(raw, week.start, week.end);
+    const mo = this._filterByPeriod(raw, month.start, month.end);
+    const pm = this._filterByPeriod(raw, prevMonth.start, prevMonth.end);
+
+    const revDay = day.sales.reduce((s, x) => s + (x.net_total || x.gross_total || 0), 0);
+    const revWeek = wk.sales.reduce((s, x) => s + (x.net_total || x.gross_total || 0), 0);
+    const revMonth = mo.sales.reduce((s, x) => s + (x.net_total || x.gross_total || 0), 0);
+    const ifoodMonth = mo.ifood.reduce((s, r) => s + (r.net_value || r.gross_value || 0), 0);
+
+    const costMonth = mo.productions.filter(p => p.status === "concluida").reduce((s, p) => s + (p.cost_ingredients || p.cost_total || 0), 0);
+    const cmv = revMonth > 0 ? (costMonth / revMonth) * 100 : 0;
+    const profit = revMonth - costMonth;
+    const margin = revMonth > 0 ? (profit / revMonth) * 100 : 0;
+
+    const expensesMonth = mo.payments.reduce((s, p) => s + (p.amount || 0), 0);
+    const expensesDay = day.payments.reduce((s, p) => s + (p.amount || 0), 0);
+
+    const saldo = raw.accounts.reduce((s, a) => s + (a.current_balance || 0), 0);
+
+    const recebimentosPendentes = raw.receipts.filter(r => r.status === "pendente").reduce((s, r) => s + (r.amount || 0), 0);
+    const pagamentosPendentes = raw.payments.filter(p => p.status === "pendente").reduce((s, p) => s + (p.amount || 0), 0);
+    const fluxoCaixa = recebimentosPendentes - pagamentosPendentes;
+
+    const boletosVencendo = raw.payments.filter(p => p.due_date === today && p.status === "pendente").length;
+    const boletosVencidos = raw.payments.filter(p => p.due_date < today && p.status === "pendente");
+    const boletosVencidosValor = boletosVencidos.reduce((s, p) => s + (p.amount || 0), 0);
+
+    const recebimentosPrevistos = raw.receipts.filter(r => r.status === "pendente" && r.expected_date >= today).reduce((s, r) => s + (r.amount || 0), 0);
+    const ifoodRecebimento = raw.ifood.filter(r => r.status === "pendente").reduce((s, r) => s + (r.net_value || 0), 0);
+
+    const biggestExpense = [...raw.payments].sort((a, b) => (b.amount || 0) - (a.amount || 0))[0];
+    const biggestRevenue = [...raw.receipts].sort((a, b) => (b.amount || 0) - (a.amount || 0))[0];
+
+    const stockCritical = raw.stocks.filter(s => (s.quantity || 0) <= (s.min_quantity || 0));
+    const stockExpiring = raw.stocks.filter(s => s.expiry_alert_level && s.expiry_alert_level !== "normal");
+    const stockValue = raw.stocks.reduce((s, x) => s + (x.total_value || 0), 0);
+    const stockCoverage = raw.stocks.length > 0 ? raw.stocks.reduce((s, x) => s + (x.coverage_days || 0), 0) / raw.stocks.length : 0;
+    const stockStopped = raw.stocks.filter(s => {
+      if (!s.last_movement_date) return true;
+      return (Date.now() - new Date(s.last_movement_date).getTime()) / 86400000 > 30;
+    });
+    const comprasUrgentes = raw.purchases.filter(p => ["pendente_aprovacao", "enviada"].includes(p.status)).length;
+
+    const prodOpen = raw.productions.filter(p => ["planejada", "liberada", "em_producao", "pausada"].includes(p.status));
+    const prodDelayed = raw.productions.filter(p => p.production_date && p.production_date < today && !["concluida", "cancelada", "reprovada"].includes(p.status));
+    const prodToProduce = raw.productions.filter(p => ["planejada", "liberada"].includes(p.status));
+    const prodDone = mo.productions.filter(p => p.status === "concluida");
+    const prodEfficiency = prodDone.length > 0 ? prodDone.reduce((s, p) => s + (p.efficiency_pct || 0), 0) / prodDone.length : 0;
+    const prodLosses = mo.productions.reduce((s, p) => s + (p.lost_quantity || 0), 0);
+
+    const newCustomers = raw.customers.filter(c => _inPeriod((c.created_date || "").slice(0, 10), month.start, month.end));
+    const salesByCustomer = {};
+    mo.sales.forEach(s => {
+      const id = s.customer_id || s.customer_name;
+      if (!id) return;
+      if (!salesByCustomer[id]) salesByCustomer[id] = { name: s.customer_name || id, orders: 0, total: 0, dates: [] };
+      salesByCustomer[id].orders++;
+      salesByCustomer[id].total += s.gross_total || 0;
+      if (s.sale_date) salesByCustomer[id].dates.push(s.sale_date);
+    });
+    const customerList = Object.values(salesByCustomer);
+    const recurring = customerList.filter(c => c.orders > 1).length;
+    const avgTicket = customerList.length > 0 ? customerList.reduce((s, c) => s + c.total / c.orders, 0) / customerList.length : 0;
+
+    let avgTimeBetween = 0;
+    let totalGaps = 0;
+    customerList.forEach(c => {
+      if (c.dates.length < 2) return;
+      c.dates.sort();
+      for (let i = 1; i < c.dates.length; i++) {
+        avgTimeBetween += (new Date(c.dates[i]) - new Date(c.dates[i - 1])) / 86400000;
+        totalGaps++;
+      }
+    });
+    avgTimeBetween = totalGaps > 0 ? avgTimeBetween / totalGaps : 0;
+
+    const prevRev = pm.sales.reduce((s, x) => s + (x.net_total || x.gross_total || 0), 0);
+
+    const alerts = [];
+    if (prevRev > 0 && revMonth < prevRev * 0.85) alerts.push({ type: "queda_vendas", severity: "critical", title: "Queda de Vendas", description: `Receita caiu ${(((prevRev - revMonth) / prevRev) * 100).toFixed(1)}% vs mês anterior`, origin: "bi", impact: revMonth - prevRev, responsible: "Gestor", suggestion: "Investigar causa e criar campanha promocional" });
+    if (cmv > 35) alerts.push({ type: "cmv_elevado", severity: "high", title: "CMV Elevado", description: `CMV em ${cmv.toFixed(1)}% (acima de 35%)`, origin: "financeiro", impact: revMonth * (cmv - 35) / 100, responsible: "Financeiro", suggestion: "Revisar receitas e renegociar fornecedores" });
+    if (fluxoCaixa < 0) alerts.push({ type: "fluxo_negativo", severity: "critical", title: "Fluxo de Caixa Negativo", description: `Fluxo de caixa: ${brl(fluxoCaixa)}`, origin: "financeiro", impact: fluxoCaixa, responsible: "Financeiro", suggestion: "Acelerar recebimentos e postergar pagamentos não urgentes" });
+    if (margin < 20 && revMonth > 0) alerts.push({ type: "margem_baixa", severity: "high", title: "Margem Abaixo da Meta", description: `Margem em ${margin.toFixed(1)}% (abaixo de 20%)`, origin: "financeiro", impact: revMonth * (20 - margin) / 100, responsible: "Gestor", suggestion: "Reajustar preços ou reduzir custos" });
+    if (stockCritical.length > 0) alerts.push({ type: "estoque_critico", severity: "high", title: "Estoque Crítico", description: `${stockCritical.length} item(ns) em nível crítico`, origin: "estoque", impact: 0, responsible: "Estoque", suggestion: "Reabastecer urgentemente" });
+    if (boletosVencidos.length > 0) alerts.push({ type: "boletos_vencidos", severity: "critical", title: "Boletos Vencidos", description: `${boletosVencidos.length} boleto(s) vencido(s) — ${brl(boletosVencidosValor)}`, origin: "financeiro", impact: boletosVencidosValor, responsible: "Financeiro", suggestion: "Regularizar pagamentos" });
+    if (comprasUrgentes > 0) alerts.push({ type: "compras_urgentes", severity: "medium", title: "Compras Urgentes", description: `${comprasUrgentes} compra(s) aguardando aprovação`, origin: "compras", impact: 0, responsible: "Compras", suggestion: "Revisar e aprovar pedidos" });
+    if (prodDelayed.length > 0) alerts.push({ type: "producao_atrasada", severity: "medium", title: "Produções Atrasadas", description: `${prodDelayed.length} produção(ões) atrasada(s)`, origin: "producao", impact: 0, responsible: "Produção", suggestion: "Concluir produções pendentes" });
+    if (stockExpiring.length > 0) alerts.push({ type: "validade_proxima", severity: "medium", title: "Validades Próximas", description: `${stockExpiring.length} item(ns) vencendo`, origin: "estoque", impact: 0, responsible: "Estoque", suggestion: "Usar ou descartar antes do vencimento" });
+    const sevOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+    alerts.sort((a, b) => (sevOrder[a.severity] || 3) - (sevOrder[b.severity] || 3));
+
+    let healthScore = 100;
+    if (fluxoCaixa < 0) healthScore -= 20;
+    if (cmv > 35) healthScore -= 15;
+    else if (cmv > 30) healthScore -= 8;
+    if (stockCritical.length > 5) healthScore -= 15;
+    else if (stockCritical.length > 0) healthScore -= Math.min(5 * stockCritical.length, 10);
+    if (prodEfficiency < 70) healthScore -= 10;
+    else if (prodEfficiency < 85) healthScore -= 5;
+    if (boletosVencidos.length > 0) healthScore -= 10;
+    if (prodDelayed.length > 3) healthScore -= 10;
+    healthScore = Math.max(0, Math.min(100, healthScore));
+
+    let healthStatus = "excelente";
+    if (healthScore < 40) healthStatus = "critica";
+    else if (healthScore < 60) healthStatus = "atencao";
+    else if (healthScore < 80) healthStatus = "boa";
+
+    const now = new Date();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const daysElapsed = now.getDate();
+    const dailyAvg = revMonth / Math.max(daysElapsed, 1);
+    const monthProjection = dailyAvg * daysInMonth;
+
+    const metaDiaria = 8000;
+    const metaSemanal = 56000;
+    const metaMensal = 240000;
+
+    const dayCost = day.productions.filter(p => p.status === "concluida").reduce((s, p) => s + (p.cost_ingredients || 0), 0);
+    const dayProfit = revDay - dayCost - expensesDay;
+    const dayCMV = revDay > 0 ? (dayCost / revDay) * 100 : 0;
+
+    const trend = prevRev > 0 ? ((revMonth - prevRev) / prevRev) * 100 : 0;
+    const paceFactor = daysInMonth / Math.max(daysElapsed, 1);
+    const forecastRevenue = revMonth * paceFactor;
+    const forecastCash = forecastRevenue - expensesMonth * paceFactor - costMonth * paceFactor;
+    const forecastProduction = Math.ceil(mo.productions.length * paceFactor);
+    const forecastPurchases = mo.purchases.reduce((s, p) => s + (p.total_amount || 0), 0) * paceFactor;
+    const forecastIFood = ifoodMonth * paceFactor;
+    const forecastProfit = forecastRevenue - costMonth * paceFactor - expensesMonth * paceFactor;
+
+    return {
+      greeting: { period: this._getGreetingPeriod(), date: today, dayOfWeek: this._getDayOfWeek() },
+      health: {
+        score: healthScore,
+        status: healthStatus,
+        breakdown: {
+          financeiro: fluxoCaixa >= 0 ? 100 : 50,
+          fluxo_caixa: fluxoCaixa >= 0 ? 100 : 40,
+          cmv: cmv <= 30 ? 100 : cmv <= 35 ? 70 : 40,
+          estoque: stockCritical.length === 0 ? 100 : stockCritical.length <= 3 ? 70 : 40,
+          producao: prodEfficiency >= 90 ? 100 : prodEfficiency >= 70 ? 70 : 40,
+          alertas: alerts.filter(a => a.severity === "critical").length === 0 ? 100 : 40,
+        },
+      },
+      metas: {
+        diaria: { meta: metaDiaria, atual: revDay, percentual: metaDiaria > 0 ? (revDay / metaDiaria) * 100 : 0 },
+        semanal: { meta: metaSemanal, atual: revWeek, percentual: metaSemanal > 0 ? (revWeek / metaSemanal) * 100 : 0 },
+        mensal: { meta: metaMensal, atual: revMonth, percentual: metaMensal > 0 ? (revMonth / metaMensal) * 100 : 0, projecao: monthProjection },
+      },
+      financeiro: {
+        saldo, fluxo_caixa: fluxoCaixa,
+        boletos_vencendo: boletosVencendo, boletos_vencidos: boletosVencidos.length,
+        boletos_vencidos_valor: boletosVencidosValor,
+        recebimentos_previstos: recebimentosPrevistos, ifood_recebimento: ifoodRecebimento,
+        maior_despesa: biggestExpense ? { description: biggestExpense.description || biggestExpense.supplier || "—", value: biggestExpense.amount || 0 } : null,
+        maior_receita: biggestRevenue ? { description: biggestRevenue.description || biggestRevenue.supplier || "—", value: biggestRevenue.amount || 0 } : null,
+        receita_dia: revDay, receita_semana: revWeek, receita_mes: revMonth,
+        cmv, lucro: profit, margem: margin,
+      },
+      estoque: {
+        criticos: stockCritical.length, vencendo: stockExpiring.length,
+        cobertura: stockCoverage, valor: stockValue, sem_movimentacao: stockStopped.length,
+        compras_urgentes: comprasUrgentes,
+        critical_items: stockCritical.slice(0, 5).map(s => ({ name: s.product_name, quantity: s.quantity, min: s.min_quantity })),
+      },
+      producao: {
+        ordens_abertas: prodOpen.length, atrasadas: prodDelayed.length,
+        para_produzir: prodToProduce.length, eficiencia: prodEfficiency, perdas: prodLosses,
+      },
+      rh: { presentes: 0, faltas: 0, atrasos: 0, banco_horas: 0, ferias: 0, folgas: 0, treinamentos: 0 },
+      motoboys: { checkins: 0, diarias: 0, ativos: 0, pendencias: 0, lanches: 0, pagamentos_pendentes: 0 },
+      clientes: { novos: newCustomers.length, recorrentes: recurring, tempo_medio_compras: avgTimeBetween, ticket_medio: avgTicket, avaliacoes: 0, reclamacoes: 0 },
+      alertas: alerts,
+      resumo_dia: {
+        receita: revDay, lucro: dayProfit, cmv: dayCMV,
+        producao: day.productions.length, compras: day.purchases.length,
+        despesas: expensesDay,
+        pendencias: raw.purchases.filter(p => p.status === "pendente_aprovacao").length + prodToProduce.length,
+        ocorrencias: alerts.length,
+      },
+      objetivos: {
+        dia: { meta: metaDiaria, atual: revDay, falta: Math.max(0, metaDiaria - revDay), ultrapassou: Math.max(0, revDay - metaDiaria) },
+        semana: { meta: metaSemanal, atual: revWeek, falta: Math.max(0, metaSemanal - revWeek), ultrapassou: Math.max(0, revWeek - metaSemanal) },
+        mes: { meta: metaMensal, atual: revMonth, falta: Math.max(0, metaMensal - revMonth), ultrapassou: Math.max(0, revMonth - metaMensal), projecao: monthProjection },
+      },
+      previsoes: {
+        fluxo_caixa: forecastCash, producao: forecastProduction, compras: forecastPurchases,
+        estoque: stockCoverage, ifood: forecastIFood, lucro: forecastProfit,
+      },
+    };
+  },
+
+  async getExecutiveAISummary(data) {
+    const prompt = `Você é a BARON AI, assistente executiva da empresa Don Baron. Gere um resumo executivo em linguagem natural, em português.
+
+DADOS:
+- Receita do dia: ${brl(data.financeiro.receita_dia)}
+- Receita da semana: ${brl(data.financeiro.receita_semana)}
+- Receita do mês: ${brl(data.financeiro.receita_mes)}
+- CMV: ${data.financeiro.cmv.toFixed(1)}%
+- Lucro: ${brl(data.financeiro.lucro)}
+- Fluxo de caixa: ${brl(data.financeiro.fluxo_caixa)}
+- Boletos vencendo hoje: ${data.financeiro.boletos_vencendo}
+- Boletos vencidos: ${data.financeiro.boletos_vencidos} (${brl(data.financeiro.boletos_vencidos_valor)})
+- Recebimentos previstos: ${brl(data.financeiro.recebimentos_previstos)}
+- iFood pendente: ${brl(data.financeiro.ifood_recebimento)}
+- Estoque crítico: ${data.estoque.criticos} itens
+- Estoque vencendo: ${data.estoque.vencendo} itens
+- Cobertura média: ${data.estoque.cobertura.toFixed(0)} dias
+- Produções abertas: ${data.producao.ordens_abertas}
+- Produções atrasadas: ${data.producao.atrasadas}
+- Eficiência: ${data.producao.eficiencia.toFixed(1)}%
+- Alertas ativos: ${data.alertas.length}
+
+INSTRUÇÕES:
+- Comece com "${data.greeting.period}"
+- Fale diretamente com o gestor, como um briefing matinal
+- Destaque apenas o que exige decisão
+- Se houver problemas, sugira ações concretas
+- Se houver oportunidades, destaque-as
+- Seja específico com números e valores
+- Não use markdown nem formatação especial
+- Máximo 6 parágrafos curtos separados por quebra de linha simples`;
+
+    try {
+      const res = await base44.integrations.Core.InvokeLLM({ prompt });
+      return typeof res === "string" ? res : String(res || "");
+    } catch (e) {
+      return this._fallbackSummary(data);
+    }
+  },
+
+  _fallbackSummary(data) {
+    const parts = [];
+    parts.push(`${data.greeting.period}.`);
+    parts.push(`Sua empresa faturou ${brl(data.financeiro.receita_semana)} esta semana e ${brl(data.financeiro.receita_mes)} no mês.`);
+    parts.push(`O CMV está em ${data.financeiro.cmv.toFixed(1)}% com margem de ${data.financeiro.margem.toFixed(1)}%.`);
+    if (data.estoque.criticos > 0) parts.push(`Há ${data.estoque.criticos} item(ns) em estoque crítico.`);
+    if (data.financeiro.boletos_vencendo > 0) parts.push(`${data.financeiro.boletos_vencendo} boleto(s) vencem hoje.`);
+    if (data.financeiro.boletos_vencidos > 0) parts.push(`${data.financeiro.boletos_vencidos} boleto(s) vencido(s) totalizando ${brl(data.financeiro.boletos_vencidos_valor)}.`);
+    if (data.producao.atrasadas > 0) parts.push(`${data.producao.atrasadas} produção(ões) atrasada(s).`);
+    if (data.alertas.length > 0) parts.push(`Há ${data.alertas.length} alerta(s) ativo(s) exigindo atenção.`);
+    return parts.join("\n\n");
+  },
 };
 
 export default BI;
