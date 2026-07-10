@@ -1,0 +1,148 @@
+import React, { useEffect, useState, useCallback } from "react";
+import { HCM, ADVANCE_TYPE_CONFIG, ADVANCE_STATUS_CONFIG } from "@/lib/hcmEngine";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus, Wallet, FileText, Loader2, Calculator } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
+
+export default function Advances({ refreshKey }) {
+  const [advances, setAdvances] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({ employee_id: '', type: 'vale_semanal', amount: 0, installments: 1, description: '', date: new Date().toISOString().split('T')[0] });
+  const [saving, setSaving] = useState(false);
+  const [payrollData, setPayrollData] = useState(null);
+  const [payrollEmp, setPayrollEmp] = useState('');
+  const [calcPayroll, setCalcPayroll] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try { const [a, e] = await Promise.all([HCM.listAdvances(), HCM.listEmployees()]); setAdvances(a); setEmployees(e); }
+    catch (err) { console.error(err); }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load(); }, [load, refreshKey]);
+
+  const handleCreate = async () => {
+    if (!form.employee_id) { toast({ title: "Selecione um colaborador", variant: "destructive" }); return; }
+    setSaving(true);
+    const emp = employees.find(e => e.id === form.employee_id);
+    const amount = Number(form.amount);
+    const installments = Number(form.installments);
+    try {
+      await HCM.createAdvance({ ...form, amount, installments, installment_amount: Math.round((amount / installments) * 100) / 100, installments_paid: 0, balance: amount, employee_name: emp?.full_name || '', status: 'ativo' });
+      toast({ title: "Vale/Empréstimo registrado" });
+      setForm({ employee_id: '', type: 'vale_semanal', amount: 0, installments: 1, description: '', date: new Date().toISOString().split('T')[0] });
+      load();
+    } catch (e) { toast({ title: "Erro", description: e.message, variant: "destructive" }); }
+    finally { setSaving(false); }
+  };
+
+  const handleGeneratePayroll = async () => {
+    if (!payrollEmp) { toast({ title: "Selecione um colaborador", variant: "destructive" }); return; }
+    setCalcPayroll(true);
+    try {
+      const res = await HCM.generatePayroll(payrollEmp);
+      setPayrollData(res);
+    } catch (e) { toast({ title: "Erro", description: e.message, variant: "destructive" }); }
+    finally { setCalcPayroll(false); }
+  };
+
+  const selectClass = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+  const activeAdvances = advances.filter(a => a.status === 'ativo');
+  const totalBalance = activeAdvances.reduce((s, a) => s + (a.balance || 0), 0);
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-xl border border-neutral-200 bg-white p-4"><p className="text-xs text-neutral-400">Vales Ativos</p><p className="text-xl font-bold text-blue-600 mt-1">{activeAdvances.length}</p></div>
+        <div className="rounded-xl border border-neutral-200 bg-white p-4"><p className="text-xs text-neutral-400">Saldo Devedor</p><p className="text-xl font-bold text-orange-600 mt-1">R$ {totalBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p></div>
+        <div className="rounded-xl border border-neutral-200 bg-white p-4"><p className="text-xs text-neutral-400">Total Registros</p><p className="text-xl font-bold text-neutral-800 mt-1">{advances.length}</p></div>
+      </div>
+
+      <div className="flex justify-end">
+        <Dialog>
+          <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4" />Novo Vale/Empréstimo</Button></DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader><DialogTitle>Novo Vale/Empréstimo</DialogTitle></DialogHeader>
+            <div className="space-y-3">
+              <div><Label className="text-xs">Colaborador</Label><select className={selectClass} value={form.employee_id} onChange={(e) => setForm({ ...form, employee_id: e.target.value })}><option value="">Selecione...</option>{employees.filter(e => e.status === 'ativo').map(e => <option key={e.id} value={e.id}>{e.full_name}</option>)}</select></div>
+              <div><Label className="text-xs">Tipo</Label><select className={selectClass} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>{Object.entries(ADVANCE_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}</select></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="text-xs">Valor (R$)</Label><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></div>
+                <div><Label className="text-xs">Parcelas</Label><Input type="number" value={form.installments} onChange={(e) => setForm({ ...form, installments: e.target.value })} /></div>
+              </div>
+              <div><Label className="text-xs">Data</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
+              <div><Label className="text-xs">Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>
+              <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => {}}>Cancelar</Button><Button onClick={handleCreate} disabled={saving}>{saving ? "Salvando..." : "Registrar"}</Button></div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Payroll Calculator */}
+      <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+        <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-neutral-500"><Calculator className="h-4 w-4" /> Calculadora de Folha</h3>
+        <div className="flex items-center gap-2">
+          <select className={selectClass} value={payrollEmp} onChange={(e) => setPayrollEmp(e.target.value)}>
+            <option value="">Selecione um colaborador...</option>
+            {employees.filter(e => e.status === 'ativo').map(e => <option key={e.id} value={e.id}>{e.full_name}</option>)}
+          </select>
+          <Button onClick={handleGeneratePayroll} disabled={calcPayroll} size="sm">{calcPayroll ? <Loader2 className="h-4 w-4 animate-spin" /> : <Calculator className="h-4 w-4" />}Calcular</Button>
+        </div>
+        {payrollData && (
+          <div className="mt-4 rounded-xl border border-neutral-100 p-4">
+            <h4 className="text-sm font-semibold text-neutral-800">{payrollData.employee_name}</h4>
+            <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+              <div className="flex justify-between"><span className="text-neutral-500">Salário Base:</span><span className="font-medium">R$ {payrollData.base_salary?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+              <div className="flex justify-between"><span className="text-neutral-500">Horas Extras:</span><span className="font-medium">{payrollData.overtime_hours}h (+R$ {payrollData.overtime_value?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})</span></div>
+              <div className="flex justify-between"><span className="text-neutral-500">Vale Alimentação:</span><span className="font-medium">R$ {payrollData.food_vale?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+              <div className="flex justify-between"><span className="text-neutral-500">Vale Transporte:</span><span className="font-medium">R$ {payrollData.transport_vale?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+              <div className="flex justify-between border-t border-neutral-100 pt-2"><span className="text-neutral-500">Salário Bruto:</span><span className="font-semibold text-emerald-600">R$ {payrollData.gross_salary?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+              <div className="flex justify-between"><span className="text-neutral-500">Adiantamentos:</span><span className="font-medium text-orange-600">- R$ {payrollData.advances?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+              <div className="flex justify-between"><span className="text-neutral-500">INSS (14%):</span><span className="font-medium text-red-500">- R$ {payrollData.inss_discount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+              <div className="flex justify-between border-t border-neutral-100 pt-2"><span className="text-neutral-500">Total Descontos:</span><span className="font-medium text-red-500">R$ {payrollData.total_discounts?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+              <div className="flex justify-between col-span-2 border-t-2 border-neutral-200 pt-2 mt-1"><span className="font-semibold text-neutral-700">Salário Líquido:</span><span className="text-lg font-bold text-emerald-600">R$ {payrollData.net_salary?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-neutral-200/60" />)}</div>
+      ) : advances.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 p-10 text-center"><Wallet className="mx-auto h-8 w-8 text-neutral-300" /><p className="mt-2 text-sm text-neutral-400">Nenhum vale ou empréstimo registrado</p></div>
+      ) : (
+        <div className="rounded-2xl border border-neutral-200 bg-white overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-neutral-50 border-b border-neutral-200">
+                <tr><th className="text-left p-3 font-medium text-neutral-500">Colaborador</th><th className="text-left p-3 font-medium text-neutral-500">Tipo</th><th className="text-left p-3 font-medium text-neutral-500">Valor</th><th className="text-left p-3 font-medium text-neutral-500">Parcelas</th><th className="text-left p-3 font-medium text-neutral-500">Saldo</th><th className="text-left p-3 font-medium text-neutral-500">Status</th></tr>
+              </thead>
+              <tbody>
+                {advances.map((a) => {
+                  const tCfg = ADVANCE_TYPE_CONFIG[a.type] || {};
+                  const sCfg = ADVANCE_STATUS_CONFIG[a.status] || {};
+                  return (
+                    <tr key={a.id} className="border-b border-neutral-100 hover:bg-neutral-50">
+                      <td className="p-3 font-medium text-neutral-700">{a.employee_name}</td>
+                      <td className="p-3">{tCfg.emoji} {tCfg.label}</td>
+                      <td className="p-3 text-neutral-600">R$ {(a.amount || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                      <td className="p-3 text-neutral-500">{a.installments_paid || 0}/{a.installments || 1}</td>
+                      <td className="p-3 font-medium text-orange-600">R$ {(a.balance || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                      <td className="p-3"><span className={`rounded-full ${sCfg.bg} ${sCfg.color} px-1.5 py-0.5 text-[10px] font-medium`}>{sCfg.label}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

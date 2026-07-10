@@ -1,0 +1,85 @@
+{
+  "name": "EmployeeDocument",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "employee_id": {
+      "type": "string"
+    },
+    "employee_name": {
+      "type": "string"
+    },
+    "doc_type": {
+      "type": "string",
+      "enum": [
+        "rg",
+        "cpf",
+        "cnh",
+        "ctps",
+        "aso",
+        "exame_medico",
+        "contrato",
+        "advertencia",
+        "certificado",
+        "curso",
+        "treinamento",
+        "epi",
+        "comprovante_residencia",
+        "outros"
+      ],
+      "default": "outros"
+    },
+    "doc_name": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data de validade (se aplicavel)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "valido",
+        "vencendo",
+        "vencido",
+        "sem_validade"
+      ],
+      "default": "valido"
+    },
+    "days_to_expiry": {
+      "type": "number",
+      "default": 0
+    },
+    "notes": {
+      "type": "string"
+    },
+    "uploaded_by": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "employee_id",
+    "doc_name"
+  ]
+}

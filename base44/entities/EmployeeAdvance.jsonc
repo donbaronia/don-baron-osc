@@ -1,0 +1,89 @@
+{
+  "name": "EmployeeAdvance",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "employee_id": {
+      "type": "string"
+    },
+    "employee_name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "vale_semanal",
+        "vale_transporte",
+        "vale_alimentacao",
+        "adiantamento",
+        "emprestimo",
+        "desconto"
+      ],
+      "default": "vale_semanal"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor total"
+    },
+    "installments": {
+      "type": "number",
+      "default": 1
+    },
+    "installment_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor da parcela"
+    },
+    "installments_paid": {
+      "type": "number",
+      "default": 0
+    },
+    "balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Saldo devedor"
+    },
+    "description": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "quitado",
+        "cancelado"
+      ],
+      "default": "ativo"
+    },
+    "payroll_id": {
+      "type": "string",
+      "description": "Folha vinculada"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "employee_id",
+    "type",
+    "amount"
+  ]
+}

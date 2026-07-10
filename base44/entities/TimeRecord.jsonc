@@ -1,0 +1,89 @@
+{
+  "name": "TimeRecord",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "employee_id": {
+      "type": "string"
+    },
+    "employee_name": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "clock_in": {
+      "type": "string",
+      "description": "HH:MM"
+    },
+    "clock_out": {
+      "type": "string",
+      "description": "HH:MM"
+    },
+    "break_start": {
+      "type": "string",
+      "description": "HH:MM"
+    },
+    "break_end": {
+      "type": "string",
+      "description": "HH:MM"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "pin",
+        "qr",
+        "biometria"
+      ],
+      "default": "manual"
+    },
+    "location_lat": {
+      "type": "number"
+    },
+    "location_lng": {
+      "type": "number"
+    },
+    "overtime_minutes": {
+      "type": "number",
+      "default": 0
+    },
+    "late_minutes": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "atraso",
+        "saida_antecipada",
+        "falta",
+        "folga",
+        "ferias"
+      ],
+      "default": "normal"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "employee_id",
+    "date"
+  ]
+}

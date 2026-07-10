@@ -1,0 +1,100 @@
+{
+  "name": "Training",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "employee_id": {
+      "type": "string"
+    },
+    "employee_name": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "interno",
+        "externo",
+        "video",
+        "documento",
+        "prova",
+        "onboarding"
+      ],
+      "default": "interno"
+    },
+    "provider": {
+      "type": "string",
+      "description": "Instrutor ou instituicao"
+    },
+    "category": {
+      "type": "string",
+      "description": "Ex: Seguranca, Higiene, Atendimento, Lideranca"
+    },
+    "duration_hours": {
+      "type": "number",
+      "default": 0
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "completion_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Validade do certificado"
+    },
+    "certificate_url": {
+      "type": "string"
+    },
+    "material_url": {
+      "type": "string",
+      "description": "Material do curso"
+    },
+    "score": {
+      "type": "number",
+      "default": 0,
+      "description": "Nota 0-10"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "em_andamento",
+        "concluido",
+        "reprovado",
+        "expirado"
+      ],
+      "default": "pendente"
+    },
+    "is_mandatory": {
+      "type": "boolean",
+      "default": false
+    },
+    "notes": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "employee_id",
+    "title"
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "name": "JobOpening",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "administracao",
+        "financeiro",
+        "compras",
+        "estoque",
+        "producao",
+        "rh",
+        "delivery",
+        "operacao",
+        "limpeza",
+        "manutencao",
+        "outros"
+      ]
+    },
+    "position": {
+      "type": "string"
+    },
+    "career_level": {
+      "type": "string",
+      "enum": [
+        "auxiliar",
+        "operador",
+        "lider",
+        "supervisor",
+        "gerente"
+      ],
+      "default": "operador"
+    },
+    "description": {
+      "type": "string"
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "salary_min": {
+      "type": "number",
+      "default": 0
+    },
+    "salary_max": {
+      "type": "number",
+      "default": 0
+    },
+    "contract_type": {
+      "type": "string",
+      "enum": [
+        "clt",
+        "pj",
+        "experiencia",
+        "temporada"
+      ],
+      "default": "clt"
+    },
+    "shift": {
+      "type": "string",
+      "enum": [
+        "manha",
+        "tarde",
+        "noite",
+        "madrugada",
+        "integral"
+      ],
+      "default": "integral"
+    },
+    "openings": {
+      "type": "number",
+      "default": 1,
+      "description": "Numero de vagas"
+    },
+    "filled": {
+      "type": "number",
+      "default": 0
+    },
+    "candidate_count": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "aberta",
+        "pausada",
+        "fechada"
+      ],
+      "default": "aberta"
+    },
+    "publication_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "closing_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

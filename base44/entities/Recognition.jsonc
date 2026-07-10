@@ -1,0 +1,62 @@
+{
+  "name": "Recognition",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "employee_id": {
+      "type": "string"
+    },
+    "employee_name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "elogio",
+        "premiacao",
+        "destaque",
+        "meta",
+        "aniversario"
+      ],
+      "default": "elogio"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "awarded_by": {
+      "type": "string"
+    },
+    "value": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor do premio (se aplicavel)"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "employee_id",
+    "title"
+  ]
+}

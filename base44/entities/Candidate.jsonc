@@ -1,0 +1,125 @@
+{
+  "name": "Candidate",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "name": {
+      "type": "string"
+    },
+    "cpf": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "whatsapp": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "position_applied": {
+      "type": "string",
+      "description": "Cargo pretendido"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "administracao",
+        "financeiro",
+        "compras",
+        "estoque",
+        "producao",
+        "rh",
+        "delivery",
+        "operacao",
+        "limpeza",
+        "manutencao",
+        "outros"
+      ]
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "indicacao",
+        "online",
+        "walk_in",
+        "parceria",
+        "interna"
+      ],
+      "default": "indicacao"
+    },
+    "source_detail": {
+      "type": "string",
+      "description": "Quem indicou ou onde viu a vaga"
+    },
+    "resume_url": {
+      "type": "string"
+    },
+    "job_opening_id": {
+      "type": "string"
+    },
+    "job_opening_title": {
+      "type": "string"
+    },
+    "interview_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "interview_notes": {
+      "type": "string"
+    },
+    "interviewed_by": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "number",
+      "default": 0,
+      "description": "0-5"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "novo",
+        "em_analise",
+        "entrevistado",
+        "aprovado",
+        "reprovado",
+        "contratado"
+      ],
+      "default": "novo"
+    },
+    "hire_reason": {
+      "type": "string",
+      "description": "Motivo da contratacao"
+    },
+    "rejection_reason": {
+      "type": "string",
+      "description": "Motivo da reprovacao"
+    },
+    "hired_employee_id": {
+      "type": "string",
+      "description": "ID do funcionario criado apos contratacao"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "name": "CareerPlan",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "employee_id": {
+      "type": "string"
+    },
+    "employee_name": {
+      "type": "string"
+    },
+    "current_level": {
+      "type": "string",
+      "enum": [
+        "auxiliar",
+        "operador",
+        "lider",
+        "supervisor",
+        "gerente"
+      ],
+      "default": "auxiliar"
+    },
+    "target_level": {
+      "type": "string",
+      "enum": [
+        "auxiliar",
+        "operador",
+        "lider",
+        "supervisor",
+        "gerente"
+      ],
+      "default": "operador"
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "[{description, completed, completed_at}]"
+    },
+    "progress_pct": {
+      "type": "number",
+      "default": 0
+    },
+    "last_promotion_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "target_promotion_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "concluido",
+        "pausado"
+      ],
+      "default": "ativo"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "employee_id"
+  ]
+}

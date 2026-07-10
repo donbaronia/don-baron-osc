@@ -4,11 +4,11 @@
   "properties": {
     "company_id": {
       "type": "string",
-      "description": "Multi-tenant: empresa proprietaria"
+      "description": "Multi-tenant"
     },
     "user_id": {
       "type": "string",
-      "description": "Vinculo com usuario do sistema (se aplicavel)"
+      "description": "Vinculo com usuario do sistema"
     },
     "full_name": {
       "type": "string",
@@ -16,19 +16,17 @@
     },
     "short_name": {
       "type": "string",
-      "description": "Nome de guerra / como e chamado"
+      "description": "Nome de guerra"
     },
     "cpf": {
-      "type": "string",
-      "description": "CPF"
+      "type": "string"
     },
     "rg": {
-      "type": "string",
-      "description": "RG"
+      "type": "string"
     },
     "ctps": {
       "type": "string",
-      "description": "Carteira de Trabalho (numero/serie)"
+      "description": "Carteira de Trabalho"
     },
     "pis": {
       "type": "string",
@@ -56,8 +54,7 @@
       "type": "string"
     },
     "pix_key": {
-      "type": "string",
-      "description": "Chave PIX para pagamentos"
+      "type": "string"
     },
     "pix_type": {
       "type": "string",
@@ -66,8 +63,16 @@
         "email",
         "telefone",
         "aleatoria"
-      ],
-      "description": "Tipo da chave PIX"
+      ]
+    },
+    "bank_name": {
+      "type": "string"
+    },
+    "bank_agency": {
+      "type": "string"
+    },
+    "bank_account": {
+      "type": "string"
     },
     "photo_url": {
       "type": "string"
@@ -102,13 +107,22 @@
         "limpeza",
         "manutencao",
         "outros"
+      ]
+    },
+    "shift": {
+      "type": "string",
+      "enum": [
+        "manha",
+        "tarde",
+        "noite",
+        "madrugada",
+        "integral"
       ],
-      "description": "Departamento"
+      "default": "integral"
     },
     "salary": {
       "type": "number",
-      "default": 0,
-      "description": "Salario base mensal"
+      "default": 0
     },
     "salary_type": {
       "type": "string",
@@ -121,15 +135,42 @@
       ],
       "default": "mensal"
     },
+    "contract_type": {
+      "type": "string",
+      "enum": [
+        "clt",
+        "pj",
+        "experiencia",
+        "temporada"
+      ],
+      "default": "clt"
+    },
     "hire_date": {
       "type": "string",
-      "format": "date",
-      "description": "Data de admissao"
+      "format": "date"
     },
     "termination_date": {
       "type": "string",
+      "format": "date"
+    },
+    "termination_reason": {
+      "type": "string"
+    },
+    "experience_end_date": {
+      "type": "string",
       "format": "date",
-      "description": "Data de demissao"
+      "description": "Fim do periodo de experiencia"
+    },
+    "career_level": {
+      "type": "string",
+      "enum": [
+        "auxiliar",
+        "operador",
+        "lider",
+        "supervisor",
+        "gerente"
+      ],
+      "default": "auxiliar"
     },
     "schedule_type": {
       "type": "string",
@@ -139,29 +180,54 @@
         "flexivel",
         "plantao"
       ],
-      "default": "fixo",
-      "description": "Tipo de escala"
+      "default": "fixo"
     },
     "work_schedule": {
       "type": "string",
-      "description": "Horario de trabalho (ex: 08:00-17:00)"
+      "description": "Horario (ex: 08:00-17:00)"
     },
     "work_days": {
       "type": "array",
       "items": {
         "type": "string"
-      },
-      "description": "Dias de trabalho (seg, ter, qua, etc)"
+      }
+    },
+    "transport_vale": {
+      "type": "number",
+      "default": 0
+    },
+    "food_vale": {
+      "type": "number",
+      "default": 0
+    },
+    "uniform_delivered": {
+      "type": "boolean",
+      "default": false
+    },
+    "badge_delivered": {
+      "type": "boolean",
+      "default": false
+    },
+    "epi_delivered": {
+      "type": "boolean",
+      "default": false
+    },
+    "onboarding_completed": {
+      "type": "boolean",
+      "default": false
+    },
+    "onboarding_completed_at": {
+      "type": "string",
+      "format": "date-time"
     },
     "bank_hours_balance": {
       "type": "number",
       "default": 0,
-      "description": "Saldo do banco de horas (positivo = credito)"
+      "description": "Saldo banco de horas (minutos)"
     },
     "vacation_days_remaining": {
       "type": "number",
-      "default": 30,
-      "description": "Dias de ferias restantes"
+      "default": 30
     },
     "vacation_start_date": {
       "type": "string",
@@ -176,7 +242,7 @@
       "items": {
         "type": "object"
       },
-      "description": "Documentos: {type, name, file_url, upload_date}"
+      "description": "Documentos: {type, name, file_url, upload_date, expiry_date}"
     },
     "emergency_contact_name": {
       "type": "string"

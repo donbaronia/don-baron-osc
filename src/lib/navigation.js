@@ -141,6 +141,13 @@ export const NAV_ITEMS = [
     roles: ["administrador", "financeiro", "compras", "estoque", "producao", "gerencia"],
   },
   {
+    label: "Capital Humano",
+    icon: Users,
+    path: "/rh",
+    emoji: "👥",
+    roles: ["administrador", "rh", "gerencia"],
+  },
+  {
     label: "BARON AI",
     icon: Bot,
     path: "/ia",

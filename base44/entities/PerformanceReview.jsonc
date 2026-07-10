@@ -1,0 +1,103 @@
+{
+  "name": "PerformanceReview",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "employee_id": {
+      "type": "string"
+    },
+    "employee_name": {
+      "type": "string"
+    },
+    "review_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "reviewer_name": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string",
+      "description": "Ex: 2026-Q2, 2026-H1"
+    },
+    "scores": {
+      "type": "object",
+      "description": "{pontualidade, produtividade, qualidade, comprometimento, organizacao, trabalho_equipe, relacionamento, lideranca}",
+      "properties": {
+        "pontualidade": {
+          "type": "number"
+        },
+        "produtividade": {
+          "type": "number"
+        },
+        "qualidade": {
+          "type": "number"
+        },
+        "comprometimento": {
+          "type": "number"
+        },
+        "organizacao": {
+          "type": "number"
+        },
+        "trabalho_equipe": {
+          "type": "number"
+        },
+        "relacionamento": {
+          "type": "number"
+        },
+        "lideranca": {
+          "type": "number"
+        }
+      }
+    },
+    "average_score": {
+      "type": "number",
+      "default": 0,
+      "description": "0-10"
+    },
+    "comments": {
+      "type": "string"
+    },
+    "development_plan": {
+      "type": "string"
+    },
+    "strengths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "improvements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "concluida",
+        "revisada"
+      ],
+      "default": "concluida"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "employee_id",
+    "review_date"
+  ]
+}
