@@ -1,0 +1,22 @@
+{
+  "name": "BaronAIHistory",
+  "type": "object",
+  "properties": {
+    "question": {
+      "type": "string"
+    },
+    "answer": {
+      "type": "string"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "question",
+    "answer"
+  ]
+}

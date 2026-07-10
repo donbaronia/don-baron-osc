@@ -1,0 +1,35 @@
+{
+  "name": "BaronAILearning",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "pergunta_frequente",
+        "erro_corrigido",
+        "preferencia"
+      ],
+      "default": "pergunta_frequente"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "occurrence_count": {
+      "type": "number",
+      "default": 0
+    },
+    "created_by_name": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "type",
+    "title"
+  ]
+}

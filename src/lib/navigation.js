@@ -71,7 +71,7 @@ export const NAV_ITEMS = [
     roles: ["administrador", "financeiro", "gerencia"],
   },
   {
-    label: "Inteligência Artificial",
+    label: "BARON AI",
     icon: Bot,
     path: "/ia",
     emoji: "🤖",

@@ -14,7 +14,7 @@ import Producao from '@/pages/Producao';
 import Compras from '@/pages/Compras';
 import Documentos from '@/pages/Documentos';
 import Indicadores from '@/pages/Indicadores';
-import InteligenciaArtificial from '@/pages/InteligenciaArtificial';
+import BaronAI from '@/pages/BaronAI';
 import Administracao from '@/pages/Administracao';
 import CadastroMestre from '@/pages/CadastroMestre';
 // Add page imports here
@@ -53,7 +53,7 @@ const AuthenticatedApp = () => {
         <Route path="/compras" element={<Compras />} />
         <Route path="/documentos" element={<Documentos />} />
         <Route path="/indicadores" element={<Indicadores />} />
-        <Route path="/ia" element={<InteligenciaArtificial />} />
+        <Route path="/ia" element={<BaronAI />} />
         <Route path="/administracao" element={<Administracao />} />
         <Route path="/cadastro" element={<CadastroMestre />} />
       </Route>
