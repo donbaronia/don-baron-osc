@@ -9,6 +9,17 @@
     "name": {
       "type": "string"
     },
+    "recipe_code": {
+      "type": "string",
+      "description": "Codigo unico (ex: REC-001)"
+    },
+    "category": {
+      "type": "string"
+    },
+    "production_center": {
+      "type": "string",
+      "description": "Centro de producao (blend, molhos, batata, etc)"
+    },
     "product_id": {
       "type": "string",
       "description": "Produto resultante da receita"
@@ -19,7 +30,7 @@
     "yield_quantity": {
       "type": "number",
       "default": 1,
-      "description": "Rendimento da receita"
+      "description": "Rendimento esperado da receita"
     },
     "yield_unit": {
       "type": "string"
@@ -29,14 +40,31 @@
       "items": {
         "type": "object"
       },
-      "description": "Lista de ingredientes: {ingredient_id, name, quantity, unit, cost}"
+      "description": "Lista de ingredientes: {ingredient_id, product_id, name, quantity, unit, unit_cost, total_cost}"
     },
     "preparation_time": {
       "type": "number",
       "description": "Tempo de preparo em minutos"
     },
+    "temperature": {
+      "type": "string",
+      "description": "Temperatura de preparo"
+    },
     "instructions": {
-      "type": "string"
+      "type": "string",
+      "description": "Modo de preparo"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "videos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "cost_total": {
       "type": "number",
@@ -64,6 +92,13 @@
     "version": {
       "type": "number",
       "default": 1
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Historico de alteracoes da receita"
     },
     "deleted_at": {
       "type": "string",

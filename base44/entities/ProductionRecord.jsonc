@@ -6,16 +6,67 @@
       "type": "string",
       "description": "Multi-tenant: empresa proprietaria"
     },
-    "item": {
-      "type": "string"
+    "production_code": {
+      "type": "string",
+      "description": "Codigo unico (ex: PROD-2026-0001)"
+    },
+    "production_center": {
+      "type": "string",
+      "description": "Centro de producao (blend, molhos, batata, bacon, etc)"
     },
     "recipe_id": {
       "type": "string",
       "description": "Receita utilizada"
     },
-    "quantity": {
+    "recipe_name": {
+      "type": "string"
+    },
+    "item": {
+      "type": "string",
+      "description": "Nome do item produzido"
+    },
+    "product_id": {
+      "type": "string",
+      "description": "Produto resultante"
+    },
+    "planned_quantity": {
       "type": "number",
-      "default": 0
+      "default": 0,
+      "description": "Quantidade planejada"
+    },
+    "produced_quantity": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade produzida"
+    },
+    "lost_quantity": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade perdida"
+    },
+    "reused_quantity": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade reaproveitada"
+    },
+    "expected_yield": {
+      "type": "number",
+      "default": 0,
+      "description": "Rendimento esperado"
+    },
+    "actual_yield": {
+      "type": "number",
+      "default": 0,
+      "description": "Rendimento real"
+    },
+    "yield_difference": {
+      "type": "number",
+      "default": 0,
+      "description": "Diferenca de rendimento"
+    },
+    "yield_reason": {
+      "type": "string",
+      "description": "Motivo da diferenca de rendimento"
     },
     "unit": {
       "type": "string",
@@ -25,21 +76,150 @@
       "type": "string",
       "format": "date"
     },
+    "start_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "pauses": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Pausas: {start, end, reason, duration_min}"
+    },
+    "total_time_min": {
+      "type": "number",
+      "default": 0,
+      "description": "Tempo total em minutos"
+    },
+    "productive_time_min": {
+      "type": "number",
+      "default": 0,
+      "description": "Tempo produtivo em minutos"
+    },
+    "unproductive_time_min": {
+      "type": "number",
+      "default": 0,
+      "description": "Tempo improdutivo em minutos"
+    },
+    "expected_time_min": {
+      "type": "number",
+      "default": 0,
+      "description": "Tempo previsto em minutos"
+    },
     "responsible": {
+      "type": "string",
+      "description": "Responsavel pela producao"
+    },
+    "team": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Equipe participante"
+    },
+    "team_size": {
+      "type": "number",
+      "default": 1
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta",
+        "critica"
+      ],
+      "default": "media"
+    },
+    "losses": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Perdas: {type, quantity, unit_cost, total_cost, reason, photos}"
+    },
+    "loss_type": {
+      "type": "string",
+      "enum": [
+        "queima",
+        "erro_preparo",
+        "vencimento",
+        "manipulacao",
+        "queda",
+        "contaminacao",
+        "sobras",
+        "treinamento",
+        "outros"
+      ],
+      "description": "Classificacao da perda principal"
+    },
+    "loss_reason": {
+      "type": "string"
+    },
+    "quality_checklist": {
+      "type": "object",
+      "description": "Checklist de qualidade: {temperature, weight, appearance, texture, flavor, standardization, photos, notes, approved, approved_by}"
+    },
+    "cost_ingredients": {
+      "type": "number",
+      "default": 0,
+      "description": "Custo dos ingredientes consumidos"
+    },
+    "cost_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Custo total da producao"
+    },
+    "cost_per_unit": {
+      "type": "number",
+      "default": 0,
+      "description": "Custo por unidade produzida"
+    },
+    "efficiency_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Eficiencia (produzido/planejado) %"
+    },
+    "stock_movement_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs dos movimentos de baixa de estoque gerados"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
       "type": "string"
     },
     "status": {
       "type": "string",
       "enum": [
         "planejada",
+        "liberada",
         "em_producao",
+        "pausada",
         "concluida",
-        "cancelada"
+        "cancelada",
+        "reprovada"
       ],
       "default": "planejada"
     },
-    "notes": {
-      "type": "string"
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Historico de alteracoes"
     },
     "version": {
       "type": "number",
