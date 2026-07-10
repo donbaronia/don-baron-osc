@@ -16,6 +16,7 @@ import Documentos from '@/pages/Documentos';
 import Indicadores from '@/pages/Indicadores';
 import InteligenciaArtificial from '@/pages/InteligenciaArtificial';
 import Administracao from '@/pages/Administracao';
+import CadastroMestre from '@/pages/CadastroMestre';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -54,6 +55,7 @@ const AuthenticatedApp = () => {
         <Route path="/indicadores" element={<Indicadores />} />
         <Route path="/ia" element={<InteligenciaArtificial />} />
         <Route path="/administracao" element={<Administracao />} />
+        <Route path="/cadastro" element={<CadastroMestre />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

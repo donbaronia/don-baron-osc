@@ -5,21 +5,94 @@
     "name": {
       "type": "string"
     },
-    "sku": {
+    "short_name": {
+      "type": "string"
+    },
+    "internal_code": {
+      "type": "string"
+    },
+    "barcode": {
       "type": "string"
     },
     "category": {
       "type": "string"
     },
-    "unit": {
-      "type": "string",
-      "default": "un"
+    "subcategory": {
+      "type": "string"
     },
-    "stock_quantity": {
+    "unit": {
+      "type": "string"
+    },
+    "primary_supplier_id": {
+      "type": "string"
+    },
+    "primary_supplier_name": {
+      "type": "string"
+    },
+    "alternative_supplier_id": {
+      "type": "string"
+    },
+    "alternative_supplier_name": {
+      "type": "string"
+    },
+    "brand": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "internally_produced": {
+      "type": "boolean",
+      "default": false
+    },
+    "controls_stock": {
+      "type": "boolean",
+      "default": true
+    },
+    "controls_expiry": {
+      "type": "boolean",
+      "default": false
+    },
+    "controls_batch": {
+      "type": "boolean",
+      "default": false
+    },
+    "controls_average_cost": {
+      "type": "boolean",
+      "default": true
+    },
+    "min_quantity": {
       "type": "number",
       "default": 0
     },
-    "min_quantity": {
+    "ideal_quantity": {
+      "type": "number",
+      "default": 0
+    },
+    "max_quantity": {
+      "type": "number",
+      "default": 0
+    },
+    "physical_location": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "stock_quantity": {
       "type": "number",
       "default": 0
     },

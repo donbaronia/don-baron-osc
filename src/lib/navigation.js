@@ -1,5 +1,6 @@
 import {
   LayoutDashboard,
+  Database,
   Wallet,
   Package,
   Factory,
@@ -19,6 +20,13 @@ export const NAV_ITEMS = [
     path: "/",
     emoji: "🏠",
     roles: ["administrador", "financeiro", "compras", "estoque", "producao", "gerencia", "operador"],
+  },
+  {
+    label: "Cadastro Mestre",
+    icon: Database,
+    path: "/cadastro",
+    emoji: "🗃️",
+    roles: ["administrador", "compras", "estoque", "gerencia"],
   },
   {
     label: "Centro Financeiro",

@@ -1,0 +1,39 @@
+{
+  "name": "PriceHistory",
+  "type": "object",
+  "properties": {
+    "product_id": {
+      "type": "string"
+    },
+    "product_name": {
+      "type": "string"
+    },
+    "supplier_id": {
+      "type": "string"
+    },
+    "supplier_name": {
+      "type": "string"
+    },
+    "price": {
+      "type": "number"
+    },
+    "quantity": {
+      "type": "number"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "user_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "product_id",
+    "supplier_id",
+    "price"
+  ]
+}

@@ -5,16 +5,38 @@
     "name": {
       "type": "string"
     },
-    "document_number": {
+    "trade_name": {
       "type": "string"
     },
-    "contact": {
+    "document_number": {
       "type": "string"
     },
     "phone": {
       "type": "string"
     },
+    "whatsapp": {
+      "type": "string"
+    },
     "email": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "primary_contact": {
+      "type": "string"
+    },
+    "average_delivery_days": {
+      "type": "number",
+      "default": 0
+    },
+    "payment_terms": {
+      "type": "string"
+    },
+    "notes": {
       "type": "string"
     },
     "category": {
