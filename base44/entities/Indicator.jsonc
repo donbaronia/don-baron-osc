@@ -1,0 +1,93 @@
+{
+  "name": "Indicator",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "code": {
+      "type": "string",
+      "description": "Codigo unico (ex: cmv, margem, lucro, fluxo_caixa)"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "description": "Categoria (financeiro, estoque, producao, vendas)"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unidade (%, R$, un, etc)"
+    },
+    "value": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor calculado pelo Data Engine"
+    },
+    "previous_value": {
+      "type": "number",
+      "default": 0
+    },
+    "variation": {
+      "type": "number",
+      "default": 0,
+      "description": "Variacao percentual"
+    },
+    "target_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Meta"
+    },
+    "calculation_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "period_type": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "annual"
+      ],
+      "default": "monthly"
+    },
+    "period_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "calculation_formula": {
+      "type": "string",
+      "description": "Formula de calculo"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "inativo",
+        "arquivado"
+      ],
+      "default": "ativo"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "code",
+    "name"
+  ]
+}

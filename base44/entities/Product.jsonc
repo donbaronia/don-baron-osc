@@ -2,6 +2,10 @@
   "name": "Product",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "name": {
       "type": "string"
     },
@@ -99,6 +103,26 @@
     "cost_price": {
       "type": "number",
       "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "inativo",
+        "arquivado"
+      ],
+      "default": "ativo"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
     }
   },
   "required": [

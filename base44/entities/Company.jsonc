@@ -1,27 +1,26 @@
 {
-  "name": "Supplier",
+  "name": "Company",
   "type": "object",
   "properties": {
-    "company_id": {
+    "legal_name": {
       "type": "string",
-      "description": "Multi-tenant: empresa proprietaria"
-    },
-    "name": {
-      "type": "string"
+      "description": "Razao social"
     },
     "trade_name": {
-      "type": "string"
+      "type": "string",
+      "description": "Nome fantasia"
     },
     "document_number": {
+      "type": "string",
+      "description": "CNPJ/CPF"
+    },
+    "email": {
       "type": "string"
     },
     "phone": {
       "type": "string"
     },
-    "whatsapp": {
-      "type": "string"
-    },
-    "email": {
+    "address": {
       "type": "string"
     },
     "city": {
@@ -30,34 +29,29 @@
     "state": {
       "type": "string"
     },
-    "primary_contact": {
+    "postal_code": {
       "type": "string"
     },
-    "average_delivery_days": {
-      "type": "number",
-      "default": 0
-    },
-    "payment_terms": {
+    "logo_url": {
       "type": "string"
     },
-    "notes": {
-      "type": "string"
+    "plan": {
+      "type": "string",
+      "enum": [
+        "free",
+        "starter",
+        "pro",
+        "enterprise"
+      ],
+      "default": "starter"
     },
-    "category": {
-      "type": "string"
+    "settings": {
+      "type": "object",
+      "description": "Configuracoes especificas da empresa"
     },
     "active": {
       "type": "boolean",
       "default": true
-    },
-    "status": {
-      "type": "string",
-      "enum": [
-        "ativo",
-        "inativo",
-        "arquivado"
-      ],
-      "default": "ativo"
     },
     "version": {
       "type": "number",
@@ -72,6 +66,6 @@
     }
   },
   "required": [
-    "name"
+    "legal_name"
   ]
 }

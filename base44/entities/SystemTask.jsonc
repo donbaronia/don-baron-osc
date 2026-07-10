@@ -2,6 +2,10 @@
   "name": "SystemTask",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "title": {
       "type": "string"
     },
@@ -56,6 +60,17 @@
       "description": "Historico de alteracoes da tarefa"
     },
     "created_by_name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
       "type": "string"
     }
   },

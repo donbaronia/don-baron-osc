@@ -1,5 +1,5 @@
 {
-  "name": "Supplier",
+  "name": "Recipe",
   "type": "object",
   "properties": {
     "company_id": {
@@ -9,42 +9,44 @@
     "name": {
       "type": "string"
     },
-    "trade_name": {
+    "product_id": {
+      "type": "string",
+      "description": "Produto resultante da receita"
+    },
+    "product_name": {
       "type": "string"
     },
-    "document_number": {
-      "type": "string"
-    },
-    "phone": {
-      "type": "string"
-    },
-    "whatsapp": {
-      "type": "string"
-    },
-    "email": {
-      "type": "string"
-    },
-    "city": {
-      "type": "string"
-    },
-    "state": {
-      "type": "string"
-    },
-    "primary_contact": {
-      "type": "string"
-    },
-    "average_delivery_days": {
+    "yield_quantity": {
       "type": "number",
-      "default": 0
+      "default": 1,
+      "description": "Rendimento da receita"
     },
-    "payment_terms": {
+    "yield_unit": {
       "type": "string"
     },
-    "notes": {
+    "ingredients": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Lista de ingredientes: {ingredient_id, name, quantity, unit, cost}"
+    },
+    "preparation_time": {
+      "type": "number",
+      "description": "Tempo de preparo em minutos"
+    },
+    "instructions": {
       "type": "string"
     },
-    "category": {
-      "type": "string"
+    "cost_total": {
+      "type": "number",
+      "default": 0,
+      "description": "Custo total calculado"
+    },
+    "cost_per_unit": {
+      "type": "number",
+      "default": 0,
+      "description": "Custo por unidade calculado"
     },
     "active": {
       "type": "boolean",

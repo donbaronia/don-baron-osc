@@ -1,0 +1,89 @@
+{
+  "name": "Stock",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "product_id": {
+      "type": "string"
+    },
+    "product_name": {
+      "type": "string"
+    },
+    "ingredient_id": {
+      "type": "string"
+    },
+    "ingredient_name": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "number",
+      "default": 0,
+      "description": "Quantidade atual (calculada via movimentos)"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "average_cost": {
+      "type": "number",
+      "default": 0,
+      "description": "Preco medio calculado via movimentos"
+    },
+    "total_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor total calculado"
+    },
+    "min_quantity": {
+      "type": "number",
+      "default": 0
+    },
+    "ideal_quantity": {
+      "type": "number",
+      "default": 0
+    },
+    "max_quantity": {
+      "type": "number",
+      "default": 0
+    },
+    "physical_location": {
+      "type": "string"
+    },
+    "last_movement_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "batches": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Controle de lotes: {batch, quantity, expiry_date}"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "inativo",
+        "arquivado"
+      ],
+      "default": "ativo"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "product_id"
+  ]
+}

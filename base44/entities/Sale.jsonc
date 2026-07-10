@@ -1,0 +1,102 @@
+{
+  "name": "Sale",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "sale_code": {
+      "type": "string",
+      "description": "Codigo unico (ex: VDA-2026-0001)"
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "balcao",
+        "delivery",
+        "ifood",
+        "whatsapp",
+        "outros"
+      ],
+      "default": "balcao"
+    },
+    "customer_id": {
+      "type": "string"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Itens da venda: {product_id, name, quantity, unit_price, total}"
+    },
+    "gross_total": {
+      "type": "number",
+      "default": 0
+    },
+    "discount": {
+      "type": "number",
+      "default": 0
+    },
+    "fees": {
+      "type": "number",
+      "default": 0,
+      "description": "Taxas (delivery, cartao, etc)"
+    },
+    "net_total": {
+      "type": "number",
+      "default": 0
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "dinheiro",
+        "pix",
+        "cartao_credito",
+        "cartao_debito",
+        "ifood",
+        "outros"
+      ],
+      "default": "dinheiro"
+    },
+    "sale_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "confirmada",
+        "entregue",
+        "cancelada"
+      ],
+      "default": "pendente"
+    },
+    "document_id": {
+      "type": "string",
+      "description": "Documento vinculado"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sale_date"
+  ]
+}

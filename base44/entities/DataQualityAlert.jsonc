@@ -2,6 +2,10 @@
   "name": "DataQualityAlert",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "severity": {
       "type": "string",
       "enum": [

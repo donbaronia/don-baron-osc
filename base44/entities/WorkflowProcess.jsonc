@@ -2,6 +2,10 @@
   "name": "WorkflowProcess",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "definition_id": {
       "type": "string"
     },
@@ -110,6 +114,17 @@
       "type": "boolean",
       "default": false,
       "description": "Se o processo foi sugerido pela BARON AI"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
     }
   },
   "required": [

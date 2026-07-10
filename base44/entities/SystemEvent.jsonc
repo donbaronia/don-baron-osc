@@ -2,6 +2,10 @@
   "name": "SystemEvent",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "event_type": {
       "type": "string",
       "description": "Tipo do evento (ex: documento_recebido, compra_registrada)"
@@ -38,6 +42,10 @@
     "origin": {
       "type": "string",
       "description": "Origem do evento (frontend, backend, workflow, etc)"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
     }
   },
   "required": [

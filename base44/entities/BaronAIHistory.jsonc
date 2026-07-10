@@ -2,6 +2,10 @@
   "name": "BaronAIHistory",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "question": {
       "type": "string"
     },
@@ -12,6 +16,17 @@
       "type": "string"
     },
     "user_email": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
       "type": "string"
     }
   },

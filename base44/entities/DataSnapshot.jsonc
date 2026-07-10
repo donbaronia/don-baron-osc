@@ -2,6 +2,10 @@
   "name": "DataSnapshot",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "dataset": {
       "type": "string",
       "description": "Nome do dataset (produtos, financeiro, cmv, dre, etc)"

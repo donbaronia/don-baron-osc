@@ -2,6 +2,10 @@
   "name": "DBDocument",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "title": {
       "type": "string"
     },
@@ -170,6 +174,10 @@
     "period_end": {
       "type": "string",
       "format": "date"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
     }
   },
   "required": [

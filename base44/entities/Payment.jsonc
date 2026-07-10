@@ -1,62 +1,83 @@
 {
-  "name": "Purchase",
+  "name": "Payment",
   "type": "object",
   "properties": {
     "company_id": {
       "type": "string",
       "description": "Multi-tenant: empresa proprietaria"
     },
-    "purchase_code": {
+    "payment_code": {
       "type": "string",
-      "description": "Codigo unico (ex: CMP-2026-0001)"
+      "description": "Codigo unico"
     },
-    "supplier_id": {
+    "financial_account_id": {
       "type": "string"
     },
-    "supplier": {
+    "financial_account_name": {
+      "type": "string"
+    },
+    "cost_center_id": {
+      "type": "string"
+    },
+    "cost_center_name": {
+      "type": "string"
+    },
+    "category": {
       "type": "string"
     },
     "description": {
       "type": "string"
     },
-    "items": {
-      "type": "array",
-      "items": {
-        "type": "object"
-      },
-      "description": "Itens da compra: {product_id, name, quantity, unit, unit_price, total}"
-    },
-    "total_amount": {
+    "amount": {
       "type": "number",
       "default": 0
     },
-    "order_date": {
+    "due_date": {
       "type": "string",
       "format": "date"
     },
-    "expected_delivery_date": {
+    "payment_date": {
       "type": "string",
       "format": "date"
     },
-    "received_date": {
-      "type": "string",
-      "format": "date"
+    "supplier_id": {
+      "type": "string"
+    },
+    "supplier_name": {
+      "type": "string"
     },
     "document_id": {
       "type": "string",
       "description": "Documento vinculado"
     },
-    "payment_id": {
+    "purchase_id": {
       "type": "string",
-      "description": "Pagamento vinculado"
+      "description": "Compra vinculada"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "dinheiro",
+        "pix",
+        "transferencia",
+        "boleto",
+        "cartao_credito",
+        "cartao_debito",
+        "outros"
+      ],
+      "default": "pix"
+    },
+    "installments": {
+      "type": "number",
+      "default": 1
     },
     "status": {
       "type": "string",
       "enum": [
         "pendente",
-        "aprovada",
-        "recebida",
-        "cancelada"
+        "pago",
+        "parcial",
+        "cancelado"
       ],
       "default": "pendente"
     },
@@ -76,6 +97,7 @@
     }
   },
   "required": [
-    "supplier"
+    "description",
+    "amount"
   ]
 }

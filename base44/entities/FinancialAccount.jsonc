@@ -1,5 +1,5 @@
 {
-  "name": "Supplier",
+  "name": "FinancialAccount",
   "type": "object",
   "properties": {
     "company_id": {
@@ -9,41 +9,41 @@
     "name": {
       "type": "string"
     },
-    "trade_name": {
+    "account_type": {
+      "type": "string",
+      "enum": [
+        "conta_corrente",
+        "poupanca",
+        "dinheiro",
+        "cartao_credito",
+        "cartao_debito",
+        "pix",
+        "outros"
+      ],
+      "default": "conta_corrente"
+    },
+    "bank": {
       "type": "string"
     },
-    "document_number": {
+    "agency": {
       "type": "string"
     },
-    "phone": {
+    "account_number": {
       "type": "string"
     },
-    "whatsapp": {
-      "type": "string"
-    },
-    "email": {
-      "type": "string"
-    },
-    "city": {
-      "type": "string"
-    },
-    "state": {
-      "type": "string"
-    },
-    "primary_contact": {
-      "type": "string"
-    },
-    "average_delivery_days": {
+    "initial_balance": {
       "type": "number",
       "default": 0
     },
-    "payment_terms": {
+    "current_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Saldo calculado pelo Data Engine"
+    },
+    "cost_center_id": {
       "type": "string"
     },
-    "notes": {
-      "type": "string"
-    },
-    "category": {
+    "cost_center_name": {
       "type": "string"
     },
     "active": {

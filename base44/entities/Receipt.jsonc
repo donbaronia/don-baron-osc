@@ -1,0 +1,104 @@
+{
+  "name": "Receipt",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "receipt_code": {
+      "type": "string",
+      "description": "Codigo unico"
+    },
+    "financial_account_id": {
+      "type": "string"
+    },
+    "financial_account_name": {
+      "type": "string"
+    },
+    "cost_center_id": {
+      "type": "string"
+    },
+    "cost_center_name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "expected_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "receipt_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "customer_id": {
+      "type": "string"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "sale_id": {
+      "type": "string"
+    },
+    "sale_code": {
+      "type": "string"
+    },
+    "document_id": {
+      "type": "string"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "dinheiro",
+        "pix",
+        "transferencia",
+        "boleto",
+        "cartao_credito",
+        "cartao_debito",
+        "outros"
+      ],
+      "default": "pix"
+    },
+    "installments": {
+      "type": "number",
+      "default": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "recebido",
+        "parcial",
+        "cancelado"
+      ],
+      "default": "pendente"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "description",
+    "amount"
+  ]
+}

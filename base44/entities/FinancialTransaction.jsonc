@@ -2,6 +2,10 @@
   "name": "FinancialTransaction",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "description": {
       "type": "string"
     },
@@ -35,6 +39,25 @@
       "type": "string"
     },
     "category": {
+      "type": "string"
+    },
+    "payment_id": {
+      "type": "string",
+      "description": "Pagamento vinculado"
+    },
+    "receipt_id": {
+      "type": "string",
+      "description": "Recebimento vinculado"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
       "type": "string"
     }
   },

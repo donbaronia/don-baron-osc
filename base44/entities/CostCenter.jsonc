@@ -1,35 +1,38 @@
 {
-  "name": "BaronAILearning",
+  "name": "CostCenter",
   "type": "object",
   "properties": {
     "company_id": {
       "type": "string",
       "description": "Multi-tenant: empresa proprietaria"
     },
-    "type": {
-      "type": "string",
-      "enum": [
-        "pergunta_frequente",
-        "erro_corrigido",
-        "preferencia"
-      ],
-      "default": "pergunta_frequente"
+    "code": {
+      "type": "string"
     },
-    "title": {
+    "name": {
       "type": "string"
     },
     "description": {
       "type": "string"
     },
-    "occurrence_count": {
-      "type": "number",
-      "default": 0
-    },
-    "created_by_name": {
+    "parent_cost_center_id": {
       "type": "string"
     },
-    "notes": {
+    "parent_cost_center_name": {
       "type": "string"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "inativo",
+        "arquivado"
+      ],
+      "default": "ativo"
     },
     "version": {
       "type": "number",
@@ -44,7 +47,6 @@
     }
   },
   "required": [
-    "type",
-    "title"
+    "name"
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "name": "Supplier",
+  "name": "Ingredient",
   "type": "object",
   "properties": {
     "company_id": {
@@ -9,42 +9,36 @@
     "name": {
       "type": "string"
     },
-    "trade_name": {
+    "product_id": {
+      "type": "string",
+      "description": "Produto vinculado ao ingrediente"
+    },
+    "product_name": {
       "type": "string"
     },
-    "document_number": {
-      "type": "string"
-    },
-    "phone": {
-      "type": "string"
-    },
-    "whatsapp": {
-      "type": "string"
-    },
-    "email": {
-      "type": "string"
-    },
-    "city": {
-      "type": "string"
-    },
-    "state": {
-      "type": "string"
-    },
-    "primary_contact": {
-      "type": "string"
-    },
-    "average_delivery_days": {
-      "type": "number",
-      "default": 0
-    },
-    "payment_terms": {
-      "type": "string"
-    },
-    "notes": {
+    "unit": {
       "type": "string"
     },
     "category": {
       "type": "string"
+    },
+    "min_quantity": {
+      "type": "number",
+      "default": 0
+    },
+    "ideal_quantity": {
+      "type": "number",
+      "default": 0
+    },
+    "max_quantity": {
+      "type": "number",
+      "default": 0
+    },
+    "allergens": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "active": {
       "type": "boolean",

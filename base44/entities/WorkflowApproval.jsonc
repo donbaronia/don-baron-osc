@@ -2,6 +2,10 @@
   "name": "WorkflowApproval",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "process_id": {
       "type": "string"
     },
@@ -51,6 +55,17 @@
       "type": "string"
     },
     "entity_id": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
       "type": "string"
     }
   },

@@ -1,0 +1,80 @@
+{
+  "name": "Inventory",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "inventory_code": {
+      "type": "string",
+      "description": "Codigo unico (ex: INV-2026-0001)"
+    },
+    "inventory_type": {
+      "type": "string",
+      "enum": [
+        "completo",
+        "parcial",
+        "rotativo"
+      ],
+      "default": "completo"
+    },
+    "inventory_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "responsible_name": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Itens contados: {product_id, name, counted_quantity, system_quantity, difference, unit_cost, total_difference}"
+    },
+    "total_items": {
+      "type": "number",
+      "default": 0
+    },
+    "total_value_counted": {
+      "type": "number",
+      "default": 0
+    },
+    "total_value_system": {
+      "type": "number",
+      "default": 0
+    },
+    "total_difference": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planejado",
+        "em_andamento",
+        "concluido",
+        "cancelado"
+      ],
+      "default": "planejado"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "inventory_date"
+  ]
+}

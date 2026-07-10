@@ -2,6 +2,10 @@
   "name": "AuditLog",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "user_name": {
       "type": "string"
     },

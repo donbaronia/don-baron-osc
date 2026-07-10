@@ -2,6 +2,10 @@
   "name": "TechLog",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "level": {
       "type": "string",
       "enum": [

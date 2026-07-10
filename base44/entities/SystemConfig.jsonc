@@ -2,6 +2,10 @@
   "name": "SystemConfig",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria (vazio = global)"
+    },
     "key": {
       "type": "string",
       "description": "Chave unica da configuracao (ex: empresa.nome, ia.modelo)"
@@ -22,6 +26,17 @@
       "default": true
     },
     "updated_by_name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
       "type": "string"
     }
   },

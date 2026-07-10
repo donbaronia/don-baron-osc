@@ -1,31 +1,29 @@
 {
-  "name": "User",
+  "name": "Role",
   "type": "object",
   "properties": {
     "company_id": {
       "type": "string",
       "description": "Multi-tenant: empresa proprietaria"
     },
-    "department": {
+    "name": {
       "type": "string",
-      "enum": [
-        "administrador",
-        "financeiro",
-        "compras",
-        "estoque",
-        "producao",
-        "gerencia",
-        "operador"
-      ],
-      "default": "operador",
-      "description": "Perfil operacional do usuario no Don Baron OS"
+      "description": "Nome do papel (administrador, financeiro, compras, gerencia, etc)"
     },
-    "role_ids": {
+    "description": {
+      "type": "string"
+    },
+    "permissions": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "object"
       },
-      "description": "IDs dos papeis (Roles) atribuidos ao usuario"
+      "description": "Lista de permissoes: {module, entity_type, operations[]}"
+    },
+    "is_system": {
+      "type": "boolean",
+      "default": false,
+      "description": "Papel padrao do sistema (nao editavel)"
     },
     "active": {
       "type": "boolean",
@@ -42,5 +40,8 @@
     "deleted_by": {
       "type": "string"
     }
-  }
+  },
+  "required": [
+    "name"
+  ]
 }

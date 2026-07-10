@@ -2,6 +2,10 @@
   "name": "FileRecord",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "file_name": {
       "type": "string"
     },
@@ -51,6 +55,13 @@
       "items": {
         "type": "string"
       }
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
     }
   },
   "required": [

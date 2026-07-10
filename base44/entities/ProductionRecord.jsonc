@@ -2,8 +2,16 @@
   "name": "ProductionRecord",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "item": {
       "type": "string"
+    },
+    "recipe_id": {
+      "type": "string",
+      "description": "Receita utilizada"
     },
     "quantity": {
       "type": "number",
@@ -25,9 +33,24 @@
       "enum": [
         "planejada",
         "em_producao",
-        "concluida"
+        "concluida",
+        "cancelada"
       ],
       "default": "planejada"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
     }
   },
   "required": [

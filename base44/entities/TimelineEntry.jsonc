@@ -2,6 +2,10 @@
   "name": "TimelineEntry",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
     "title": {
       "type": "string"
     },

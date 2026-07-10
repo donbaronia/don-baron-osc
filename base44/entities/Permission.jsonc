@@ -2,6 +2,10 @@
   "name": "Permission",
   "type": "object",
   "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria (vazio = global)"
+    },
     "role": {
       "type": "string",
       "description": "Perfil do usuario (administrador, financeiro, compras, etc)"
@@ -29,6 +33,10 @@
     },
     "description": {
       "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
     }
   },
   "required": [

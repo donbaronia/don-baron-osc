@@ -1,0 +1,111 @@
+{
+  "name": "Movement",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "movement_code": {
+      "type": "string",
+      "description": "Codigo unico (ex: MOV-2026-0001)"
+    },
+    "movement_type": {
+      "type": "string",
+      "enum": [
+        "entrada",
+        "saida",
+        "transferencia",
+        "producao",
+        "perda",
+        "compra",
+        "venda",
+        "inventario",
+        "ajuste"
+      ],
+      "default": "entrada"
+    },
+    "product_id": {
+      "type": "string"
+    },
+    "product_name": {
+      "type": "string"
+    },
+    "ingredient_id": {
+      "type": "string"
+    },
+    "ingredient_name": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "number",
+      "default": 0
+    },
+    "unit": {
+      "type": "string"
+    },
+    "unit_cost": {
+      "type": "number",
+      "default": 0
+    },
+    "total_cost": {
+      "type": "number",
+      "default": 0
+    },
+    "origin_type": {
+      "type": "string",
+      "description": "Tipo de origem (compra, producao, inventario, etc)"
+    },
+    "origin_id": {
+      "type": "string",
+      "description": "ID do registro de origem"
+    },
+    "destination_type": {
+      "type": "string"
+    },
+    "destination_id": {
+      "type": "string"
+    },
+    "batch": {
+      "type": "string"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "responsible_name": {
+      "type": "string"
+    },
+    "movement_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "inativo",
+        "arquivado"
+      ],
+      "default": "ativo"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "movement_type",
+    "product_id"
+  ]
+}
