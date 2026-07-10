@@ -6,13 +6,31 @@
       "type": "string",
       "description": "Multi-tenant: empresa proprietaria"
     },
+    "event_uuid": {
+      "type": "string",
+      "description": "UUID unico do evento (gerado automaticamente)"
+    },
+    "event_name": {
+      "type": "string",
+      "description": "Nome oficial do evento (PascalCase, ex: PurchaseCreated)"
+    },
     "event_type": {
       "type": "string",
-      "description": "Tipo do evento (ex: documento_recebido, compra_registrada)"
+      "description": "Tipo do evento em snake_case (ex: purchase_created)"
     },
     "module": {
       "type": "string",
       "description": "Modulo que emitiu o evento"
+    },
+    "origin": {
+      "type": "string",
+      "description": "Origem do evento (frontend, backend, workflow, ia, schedule)"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
     },
     "entity_type": {
       "type": "string",
@@ -24,7 +42,63 @@
     },
     "payload": {
       "type": "object",
-      "description": "Dados do evento"
+      "description": "Dados imutaveis do evento"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "critica",
+        "alta",
+        "media",
+        "baixa"
+      ],
+      "default": "media"
+    },
+    "queue": {
+      "type": "string",
+      "enum": [
+        "finance",
+        "inventory",
+        "production",
+        "purchasing",
+        "hr",
+        "courier",
+        "crm",
+        "documents",
+        "ai",
+        "notifications",
+        "analytics"
+      ],
+      "default": "notifications",
+      "description": "Fila de processamento"
+    },
+    "event_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "dispatched",
+        "completed",
+        "failed",
+        "retrying"
+      ],
+      "default": "pending"
+    },
+    "correlation_id": {
+      "type": "string",
+      "description": "ID de correlacao (agrupa eventos relacionados)"
+    },
+    "trace_id": {
+      "type": "string",
+      "description": "ID de rastreamento (para observabilidade)"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "description": "Chave de idempotencia (impede processamento duplicado)"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Assinatura interna de validacao"
     },
     "dispatched_to": {
       "type": "array",
@@ -33,15 +107,38 @@
       },
       "description": "Modulos notificados pelo dispatcher"
     },
-    "user_name": {
-      "type": "string"
+    "subscribers": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Status por subscriber: {module, status, processed_at, error, attempts}"
     },
-    "user_email": {
-      "type": "string"
+    "processing_time_ms": {
+      "type": "number",
+      "default": 0,
+      "description": "Tempo de processamento em milissegundos"
     },
-    "origin": {
+    "retry_count": {
+      "type": "number",
+      "default": 0
+    },
+    "max_retries": {
+      "type": "number",
+      "default": 3
+    },
+    "last_retry_at": {
       "type": "string",
-      "description": "Origem do evento (frontend, backend, workflow, etc)"
+      "format": "date-time"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Mensagem de erro se falhou"
+    },
+    "ai_processed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a BARON AI processou este evento"
     },
     "version": {
       "type": "number",

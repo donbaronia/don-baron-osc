@@ -12,6 +12,7 @@ import {
   PieChart,
   Brain,
   Target,
+  Zap,
 } from "lucide-react";
 
 // Centros de Operação do Don Baron OS.
@@ -93,6 +94,13 @@ export const NAV_ITEMS = [
     path: "/decisoes",
     emoji: "🎯",
     roles: ["administrador", "financeiro", "gerencia"],
+  },
+  {
+    label: "Event Bus",
+    icon: Zap,
+    path: "/event-bus",
+    emoji: "⚡",
+    roles: ["administrador", "gerencia"],
   },
   {
     label: "BARON AI",

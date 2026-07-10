@@ -1,4 +1,5 @@
 import { base44 } from "@/api/base44Client";
+import { EventBus } from "@/lib/eventBus";
 
 /**
  * Core Engine — Sistema Operacional do Don Baron OS
@@ -19,10 +20,11 @@ async function invoke(action, params = {}) {
 }
 
 export const Core = {
-  // ===== EVENT BUS + DISPATCHER =====
-  // Registra o evento e distribui automaticamente para os modulos interessados.
+  // ===== EVENT BUS =====
+  // Delegado ao Core Event Bus Engine (Documento 028).
+  // Nenhum modulo chama outro diretamente — toda comunicacao via Event Bus.
   events: {
-    emit: (params) => invoke("emitEvent", params),
+    emit: (params) => EventBus.publish(params),
   },
 
   // ===== NOTIFICATION CENTER =====
