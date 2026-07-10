@@ -1,0 +1,128 @@
+{
+  "name": "Module",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria (vazio = global)"
+    },
+    "module_key": {
+      "type": "string",
+      "description": "Identificador unico (ex: financeiro, estoque, producao)"
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "default": "1.0.0"
+    },
+    "description": {
+      "type": "string"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Modulos dos quais depende"
+    },
+    "events_published": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Eventos que publica"
+    },
+    "events_consumed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Eventos que consome"
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Rotas de frontend"
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Permissoes exigidas"
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Servicos oferecidos"
+    },
+    "boot_time_ms": {
+      "type": "number",
+      "default": 0,
+      "description": "Tempo de inicializacao em ms"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "registered",
+        "loading",
+        "active",
+        "degraded",
+        "isolated",
+        "failed",
+        "inactive"
+      ],
+      "default": "registered"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Assinatura interna de validacao"
+    },
+    "is_core": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se e modulo do nucleo (nao pode ser desativado)"
+    },
+    "load_order": {
+      "type": "number",
+      "default": 99,
+      "description": "Ordem de carregamento no boot"
+    },
+    "last_boot_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_error": {
+      "type": "string"
+    },
+    "restart_count": {
+      "type": "number",
+      "default": 0
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "version_number": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "module_key",
+    "name"
+  ]
+}

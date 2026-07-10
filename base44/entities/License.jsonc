@@ -1,0 +1,114 @@
+{
+  "name": "License",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria (vazio = global)"
+    },
+    "license_key": {
+      "type": "string",
+      "description": "Chave de licenca"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "free",
+        "starter",
+        "pro",
+        "enterprise"
+      ],
+      "default": "starter"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "trial",
+        "expired",
+        "suspended",
+        "cancelled"
+      ],
+      "default": "trial"
+    },
+    "max_users": {
+      "type": "number",
+      "default": 5
+    },
+    "max_companies": {
+      "type": "number",
+      "default": 1
+    },
+    "storage_limit_mb": {
+      "type": "number",
+      "default": 1024
+    },
+    "active_modules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Modulos ativados para esta licenca"
+    },
+    "premium_features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Recursos premium liberados"
+    },
+    "limits": {
+      "type": "object",
+      "description": "Limites operacionais: {max_products, max_suppliers, max_transactions_month, api_calls_month}",
+      "properties": {
+        "max_products": {
+          "type": "number",
+          "default": 1000
+        },
+        "max_suppliers": {
+          "type": "number",
+          "default": 100
+        },
+        "max_transactions_month": {
+          "type": "number",
+          "default": 10000
+        },
+        "api_calls_month": {
+          "type": "number",
+          "default": 50000
+        }
+      }
+    },
+    "trial_ends_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "issued_to": {
+      "type": "string",
+      "description": "Empresa ou cliente licenciado"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "license_key",
+    "plan"
+  ]
+}

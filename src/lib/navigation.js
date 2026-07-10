@@ -14,6 +14,7 @@ import {
   Target,
   Zap,
   Plug,
+  Cpu,
 } from "lucide-react";
 
 // Centros de Operação do Don Baron OS.
@@ -102,6 +103,13 @@ export const NAV_ITEMS = [
     path: "/event-bus",
     emoji: "⚡",
     roles: ["administrador", "gerencia"],
+  },
+  {
+    label: "BARON Kernel",
+    icon: Cpu,
+    path: "/kernel",
+    emoji: "🧬",
+    roles: ["administrador"],
   },
   {
     label: "API Gateway",

@@ -1,0 +1,86 @@
+{
+  "name": "ServiceRegistry",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria (vazio = global)"
+    },
+    "service_key": {
+      "type": "string",
+      "description": "Identificador unico do servico (ex: finance_engine, inventory_engine)"
+    },
+    "name": {
+      "type": "string"
+    },
+    "engine": {
+      "type": "string",
+      "description": "Engine correspondente (Finance Engine, Inventory Engine, etc)"
+    },
+    "module_key": {
+      "type": "string",
+      "description": "Modulo ao qual pertence"
+    },
+    "description": {
+      "type": "string"
+    },
+    "endpoints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Endpoints oferecidos"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Servicos dos quais depende"
+    },
+    "health_check_url": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "degraded",
+        "failed"
+      ],
+      "default": "active"
+    },
+    "auto_registered": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_health_check": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "response_time_ms": {
+      "type": "number",
+      "default": 0
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "service_key",
+    "name"
+  ]
+}

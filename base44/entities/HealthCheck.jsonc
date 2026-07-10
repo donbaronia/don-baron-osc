@@ -1,0 +1,79 @@
+{
+  "name": "HealthCheck",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria (vazio = global)"
+    },
+    "component": {
+      "type": "string",
+      "description": "Componente verificado (banco, fila, cache, ia, api, etc)"
+    },
+    "component_type": {
+      "type": "string",
+      "enum": [
+        "database",
+        "queue",
+        "cache",
+        "ai",
+        "api",
+        "plugin",
+        "integration",
+        "event_bus",
+        "workflow",
+        "storage",
+        "auth",
+        "module"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "healthy",
+        "degraded",
+        "unhealthy",
+        "unknown"
+      ],
+      "default": "healthy"
+    },
+    "response_time_ms": {
+      "type": "number",
+      "default": 0
+    },
+    "details": {
+      "type": "string"
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Metricas do componente: {cpu, memory, disk, connections, etc}"
+    },
+    "error": {
+      "type": "string"
+    },
+    "checked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "auto_recovered": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o componente se recuperou automaticamente"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "component",
+    "component_type"
+  ]
+}

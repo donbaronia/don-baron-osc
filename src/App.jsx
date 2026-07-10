@@ -23,6 +23,7 @@ import EventBusPage from '@/pages/EventBus';
 import Administracao from '@/pages/Administracao';
 import CadastroMestre from '@/pages/CadastroMestre';
 import Integracoes from '@/pages/Integracoes';
+import Kernel from '@/pages/Kernel';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -68,6 +69,7 @@ const AuthenticatedApp = () => {
         <Route path="/administracao" element={<Administracao />} />
         <Route path="/cadastro" element={<CadastroMestre />} />
         <Route path="/integracoes" element={<Integracoes />} />
+        <Route path="/kernel" element={<Kernel />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

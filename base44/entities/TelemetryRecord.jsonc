@@ -1,0 +1,60 @@
+{
+  "name": "TelemetryRecord",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria (vazio = global)"
+    },
+    "metric_name": {
+      "type": "string",
+      "description": "Nome da metrica (boot_time, response_time, memory_usage, events_per_min, online_users, module_usage)"
+    },
+    "metric_type": {
+      "type": "string",
+      "enum": [
+        "performance",
+        "resource",
+        "usage",
+        "availability",
+        "business"
+      ],
+      "default": "performance"
+    },
+    "metric_value": {
+      "type": "number",
+      "default": 0
+    },
+    "metric_unit": {
+      "type": "string",
+      "description": "Unidade (ms, MB, %, count)"
+    },
+    "module_key": {
+      "type": "string",
+      "description": "Modulo relacionado (se aplicavel)"
+    },
+    "context": {
+      "type": "object",
+      "description": "Contexto adicional da metrica"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "metric_name",
+    "metric_type"
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "name": "MaintenanceWindow",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria (vazio = global)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "scheduled",
+        "active",
+        "ended",
+        "cancelled"
+      ],
+      "default": "scheduled"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "message": {
+      "type": "string",
+      "description": "Mensagem exibida aos usuarios"
+    },
+    "allow_admins": {
+      "type": "boolean",
+      "default": true,
+      "description": "Permitir acesso de administradores durante manutencao"
+    },
+    "started_by": {
+      "type": "string"
+    },
+    "started_by_email": {
+      "type": "string"
+    },
+    "ended_by": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ended_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duration_min": {
+      "type": "number",
+      "default": 0
+    },
+    "affected_modules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Modulos afetados (vazio = todos)"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reason"
+  ]
+}
