@@ -28,6 +28,7 @@ import BaronBrain from '@/pages/BaronBrain';
 import FuncionariosDigitais from '@/pages/FuncionariosDigitais';
 import MissionControl from '@/pages/MissionControl';
 import HumanCapital from '@/pages/HumanCapital';
+import PeopleAnalytics from '@/pages/PeopleAnalytics';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -78,6 +79,7 @@ const AuthenticatedApp = () => {
         <Route path="/workforce" element={<FuncionariosDigitais />} />
         <Route path="/missions" element={<MissionControl />} />
         <Route path="/rh" element={<HumanCapital />} />
+        <Route path="/people-analytics" element={<PeopleAnalytics />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

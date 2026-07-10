@@ -148,6 +148,13 @@ export const NAV_ITEMS = [
     roles: ["administrador", "rh", "gerencia"],
   },
   {
+    label: "People Analytics",
+    icon: BarChart3,
+    path: "/people-analytics",
+    emoji: "📊",
+    roles: ["administrador", "rh", "gerencia"],
+  },
+  {
     label: "BARON AI",
     icon: Bot,
     path: "/ia",
