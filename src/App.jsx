@@ -11,6 +11,7 @@ import Dashboard from '@/pages/Dashboard';
 import Financeiro from '@/pages/Financeiro';
 import Estoque from '@/pages/Estoque';
 import Producao from '@/pages/Producao';
+import CMV from '@/pages/CMV';
 import Compras from '@/pages/Compras';
 import Documentos from '@/pages/Documentos';
 import Indicadores from '@/pages/Indicadores';
@@ -50,6 +51,7 @@ const AuthenticatedApp = () => {
         <Route path="/financeiro" element={<Financeiro />} />
         <Route path="/estoque" element={<Estoque />} />
         <Route path="/producao" element={<Producao />} />
+        <Route path="/cmv" element={<CMV />} />
         <Route path="/compras" element={<Compras />} />
         <Route path="/documentos" element={<Documentos />} />
         <Route path="/indicadores" element={<Indicadores />} />

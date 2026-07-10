@@ -1,0 +1,63 @@
+{
+  "name": "CMVGoal",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "name": {
+      "type": "string"
+    },
+    "period_type": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "annual"
+      ],
+      "default": "monthly"
+    },
+    "max_cmv_pct": {
+      "type": "number",
+      "default": 30,
+      "description": "CMV maximo (%)"
+    },
+    "target_margin_pct": {
+      "type": "number",
+      "default": 30,
+      "description": "Margem minima (%)"
+    },
+    "category": {
+      "type": "string",
+      "description": "Categoria especifica (vazio = geral)"
+    },
+    "channel": {
+      "type": "string",
+      "description": "Canal especifico (vazio = todos)"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "created_by_name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "max_cmv_pct"
+  ]
+}

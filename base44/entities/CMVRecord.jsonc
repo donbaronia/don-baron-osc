@@ -1,0 +1,196 @@
+{
+  "name": "CMVRecord",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "calculation_code": {
+      "type": "string",
+      "description": "Codigo unico (ex: CMV-2026-0001)"
+    },
+    "period_type": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly",
+        "annual"
+      ],
+      "default": "daily"
+    },
+    "period_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date"
+    },
+    "revenue_gross": {
+      "type": "number",
+      "default": 0,
+      "description": "Receita bruta"
+    },
+    "revenue_net": {
+      "type": "number",
+      "default": 0,
+      "description": "Receita liquida (apos taxas, descontos)"
+    },
+    "fees": {
+      "type": "number",
+      "default": 0,
+      "description": "Taxas (delivery, cartao, comissoes)"
+    },
+    "discounts": {
+      "type": "number",
+      "default": 0
+    },
+    "campaigns": {
+      "type": "number",
+      "default": 0,
+      "description": "Campanhas/reembolsos"
+    },
+    "cost_goods_sold": {
+      "type": "number",
+      "default": 0,
+      "description": "CMV - custo dos produtos vendidos"
+    },
+    "cmv_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "CMV % = custo / receita liquida * 100"
+    },
+    "gross_profit": {
+      "type": "number",
+      "default": 0,
+      "description": "Lucro bruto = receita liquida - CMV"
+    },
+    "net_profit": {
+      "type": "number",
+      "default": 0,
+      "description": "Lucro liquido"
+    },
+    "margin_pct": {
+      "type": "number",
+      "default": 0,
+      "description": "Margem % = lucro bruto / receita liquida * 100"
+    },
+    "losses_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor total de perdas no periodo"
+    },
+    "waste_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor de desperdicios"
+    },
+    "bonifications_value": {
+      "type": "number",
+      "default": 0,
+      "description": "Valor de bonificacoes recebidas"
+    },
+    "breakdown_by_product": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Analise por produto: {product_id, name, revenue, quantity, cost, cmv_pct, margin, profit, revenue_share, profit_share}"
+    },
+    "breakdown_by_category": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "breakdown_by_channel": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Por canal: {channel, revenue, cost, cmv_pct, margin}"
+    },
+    "breakdown_by_supplier": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "breakdown_by_recipe": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "breakdown_by_ingredient": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Por ingrediente: {ingredient_id, name, consumed_qty, purchased_qty, losses, avg_price, supplier, price_variation, financial_impact}"
+    },
+    "losses_by_type": {
+      "type": "object",
+      "description": "Perdas por tipo: {producao, estoque, validade, erro_operacional, treinamento, manipulacao, furto, quebra, outros}"
+    },
+    "data_sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Modulos que contribuiram: [financeiro, compras, estoque, producao, receitas, ifood, delivery, balcao]"
+    },
+    "order_count": {
+      "type": "number",
+      "default": 0
+    },
+    "average_ticket": {
+      "type": "number",
+      "default": 0
+    },
+    "calculated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "triggered_by": {
+      "type": "string",
+      "description": "Origem do calculo (schedule, manual, workflow, event)"
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Historico de recalculos: {date, version, reason, cmv_pct, gross_profit}"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "arquivado"
+      ],
+      "default": "ativo"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "period_type",
+    "period_date"
+  ]
+}

@@ -10,17 +10,35 @@
       "type": "string",
       "description": "Identificador da semana (ex: 2026-W28)"
     },
+    "period_start": {
+      "type": "string",
+      "format": "date",
+      "description": "Inicio do periodo"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date",
+      "description": "Fim do periodo"
+    },
     "gross_value": {
       "type": "number",
-      "default": 0
+      "default": 0,
+      "description": "Receita bruta"
     },
     "fees": {
       "type": "number",
-      "default": 0
+      "default": 0,
+      "description": "Taxas e comissoes"
+    },
+    "commissions": {
+      "type": "number",
+      "default": 0,
+      "description": "Comissoes do iFood"
     },
     "campaigns": {
       "type": "number",
-      "default": 0
+      "default": 0,
+      "description": "Campanhas"
     },
     "chargebacks": {
       "type": "number",
@@ -32,10 +50,25 @@
       "default": 0,
       "description": "Reembolsos"
     },
+    "cancellations": {
+      "type": "number",
+      "default": 0,
+      "description": "Cancelamentos"
+    },
     "net_value": {
       "type": "number",
       "default": 0,
-      "description": "Calculado: bruto - taxas - estornos - reembolsos + campanhas"
+      "description": "Calculado: bruto - taxas - comissoes - estornos - reembolsos + campanhas"
+    },
+    "order_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Numero de pedidos"
+    },
+    "average_ticket": {
+      "type": "number",
+      "default": 0,
+      "description": "Ticket medio"
     },
     "expected_date": {
       "type": "string",
@@ -53,12 +86,33 @@
     "document_id": {
       "type": "string"
     },
+    "file_url": {
+      "type": "string",
+      "description": "Arquivo importado"
+    },
+    "file_type": {
+      "type": "string",
+      "description": "Tipo do arquivo (pdf, xlsx, csv)"
+    },
+    "confirmed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se foi conferido pelo usuario"
+    },
+    "confirmed_by": {
+      "type": "string"
+    },
+    "confirmed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "status": {
       "type": "string",
       "enum": [
         "pendente",
         "recebido",
-        "cancelado"
+        "cancelado",
+        "importado"
       ],
       "default": "pendente"
     },

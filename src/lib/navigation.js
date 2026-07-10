@@ -9,6 +9,7 @@ import {
   BarChart3,
   Bot,
   Settings,
+  PieChart,
 } from "lucide-react";
 
 // Centros de Operação do Don Baron OS.
@@ -48,6 +49,13 @@ export const NAV_ITEMS = [
     path: "/producao",
     emoji: "🏭",
     roles: ["administrador", "producao", "gerencia"],
+  },
+  {
+    label: "Motor de CMV",
+    icon: PieChart,
+    path: "/cmv",
+    emoji: "📊",
+    roles: ["administrador", "financeiro", "gerencia"],
   },
   {
     label: "Centro de Compras",
