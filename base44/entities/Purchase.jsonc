@@ -1,0 +1,33 @@
+{
+  "name": "Purchase",
+  "type": "object",
+  "properties": {
+    "supplier": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "total_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "order_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "aprovada",
+        "recebida",
+        "cancelada"
+      ],
+      "default": "pendente"
+    }
+  },
+  "required": [
+    "supplier"
+  ]
+}

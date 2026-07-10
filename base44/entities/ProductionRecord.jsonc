@@ -1,0 +1,36 @@
+{
+  "name": "ProductionRecord",
+  "type": "object",
+  "properties": {
+    "item": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "number",
+      "default": 0
+    },
+    "unit": {
+      "type": "string",
+      "default": "un"
+    },
+    "production_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "responsible": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planejada",
+        "em_producao",
+        "concluida"
+      ],
+      "default": "planejada"
+    }
+  },
+  "required": [
+    "item"
+  ]
+}

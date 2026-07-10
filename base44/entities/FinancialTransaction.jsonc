@@ -1,0 +1,45 @@
+{
+  "name": "FinancialTransaction",
+  "type": "object",
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "a_pagar",
+        "a_receber"
+      ],
+      "default": "a_pagar"
+    },
+    "amount": {
+      "type": "number",
+      "default": 0
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "pago",
+        "recebido",
+        "vencido"
+      ],
+      "default": "pendente"
+    },
+    "supplier": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "description",
+    "amount"
+  ]
+}

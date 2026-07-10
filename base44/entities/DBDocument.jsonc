@@ -1,0 +1,56 @@
+{
+  "name": "DBDocument",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "nota_fiscal",
+        "boleto",
+        "planilha",
+        "contrato",
+        "recibo",
+        "relatorio",
+        "outro"
+      ],
+      "default": "outro"
+    },
+    "supplier": {
+      "type": "string"
+    },
+    "document_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string"
+    },
+    "file_type": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "processado",
+        "arquivado"
+      ],
+      "default": "pendente"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "title"
+  ]
+}

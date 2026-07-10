@@ -1,0 +1,24 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "department": {
+      "type": "string",
+      "enum": [
+        "administrador",
+        "financeiro",
+        "compras",
+        "estoque",
+        "producao",
+        "gerencia",
+        "operador"
+      ],
+      "default": "operador",
+      "description": "Perfil operacional do usu\u00e1rio no Don Baron OS"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

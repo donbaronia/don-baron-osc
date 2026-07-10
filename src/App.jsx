@@ -6,6 +6,16 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
+import AppLayout from '@/components/layout/AppLayout';
+import Dashboard from '@/pages/Dashboard';
+import Financeiro from '@/pages/Financeiro';
+import Estoque from '@/pages/Estoque';
+import Producao from '@/pages/Producao';
+import Compras from '@/pages/Compras';
+import Documentos from '@/pages/Documentos';
+import Indicadores from '@/pages/Indicadores';
+import InteligenciaArtificial from '@/pages/InteligenciaArtificial';
+import Administracao from '@/pages/Administracao';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -34,7 +44,17 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      <Route element={<AppLayout />}>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/financeiro" element={<Financeiro />} />
+        <Route path="/estoque" element={<Estoque />} />
+        <Route path="/producao" element={<Producao />} />
+        <Route path="/compras" element={<Compras />} />
+        <Route path="/documentos" element={<Documentos />} />
+        <Route path="/indicadores" element={<Indicadores />} />
+        <Route path="/ia" element={<InteligenciaArtificial />} />
+        <Route path="/administracao" element={<Administracao />} />
+      </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
