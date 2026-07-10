@@ -2,10 +2,11 @@ import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { analyzeDocument, mapExtractedToDocument } from "@/lib/documentAI";
+import { runFullAnalysis } from "@/lib/documentCenter";
 import { ACCEPTED_FILE_TYPES } from "@/lib/documentUtils";
-import { logAudit } from "@/lib/audit";
+import { Core } from "@/lib/coreEngine";
 import { cn } from "@/lib/utils";
-import { Upload, Camera, Loader2, CheckCircle, XCircle, FileText } from "lucide-react";
+import { Upload, Camera, Loader2, CheckCircle, XCircle, FileText, AlertTriangle } from "lucide-react";
 
 export default function DocumentUpload({ onUploaded }) {
   const { user } = useAuth();
@@ -14,7 +15,7 @@ export default function DocumentUpload({ onUploaded }) {
   const inputRef = useRef(null);
   const cameraRef = useRef(null);
 
-  const processFile = async (file) => {
+  const processFile = async (file, source = "upload") => {
     const fileId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const updateEntry = (updates) =>
       setProcessing((prev) => prev.map((f) => (f.id === fileId ? { ...f, ...updates } : f)));
@@ -28,12 +29,12 @@ export default function DocumentUpload({ onUploaded }) {
         title: file.name,
         file_url,
         file_type: file.type || file.name.split(".").pop(),
-        status: "recebido",
+        status: "em_analise",
+        source,
         sent_by: user?.full_name || "Sistema",
         sent_at: new Date().toISOString(),
       });
 
-      await base44.entities.DBDocument.update(doc.id, { status: "em_analise" });
       updateEntry({ status: "analyzing" });
 
       try {
@@ -42,39 +43,62 @@ export default function DocumentUpload({ onUploaded }) {
         const title = mapped.supplier
           ? `${mapped.supplier}${mapped.document_date ? ` - ${mapped.document_date}` : ""}`
           : file.name;
+
         await base44.entities.DBDocument.update(doc.id, {
           ...mapped,
           extracted_data: extracted,
           status: "aguardando_confirmacao",
           title,
         });
-        await logAudit({ user, module: "Documentos", action: "IA analisou documento", details: file.name });
+
+        updateEntry({ status: "analyzing_deep" });
+
+        const analysis = await runFullAnalysis({ ...doc, ...mapped });
+
+        await base44.entities.DBDocument.update(doc.id, {
+          ia_analysis: analysis.ia_analysis,
+          alerts: analysis.alerts,
+          duplicate_of: analysis.duplicate?.id || null,
+        });
+
+        await Core.audit({
+          audit_action: "create",
+          module: "documentos",
+          entity_type: "DBDocument",
+          entity_id: doc.id,
+          details: `Documento processado: ${title}`,
+        });
+
+        if (analysis.alerts.length > 0) {
+          updateEntry({ status: "done", alertCount: analysis.alerts.length });
+        } else {
+          updateEntry({ status: "done" });
+        }
       } catch (aiError) {
         await base44.entities.DBDocument.update(doc.id, {
           status: "recebido",
-          notes: "Falha na análise automática — preencha manualmente.",
+          notes: "Falha na analise automatica — preencha manualmente.",
         });
+        updateEntry({ status: "done" });
       }
-
-      updateEntry({ status: "done" });
     } catch (error) {
       updateEntry({ status: "error", error: error.message });
     }
   };
 
-  const handleFiles = async (fileList) => {
+  const handleFiles = async (fileList, source = "upload") => {
     const files = Array.from(fileList);
     for (const file of files) {
-      await processFile(file);
+      await processFile(file, source);
     }
     onUploaded?.();
-    setTimeout(() => setProcessing([]), 4000);
+    setTimeout(() => setProcessing([]), 5000);
   };
 
   return (
     <div>
       <div
-        onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
+        onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files, "upload"); }}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         tabIndex={0}
@@ -88,7 +112,7 @@ export default function DocumentUpload({ onUploaded }) {
               if (f) files.push(f);
             }
           }
-          if (files.length) handleFiles(files);
+          if (files.length) handleFiles(files, "paste");
         }}
         onClick={() => inputRef.current?.click()}
         className={cn(
@@ -102,7 +126,7 @@ export default function DocumentUpload({ onUploaded }) {
           multiple
           accept={ACCEPTED_FILE_TYPES}
           className="hidden"
-          onChange={(e) => { handleFiles(e.target.files); e.target.value = ""; }}
+          onChange={(e) => { handleFiles(e.target.files, "upload"); e.target.value = ""; }}
         />
         <input
           ref={cameraRef}
@@ -110,14 +134,14 @@ export default function DocumentUpload({ onUploaded }) {
           accept="image/*"
           capture="environment"
           className="hidden"
-          onChange={(e) => { handleFiles(e.target.files); e.target.value = ""; }}
+          onChange={(e) => { handleFiles(e.target.files, "camera"); e.target.value = ""; }}
         />
         <Upload className="mx-auto h-10 w-10 text-neutral-400" />
         <p className="mt-3 text-sm font-medium text-neutral-700">
           Arraste arquivos, cole uma imagem ou clique para selecionar
         </p>
         <p className="mt-1 text-xs text-neutral-400">
-          PDF · JPG · PNG · HEIC · XML · Excel · CSV · TXT · ZIP — múltiplos arquivos suportados
+          PDF · JPG · PNG · HEIC · XML · Excel · CSV · TXT · ZIP — multiplos arquivos suportados
         </p>
         <button
           type="button"
@@ -132,14 +156,14 @@ export default function DocumentUpload({ onUploaded }) {
         <div className="mt-4 space-y-2">
           {processing.map((f) => (
             <div key={f.id} className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white p-3">
-              {f.status === "uploading" && <Loader2 className="h-4 w-4 animate-spin text-blue-500" />}
-              {f.status === "analyzing" && <Loader2 className="h-4 w-4 animate-spin text-amber-500" />}
+              {(f.status === "uploading" || f.status === "analyzing" || f.status === "analyzing_deep") && <Loader2 className="h-4 w-4 animate-spin text-blue-500" />}
               {f.status === "done" && <CheckCircle className="h-4 w-4 text-emerald-500" />}
               {f.status === "error" && <XCircle className="h-4 w-4 text-rose-500" />}
               <FileText className="h-4 w-4 text-neutral-400" />
               <span className="flex-1 truncate text-sm text-neutral-700">{f.name}</span>
+              {f.alertCount > 0 && <AlertTriangle className="h-4 w-4 text-amber-500" />}
               <span className="text-xs font-medium text-neutral-500">
-                {f.status === "uploading" ? "Enviando..." : f.status === "analyzing" ? "IA analisando..." : f.status === "done" ? "Concluído" : "Erro"}
+                {f.status === "uploading" ? "Enviando..." : f.status === "analyzing" ? "IA extraindo..." : f.status === "analyzing_deep" ? "IA analisando..." : f.status === "done" ? (f.alertCount > 0 ? `${f.alertCount} alerta(s)` : "Concluido") : "Erro"}
               </span>
             </div>
           ))}

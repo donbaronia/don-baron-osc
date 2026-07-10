@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { logAudit } from "@/lib/audit";
+import { Core } from "@/lib/coreEngine";
 import { searchDocuments, DOCUMENT_CATEGORIES } from "@/lib/documentUtils";
 import PageHeader from "@/components/shared/PageHeader";
 import Toolbar from "@/components/shared/Toolbar";
@@ -9,6 +9,7 @@ import DocumentUpload from "@/components/documentos/DocumentUpload";
 import DocumentList from "@/components/documentos/DocumentList";
 import DocumentConfirmDialog from "@/components/documentos/DocumentConfirmDialog";
 import DocumentViewer from "@/components/documentos/DocumentViewer";
+import DocumentReports from "@/components/documentos/DocumentReports";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import {
@@ -63,19 +64,19 @@ export default function Documentos() {
       deleted_at: new Date().toISOString(),
       deleted_by: user?.full_name || "Sistema",
     });
-    await logAudit({ user, module: "Documentos", action: "Moveu documento para lixeira", details: doc.title });
+    await Core.audit({ audit_action: "delete", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Moveu para lixeira: ${doc.title}` });
     load();
   };
 
   const handleRestore = async (doc) => {
     await base44.entities.DBDocument.update(doc.id, { deleted_at: null, deleted_by: null });
-    await logAudit({ user, module: "Documentos", action: "Restaurou documento da lixeira", details: doc.title });
+    await Core.audit({ audit_action: "update", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Restaurou da lixeira: ${doc.title}` });
     load();
   };
 
   const handleArchive = async (doc) => {
     await base44.entities.DBDocument.update(doc.id, { status: "arquivado" });
-    await logAudit({ user, module: "Documentos", action: "Arquivou documento", details: doc.title });
+    await Core.audit({ audit_action: "update", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Arquivou: ${doc.title}` });
     load();
   };
 
@@ -84,7 +85,7 @@ export default function Documentos() {
       status: "rejeitado",
       rejected_by: user?.full_name || "Sistema",
     });
-    await logAudit({ user, module: "Documentos", action: "Rejeitou documento", details: doc.title });
+    await Core.audit({ audit_action: "reject", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Rejeitou: ${doc.title}` });
     load();
   };
 
@@ -109,6 +110,7 @@ export default function Documentos() {
           <TabsTrigger value="processados">Processados</TabsTrigger>
           <TabsTrigger value="arquivados">Arquivados</TabsTrigger>
           <TabsTrigger value="pesquisa">Pesquisa</TabsTrigger>
+          <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
           <TabsTrigger value="lixeira">
             Lixeira {trashCount > 0 && <span className="ml-1.5 rounded-full bg-neutral-400 px-1.5 py-0.5 text-xs font-bold text-white">{trashCount}</span>}
           </TabsTrigger>
@@ -183,6 +185,10 @@ export default function Documentos() {
             loading={loading}
             onRestore={handleRestore}
           />
+        </TabsContent>
+
+        <TabsContent value="relatorios" className="mt-4">
+          <DocumentReports />
         </TabsContent>
       </Tabs>
 

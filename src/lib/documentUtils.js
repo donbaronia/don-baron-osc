@@ -6,9 +6,14 @@ export const DOCUMENT_CATEGORIES = [
   { value: "contrato", label: "Contrato", emoji: "📋" },
   { value: "relatorio_ifood", label: "Relatório iFood", emoji: "📱" },
   { value: "relatorio_financeiro", label: "Relatório Financeiro", emoji: "📊" },
+  { value: "relatorio_bancario", label: "Relatório Bancário", emoji: "🏦" },
   { value: "pedido_compra", label: "Pedido de Compra", emoji: "🛒" },
   { value: "orcamento", label: "Orçamento", emoji: "💵" },
   { value: "recibo", label: "Recibo", emoji: "🧾" },
+  { value: "xml", label: "XML", emoji: "📄" },
+  { value: "planilha", label: "Planilha", emoji: "📈" },
+  { value: "imagem", label: "Imagem", emoji: "🖼️" },
+  { value: "documento_interno", label: "Documento Interno", emoji: "📁" },
   { value: "outros", label: "Outros", emoji: "📎" },
 ];
 
@@ -21,7 +26,7 @@ export const DOCUMENT_STATUSES = [
   { value: "rejeitado", label: "Rejeitado" },
 ];
 
-export const ACCEPTED_FILE_TYPES = ".pdf,.jpg,.jpeg,.png,.heic,.xml,.xlsx,.xls,.csv,.txt,.zip";
+export const ACCEPTED_FILE_TYPES = ".pdf,.jpg,.jpeg,.png,.heic,.xml,.xlsx,.xls,.csv,.txt,.zip,.webp,.gif";
 
 export function formatBRL(n) {
   return (n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

@@ -19,9 +19,14 @@
         "contrato",
         "relatorio_ifood",
         "relatorio_financeiro",
+        "relatorio_bancario",
         "pedido_compra",
         "orcamento",
         "recibo",
+        "xml",
+        "planilha",
+        "imagem",
+        "documento_interno",
         "outros"
       ],
       "default": "outros"
@@ -44,8 +49,15 @@
     "cnpj": {
       "type": "string"
     },
+    "cpf": {
+      "type": "string"
+    },
     "document_number": {
       "type": "string"
+    },
+    "chave_nota": {
+      "type": "string",
+      "description": "Chave de acesso da NFe (44 digitos)"
     },
     "value": {
       "type": "number",
@@ -77,11 +89,30 @@
         "type": "string"
       }
     },
+    "auto_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags geradas automaticamente pela IA"
+    },
     "extracted_data": {
       "type": "object"
     },
     "annotations": {
       "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "upload",
+        "camera",
+        "scanner",
+        "batch",
+        "email",
+        "paste"
+      ],
+      "default": "upload"
     },
     "sent_by": {
       "type": "string"
@@ -100,6 +131,10 @@
       "format": "date-time"
     },
     "confirmed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "edited_at": {
       "type": "string",
       "format": "date-time"
     },
@@ -174,6 +209,67 @@
     "period_end": {
       "type": "string",
       "format": "date"
+    },
+    "parent_document_id": {
+      "type": "string",
+      "description": "ID do documento original (para versionamento)"
+    },
+    "version_number": {
+      "type": "number",
+      "default": 1
+    },
+    "duplicate_of": {
+      "type": "string",
+      "description": "ID do documento do qual este e duplicata"
+    },
+    "ia_summary": {
+      "type": "string",
+      "description": "Resumo gerado pela BARON AI"
+    },
+    "ia_analysis": {
+      "type": "object",
+      "description": "Analise da IA: inconsistencias, duplicatas, alteracoes de preco, produtos novos",
+      "properties": {
+        "inconsistencies": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "price_changes": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "new_products": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "classification_flow": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Fluxo de classificacao sugerido pela IA: [{ step, entity_type, description }]"
+    },
+    "related_entities": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Entidades relacionadas: [{ entity_type, entity_id, entity_name, relationship }]"
+    },
+    "alerts": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Alertas detectados: [{ type, severity, message }]"
     },
     "version": {
       "type": "number",

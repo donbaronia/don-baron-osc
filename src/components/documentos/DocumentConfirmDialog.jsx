@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
-import { logAudit } from "@/lib/audit";
+import { Core } from "@/lib/coreEngine";
 import {
   DOCUMENT_CATEGORIES, formatBRL, isImageFile, isPDFFile,
 } from "@/lib/documentUtils";
@@ -15,10 +15,10 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, ZoomIn, ZoomOut, Check, X, Loader2 } from "lucide-react";
+import { Plus, Trash2, ZoomIn, ZoomOut, Check, X, Loader2, AlertTriangle, Sparkles, TrendingUp, Tag } from "lucide-react";
 
 const EMPTY_FORM = {
-  title: "", category: "outros", supplier: "", cnpj: "", document_number: "",
+  title: "", category: "outros", supplier: "", cnpj: "", cpf: "", document_number: "", chave_nota: "",
   value: 0, document_date: "", due_date: "", notes: "",
   bank: "", linha_digitavel: "", codigo_barras: "", pix_copia_cola: "", beneficiario: "",
   products: [], taxes: 0, freight: 0,
@@ -86,19 +86,23 @@ export default function DocumentConfirmDialog({ open, onClose, document: doc, on
         confirmed_by: user?.full_name || "Sistema",
         confirmed_at: new Date().toISOString(),
       });
-      await logAudit({ user, module: "Documentos", action: "Confirmou documento", details: form.title || doc.title });
+      await Core.audit({ audit_action: "confirm", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Confirmou: ${form.title || doc.title}` });
 
       if (isBoleto && form.value > 0) {
-        await base44.entities.FinancialTransaction.create({
+        await base44.entities.Payment.create({
           description: `${form.supplier || "Documento"}${form.document_number ? ` - ${form.document_number}` : ""}`.trim(),
-          type: "a_pagar",
+          supplier_name: form.supplier,
           amount: form.value,
+          issue_date: form.document_date,
           due_date: form.due_date,
-          supplier: form.supplier,
-          category: form.category === "boleto" ? "Boleto" : "PIX",
+          bank: form.bank,
+          pix_key: form.pix_copia_cola,
+          barcode: form.codigo_barras,
+          document_number: form.document_number,
+          payment_method: form.category === "boleto" ? "boleto" : "pix",
           status: "pendente",
         });
-        await logAudit({ user, module: "Documentos", action: "Criou conta a pagar via documento", details: `${formatBRL(form.value)} - ${form.supplier}` });
+        await Core.audit({ audit_action: "create", module: "financeiro", entity_type: "Payment", details: `Conta a pagar via documento: ${formatBRL(form.value)} - ${form.supplier}` });
       }
 
       onConfirmed?.();
@@ -114,7 +118,7 @@ export default function DocumentConfirmDialog({ open, onClose, document: doc, on
       status: "rejeitado",
       rejected_by: user?.full_name || "Sistema",
     });
-    await logAudit({ user, module: "Documentos", action: "Rejeitou documento", details: doc.title });
+    await Core.audit({ audit_action: "reject", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Rejeitou: ${doc.title}` });
     setSaving(false);
     onConfirmed?.();
     onClose();
@@ -158,6 +162,66 @@ export default function DocumentConfirmDialog({ open, onClose, document: doc, on
             <h3 className="mb-4 text-sm font-semibold text-neutral-900">Dados Extraídos pela IA — revise e confirme</h3>
 
             <div className="space-y-4">
+              {/* AI summary */}
+              {doc.ia_summary && (
+                <div className="rounded-xl border border-violet-200 bg-violet-50/50 p-3">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Sparkles className="h-3.5 w-3.5 text-violet-600" />
+                    <span className="text-xs font-semibold uppercase text-violet-700">Resumo da IA</span>
+                  </div>
+                  <p className="text-xs text-neutral-700">{doc.ia_summary}</p>
+                </div>
+              )}
+
+              {/* Alerts */}
+              {(doc.alerts || []).length > 0 && (
+                <div className="space-y-1.5">
+                  {(doc.alerts || []).map((a, i) => (
+                    <div key={i} className={`flex items-start gap-2 rounded-lg border p-2 ${a.severity === "urgent" ? "border-rose-200 bg-rose-50" : a.severity === "warning" ? "border-amber-200 bg-amber-50" : "border-blue-200 bg-blue-50"}`}>
+                      <AlertTriangle className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${a.severity === "urgent" ? "text-rose-600" : a.severity === "warning" ? "text-amber-600" : "text-blue-600"}`} />
+                      <span className={`text-xs ${a.severity === "urgent" ? "text-rose-700" : a.severity === "warning" ? "text-amber-700" : "text-blue-700"}`}>{a.message}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Classification flow */}
+              {(doc.classification_flow || []).length > 0 && (
+                <div className="rounded-xl border border-neutral-200 p-3">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Tag className="h-3.5 w-3.5 text-neutral-500" />
+                    <span className="text-xs font-semibold uppercase text-neutral-500">Fluxo Sugerido</span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1">
+                    {(doc.classification_flow || []).map((s, i) => (
+                      <React.Fragment key={i}>
+                        <span className="rounded-lg bg-neutral-100 px-2 py-1 text-xs font-medium text-neutral-700">{s.step}</span>
+                        {i < (doc.classification_flow || []).length - 1 && <span className="text-neutral-400 text-xs">→</span>}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* IA price changes */}
+              {(doc.ia_analysis?.price_changes || []).length > 0 && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50/30 p-3 space-y-1.5">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <TrendingUp className="h-3.5 w-3.5 text-amber-600" />
+                    <span className="text-xs font-semibold uppercase text-amber-700">Alteracoes de Preco</span>
+                  </div>
+                  {(doc.ia_analysis?.price_changes || []).map((pc, i) => (
+                    <div key={i} className="flex items-center justify-between text-xs">
+                      <span className="text-neutral-700">{pc.product_name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-neutral-400">{pc.old_price?.toFixed(2)} → {pc.new_price?.toFixed(2)}</span>
+                        <span className={`font-medium ${pc.change_pct > 0 ? "text-rose-600" : "text-emerald-600"}`}>{pc.change_pct > 0 ? "+" : ""}{pc.change_pct?.toFixed(0)}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <Field label="Título">
                 <Input value={form.title} onChange={(e) => set("title", e.target.value)} className={inputCls} />
               </Field>
@@ -180,8 +244,8 @@ export default function DocumentConfirmDialog({ open, onClose, document: doc, on
                 <Field label="Fornecedor">
                   <Input value={form.supplier} onChange={(e) => set("supplier", e.target.value)} className={inputCls} />
                 </Field>
-                <Field label="CNPJ">
-                  <Input value={form.cnpj} onChange={(e) => set("cnpj", e.target.value)} className={inputCls} />
+                <Field label="CNPJ / CPF">
+                  <Input value={form.cnpj} onChange={(e) => set("cnpj", e.target.value)} className={inputCls} placeholder="CNPJ" />
                 </Field>
               </div>
 
@@ -196,6 +260,10 @@ export default function DocumentConfirmDialog({ open, onClose, document: doc, on
                   <Input type="date" value={form.due_date} onChange={(e) => set("due_date", e.target.value)} className={inputCls} />
                 </Field>
               </div>
+
+              <Field label="Chave de Acesso NFe">
+                <Input value={form.chave_nota} onChange={(e) => set("chave_nota", e.target.value)} className={inputCls} placeholder="44 dígitos" />
+              </Field>
 
               {/* Boleto / PIX fields */}
               {isBoleto && (

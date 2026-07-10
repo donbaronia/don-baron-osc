@@ -7,6 +7,7 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import {
   Eye, CheckCircle, Trash2, RotateCcw, FileText, Archive, XCircle,
+  AlertTriangle, Copy, GitBranch,
 } from "lucide-react";
 
 export default function DocumentList({ documents, loading, onView, onConfirm, onReject, onArchive, onDelete, onRestore }) {
@@ -26,74 +27,108 @@ export default function DocumentList({ documents, loading, onView, onConfirm, on
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {documents.map((doc) => (
-        <div key={doc.id} className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all hover:shadow-lg hover:shadow-neutral-200/50">
-          {/* Thumbnail */}
-          <div className="relative flex h-36 items-center justify-center overflow-hidden bg-neutral-100">
-            {isImageFile(doc.file_type, doc.file_url) ? (
-              <img src={doc.file_url} alt={doc.title} className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex flex-col items-center gap-1 text-neutral-400">
-                <FileText className="h-8 w-8" />
-                <span className="text-xs uppercase">{(doc.file_type || "arquivo").split("/").pop()}</span>
-              </div>
-            )}
-            <div className="absolute left-2 top-2">
-              <StatusBadge status={doc.status} />
-            </div>
-            {doc.deleted_at && (
-              <div className="absolute right-2 top-2 rounded-full bg-rose-500 px-2 py-0.5 text-xs font-medium text-white">Na Lixeira</div>
-            )}
-          </div>
+      {documents.map((doc) => {
+        const allTags = [...new Set([...(doc.auto_tags || []), ...(doc.tags || [])])];
+        const alertCount = (doc.alerts || []).length;
+        const isVersion = doc.version_number > 1 || doc.parent_document_id;
+        const isDuplicate = !!doc.duplicate_of;
 
-          {/* Info */}
-          <div className="flex flex-1 flex-col p-4">
-            <div className="flex items-start justify-between gap-2">
-              <p className="line-clamp-2 text-sm font-medium text-neutral-900">{doc.title}</p>
-              <span className="shrink-0 text-lg">{getCategoryEmoji(doc.category)}</span>
-            </div>
-            <div className="mt-2 space-y-1 text-xs text-neutral-500">
-              <p><span className="font-medium text-neutral-600">Categoria:</span> {getCategoryLabel(doc.category)}</p>
-              {doc.supplier && <p><span className="font-medium text-neutral-600">Fornecedor:</span> {doc.supplier}</p>}
-              {doc.value > 0 && <p className="font-semibold text-neutral-900">{formatBRL(doc.value)}</p>}
-              <p>{formatDate(doc.document_date || doc.sent_at || doc.created_date)}</p>
-            </div>
-
-            {/* Actions */}
-            <div className="mt-3 flex items-center gap-1 border-t border-neutral-100 pt-3">
-              {doc.deleted_at ? (
-                <button onClick={() => onRestore?.(doc)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-emerald-600 hover:bg-emerald-50">
-                  <RotateCcw className="h-3.5 w-3.5" /> Restaurar
-                </button>
+        return (
+          <div key={doc.id} className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all hover:shadow-lg hover:shadow-neutral-200/50">
+            <div className="relative flex h-36 items-center justify-center overflow-hidden bg-neutral-100">
+              {isImageFile(doc.file_type, doc.file_url) ? (
+                <img src={doc.file_url} alt={doc.title} className="h-full w-full object-cover" />
               ) : (
-                <>
-                  <button onClick={() => onView?.(doc)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-100" title="Visualizar">
-                    <Eye className="h-3.5 w-3.5" /> Ver
-                  </button>
-                  {doc.status === "aguardando_confirmacao" && (
-                    <>
-                      <button onClick={() => onConfirm?.(doc)} className="inline-flex items-center gap-1 rounded-lg bg-amber-500 px-2 py-1.5 text-xs font-medium text-white hover:bg-amber-600" title="Conferir">
-                        <CheckCircle className="h-3.5 w-3.5" /> Conferir
-                      </button>
-                      <button onClick={() => onReject?.(doc)} className="rounded-lg p-1.5 text-neutral-400 hover:bg-rose-50 hover:text-rose-600" title="Rejeitar">
-                        <XCircle className="h-3.5 w-3.5" />
-                      </button>
-                    </>
-                  )}
-                  {doc.status === "processado" && (
-                    <button onClick={() => onArchive?.(doc)} className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600" title="Arquivar">
-                      <Archive className="h-3.5 w-3.5" />
-                    </button>
-                  )}
-                  <button onClick={() => onDelete?.(doc)} className="ml-auto rounded-lg p-1.5 text-neutral-400 hover:bg-rose-50 hover:text-rose-600" title="Excluir">
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </>
+                <div className="flex flex-col items-center gap-1 text-neutral-400">
+                  <FileText className="h-8 w-8" />
+                  <span className="text-xs uppercase">{(doc.file_type || "arquivo").split("/").pop()}</span>
+                </div>
+              )}
+              <div className="absolute left-2 top-2 flex gap-1">
+                <StatusBadge status={doc.status} />
+              </div>
+              <div className="absolute right-2 top-2 flex gap-1">
+                {isVersion && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-500 px-2 py-0.5 text-xs font-medium text-white" title={`Versão ${doc.version_number || 1}`}>
+                    <GitBranch className="h-3 w-3" /> v{doc.version_number || 1}
+                  </span>
+                )}
+                {isDuplicate && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-purple-500 px-2 py-0.5 text-xs font-medium text-white" title="Possível duplicata">
+                    <Copy className="h-3 w-3" /> Dup
+                  </span>
+                )}
+                {alertCount > 0 && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500 px-2 py-0.5 text-xs font-medium text-white" title={`${alertCount} alerta(s)`}>
+                    <AlertTriangle className="h-3 w-3" /> {alertCount}
+                  </span>
+                )}
+              </div>
+              {doc.deleted_at && (
+                <div className="absolute inset-x-0 bottom-0 bg-rose-500 py-0.5 text-center text-xs font-medium text-white">Na Lixeira</div>
               )}
             </div>
+
+            <div className="flex flex-1 flex-col p-4">
+              <div className="flex items-start justify-between gap-2">
+                <p className="line-clamp-2 text-sm font-medium text-neutral-900">{doc.title}</p>
+                <span className="shrink-0 text-lg">{getCategoryEmoji(doc.category)}</span>
+              </div>
+
+              {doc.ia_summary && (
+                <p className="mt-1.5 line-clamp-2 text-xs text-neutral-500 italic">{doc.ia_summary}</p>
+              )}
+
+              <div className="mt-2 space-y-1 text-xs text-neutral-500">
+                {doc.supplier && <p><span className="font-medium text-neutral-600">Fornecedor:</span> {doc.supplier}</p>}
+                {doc.value > 0 && <p className="font-semibold text-neutral-900">{formatBRL(doc.value)}</p>}
+                <p>{formatDate(doc.document_date || doc.sent_at || doc.created_date)}</p>
+              </div>
+
+              {allTags.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {allTags.slice(0, 4).map((t) => (
+                    <span key={t} className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-600">{t}</span>
+                  ))}
+                  {allTags.length > 4 && <span className="text-xs text-neutral-400">+{allTags.length - 4}</span>}
+                </div>
+              )}
+
+              <div className="mt-3 flex items-center gap-1 border-t border-neutral-100 pt-3">
+                {doc.deleted_at ? (
+                  <button onClick={() => onRestore?.(doc)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-emerald-600 hover:bg-emerald-50">
+                    <RotateCcw className="h-3.5 w-3.5" /> Restaurar
+                  </button>
+                ) : (
+                  <>
+                    <button onClick={() => onView?.(doc)} className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-100" title="Visualizar">
+                      <Eye className="h-3.5 w-3.5" /> Ver
+                    </button>
+                    {doc.status === "aguardando_confirmacao" && (
+                      <>
+                        <button onClick={() => onConfirm?.(doc)} className="inline-flex items-center gap-1 rounded-lg bg-amber-500 px-2 py-1.5 text-xs font-medium text-white hover:bg-amber-600" title="Conferir">
+                          <CheckCircle className="h-3.5 w-3.5" /> Conferir
+                        </button>
+                        <button onClick={() => onReject?.(doc)} className="rounded-lg p-1.5 text-neutral-400 hover:bg-rose-50 hover:text-rose-600" title="Rejeitar">
+                          <XCircle className="h-3.5 w-3.5" />
+                        </button>
+                      </>
+                    )}
+                    {doc.status === "processado" && (
+                      <button onClick={() => onArchive?.(doc)} className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600" title="Arquivar">
+                        <Archive className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                    <button onClick={() => onDelete?.(doc)} className="ml-auto rounded-lg p-1.5 text-neutral-400 hover:bg-rose-50 hover:text-rose-600" title="Excluir">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
