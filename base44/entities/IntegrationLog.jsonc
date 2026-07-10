@@ -1,0 +1,116 @@
+{
+  "name": "IntegrationLog",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "integration_id": {
+      "type": "string"
+    },
+    "integration_name": {
+      "type": "string"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "inbound",
+        "outbound"
+      ],
+      "default": "outbound"
+    },
+    "origin": {
+      "type": "string",
+      "enum": [
+        "api_gateway",
+        "webhook",
+        "workflow",
+        "ia",
+        "sandbox",
+        "manual"
+      ],
+      "default": "api_gateway"
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+      ],
+      "default": "POST"
+    },
+    "endpoint": {
+      "type": "string",
+      "description": "URL ou path do endpoint"
+    },
+    "request_headers": {
+      "type": "object",
+      "description": "Headers enviados (sanitizados, sem tokens)"
+    },
+    "request_payload": {
+      "type": "object",
+      "description": "Payload enviado"
+    },
+    "response_status": {
+      "type": "number",
+      "default": 0
+    },
+    "response_headers": {
+      "type": "object"
+    },
+    "response_payload": {
+      "type": "string",
+      "description": "Resposta (truncada)"
+    },
+    "duration_ms": {
+      "type": "number",
+      "default": 0
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "error": {
+      "type": "string"
+    },
+    "sandbox": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a chamada foi em modo sandbox"
+    },
+    "correlation_id": {
+      "type": "string"
+    },
+    "trace_id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "integration_id",
+    "direction"
+  ]
+}

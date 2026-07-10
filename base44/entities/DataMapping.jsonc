@@ -1,0 +1,87 @@
+{
+  "name": "DataMapping",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nome do mapeamento (ex: iFood -> Produto Interno)"
+    },
+    "source_system": {
+      "type": "string",
+      "description": "Sistema de origem (iFood, Saipos, etc)"
+    },
+    "target_system": {
+      "type": "string",
+      "default": "internal"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Tipo de entidade mapeada (product, supplier, customer, order, import_columns)"
+    },
+    "source_format": {
+      "type": "string",
+      "enum": [
+        "json",
+        "excel",
+        "csv",
+        "xml",
+        "pdf",
+        "image",
+        "api"
+      ],
+      "default": "json"
+    },
+    "mapping_rules": {
+      "type": "object",
+      "description": "Regras: {source_field: target_field}"
+    },
+    "transformations": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Transformacoes: [{source_field, target_field, transform_type, params}]"
+    },
+    "delimiter": {
+      "type": "string",
+      "default": ",",
+      "description": "Delimitador para CSV"
+    },
+    "has_header": {
+      "type": "boolean",
+      "default": true
+    },
+    "skip_rows": {
+      "type": "number",
+      "default": 0
+    },
+    "is_template": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se e reutilizavel"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "entity_type"
+  ]
+}

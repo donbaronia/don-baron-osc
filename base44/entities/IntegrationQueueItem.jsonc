@@ -1,0 +1,108 @@
+{
+  "name": "IntegrationQueueItem",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "integration_id": {
+      "type": "string"
+    },
+    "integration_name": {
+      "type": "string"
+    },
+    "queue_type": {
+      "type": "string",
+      "enum": [
+        "outbound_retry",
+        "webhook_retry",
+        "import_retry"
+      ],
+      "default": "outbound_retry"
+    },
+    "payload": {
+      "type": "object",
+      "description": "Dados para reprocessar"
+    },
+    "endpoint": {
+      "type": "string"
+    },
+    "method": {
+      "type": "string",
+      "default": "POST"
+    },
+    "headers": {
+      "type": "object"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "critica",
+        "alta",
+        "media",
+        "baixa"
+      ],
+      "default": "media"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+        "dead_letter"
+      ],
+      "default": "pending"
+    },
+    "retry_count": {
+      "type": "number",
+      "default": 0
+    },
+    "max_retries": {
+      "type": "number",
+      "default": 3
+    },
+    "next_retry_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_retry_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_error": {
+      "type": "string"
+    },
+    "original_event_id": {
+      "type": "string"
+    },
+    "correlation_id": {
+      "type": "string"
+    },
+    "scheduled_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "integration_id",
+    "queue_type"
+  ]
+}

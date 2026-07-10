@@ -13,6 +13,7 @@ import {
   Brain,
   Target,
   Zap,
+  Plug,
 } from "lucide-react";
 
 // Centros de Operação do Don Baron OS.
@@ -100,6 +101,13 @@ export const NAV_ITEMS = [
     icon: Zap,
     path: "/event-bus",
     emoji: "⚡",
+    roles: ["administrador", "gerencia"],
+  },
+  {
+    label: "API Gateway",
+    icon: Plug,
+    path: "/integracoes",
+    emoji: "🔌",
     roles: ["administrador", "gerencia"],
   },
   {

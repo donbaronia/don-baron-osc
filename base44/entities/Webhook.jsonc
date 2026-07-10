@@ -1,0 +1,119 @@
+{
+  "name": "Webhook",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "integration_id": {
+      "type": "string"
+    },
+    "integration_name": {
+      "type": "string"
+    },
+    "webhook_type": {
+      "type": "string",
+      "enum": [
+        "incoming",
+        "outgoing"
+      ],
+      "default": "incoming"
+    },
+    "event_name": {
+      "type": "string",
+      "description": "Nome do evento recebido ou enviado"
+    },
+    "url": {
+      "type": "string",
+      "description": "URL de origem (incoming) ou destino (outgoing)"
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+      ],
+      "default": "POST"
+    },
+    "headers": {
+      "type": "object",
+      "description": "Headers recebidos ou enviados (sanitizados)"
+    },
+    "payload": {
+      "type": "object",
+      "description": "Payload recebido ou enviado"
+    },
+    "response_status": {
+      "type": "number",
+      "description": "Status HTTP da resposta"
+    },
+    "response_body": {
+      "type": "string"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Assinatura recebida para validacao"
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a assinatura foi validada"
+    },
+    "source_ip": {
+      "type": "string"
+    },
+    "processing_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "processing",
+        "completed",
+        "failed",
+        "reprocessing"
+      ],
+      "default": "completed"
+    },
+    "reprocessed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reprocess_count": {
+      "type": "number",
+      "default": 0
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "received_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "dispatched_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "integration_id",
+    "webhook_type"
+  ]
+}

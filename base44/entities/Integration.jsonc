@@ -1,0 +1,248 @@
+{
+  "name": "Integration",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nome da integracao (ex: iFood, Mercado Pago)"
+    },
+    "integration_type": {
+      "type": "string",
+      "enum": [
+        "ifood",
+        "saipos",
+        "cardapio_web",
+        "mercado_pago",
+        "stone",
+        "pagseguro",
+        "pix",
+        "whatsapp_business",
+        "google_drive",
+        "dropbox",
+        "one_drive",
+        "google_calendar",
+        "outlook",
+        "gmail",
+        "open_finance",
+        "power_bi",
+        "meta_ads",
+        "google_ads",
+        "nfc_e",
+        "nf_e",
+        "sped",
+        "custom_api"
+      ],
+      "description": "Tipo de integracao"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "delivery",
+        "payment",
+        "storage",
+        "calendar",
+        "email",
+        "ads",
+        "fiscal",
+        "analytics",
+        "messaging",
+        "finance",
+        "custom"
+      ],
+      "description": "Categoria da integracao"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "inbound",
+        "outbound",
+        "both"
+      ],
+      "default": "both"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "inativo",
+        "erro",
+        "sandbox",
+        "pendente"
+      ],
+      "default": "pendente"
+    },
+    "provider_config": {
+      "type": "object",
+      "description": "Configuracao do provedor: {base_url, auth_type, auth_config, scopes, redirect_uri, api_version}",
+      "properties": {
+        "base_url": {
+          "type": "string"
+        },
+        "auth_type": {
+          "type": "string",
+          "enum": [
+            "oauth2",
+            "api_key",
+            "bearer_token",
+            "basic_auth",
+            "none"
+          ]
+        },
+        "api_version": {
+          "type": "string"
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "redirect_uri": {
+          "type": "string"
+        }
+      }
+    },
+    "credentials_encrypted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se as credenciais estao criptografadas"
+    },
+    "rate_limit": {
+      "type": "object",
+      "description": "Limites de requisicoes",
+      "properties": {
+        "requests_per_min": {
+          "type": "number",
+          "default": 60
+        },
+        "requests_per_hour": {
+          "type": "number",
+          "default": 1000
+        },
+        "requests_per_day": {
+          "type": "number",
+          "default": 10000
+        }
+      }
+    },
+    "rate_usage": {
+      "type": "object",
+      "description": "Uso atual de rate limit",
+      "properties": {
+        "current_min": {
+          "type": "number",
+          "default": 0
+        },
+        "current_hour": {
+          "type": "number",
+          "default": 0
+        },
+        "current_day": {
+          "type": "number",
+          "default": 0
+        },
+        "last_reset": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "exceeded_count": {
+          "type": "number",
+          "default": 0
+        }
+      }
+    },
+    "webhook_url": {
+      "type": "string",
+      "description": "URL de webhook gerada para receber dados"
+    },
+    "webhook_secret": {
+      "type": "string",
+      "description": "Segredo para validacao de assinatura do webhook"
+    },
+    "allowed_ips": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Lista de IPs permitidos"
+    },
+    "cors_origins": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Origens CORS permitidas"
+    },
+    "sandbox_mode": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se a integracao esta em modo sandbox"
+    },
+    "sandbox_config": {
+      "type": "object",
+      "description": "Configuracao de sandbox: {base_url, credentials}",
+      "properties": {
+        "base_url": {
+          "type": "string"
+        }
+      }
+    },
+    "last_call_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_error_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_error_message": {
+      "type": "string"
+    },
+    "total_calls": {
+      "type": "number",
+      "default": 0
+    },
+    "total_errors": {
+      "type": "number",
+      "default": 0
+    },
+    "avg_response_time_ms": {
+      "type": "number",
+      "default": 0
+    },
+    "events_sent": {
+      "type": "number",
+      "default": 0
+    },
+    "events_received": {
+      "type": "number",
+      "default": 0
+    },
+    "description": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deleted_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "integration_type"
+  ]
+}
