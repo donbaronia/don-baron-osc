@@ -9,6 +9,7 @@ import {
   BarChart3,
   Bot,
   Settings,
+  MessageCircle,
   PieChart,
   Brain,
   Target,
@@ -167,6 +168,13 @@ export const NAV_ITEMS = [
     path: "/ia",
     emoji: "🤖",
     roles: ["administrador", "financeiro", "compras", "estoque", "producao", "gerencia"],
+  },
+  {
+    label: "WhatsApp Assistant",
+    icon: MessageCircle,
+    path: "/whatsapp",
+    emoji: "💬",
+    roles: ["administrador", "financeiro", "compras", "estoque", "producao", "rh", "gerencia", "operador"],
   },
   {
     label: "Administração",
