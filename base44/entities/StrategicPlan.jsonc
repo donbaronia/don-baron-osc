@@ -1,0 +1,94 @@
+{
+  "name": "StrategicPlan",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "plan_type": {
+      "type": "string",
+      "enum": [
+        "diario",
+        "semanal",
+        "mensal",
+        "trimestral",
+        "semestral",
+        "anual",
+        "plurianual"
+      ],
+      "default": "mensal"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "rascunho",
+        "aprovado",
+        "em_execucao",
+        "concluido",
+        "revisado",
+        "arquivado"
+      ],
+      "default": "rascunho"
+    },
+    "plan_version": {
+      "type": "number",
+      "default": 1,
+      "description": "Vers\u00e3o do planejamento"
+    },
+    "parent_plan_id": {
+      "type": "string",
+      "description": "ID da vers\u00e3o anterior"
+    },
+    "responsible_name": {
+      "type": "string"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "objectives": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "summary": {
+      "type": "string"
+    },
+    "learnings": {
+      "type": "string",
+      "description": "Licoes aprendidas: planejado vs executado vs resultado"
+    },
+    "audit_log": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "[{user, action, timestamp, reason, plan_version}]"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

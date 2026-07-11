@@ -1,0 +1,74 @@
+{
+  "name": "RoadmapItem",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "year": {
+      "type": "number"
+    },
+    "quarter": {
+      "type": "string",
+      "enum": [
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "anual"
+      ],
+      "default": "anual"
+    },
+    "item_type": {
+      "type": "string",
+      "enum": [
+        "meta",
+        "projeto",
+        "expansao",
+        "investimento",
+        "outros"
+      ],
+      "default": "meta"
+    },
+    "linked_goal_id": {
+      "type": "string"
+    },
+    "linked_project_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planejado",
+        "em_andamento",
+        "concluido",
+        "atrasado"
+      ],
+      "default": "planejado"
+    },
+    "responsible_name": {
+      "type": "string"
+    },
+    "milestones": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "[{title, date, status}]"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "title",
+    "year"
+  ]
+}

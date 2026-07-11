@@ -1,0 +1,111 @@
+{
+  "name": "StrategicProject",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "project_type": {
+      "type": "string",
+      "enum": [
+        "nova_loja",
+        "nova_marca",
+        "novo_produto",
+        "reforma",
+        "equipamento",
+        "automacao",
+        "marketing",
+        "outros"
+      ],
+      "default": "outros"
+    },
+    "responsible_name": {
+      "type": "string"
+    },
+    "team": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "investment_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "expected_return": {
+      "type": "number",
+      "default": 0
+    },
+    "roi_pct": {
+      "type": "number",
+      "default": 0
+    },
+    "payback_months": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planejado",
+        "em_andamento",
+        "concluido",
+        "pausado",
+        "cancelado"
+      ],
+      "default": "planejado"
+    },
+    "progress_pct": {
+      "type": "number",
+      "default": 0
+    },
+    "milestones": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "[{title, date, status}]"
+    },
+    "indicators": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "[{name, target, actual, unit}]"
+    },
+    "plan_id": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta",
+        "critica"
+      ],
+      "default": "media"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

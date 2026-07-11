@@ -1,0 +1,79 @@
+{
+  "name": "KPIRecord",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "financeiro",
+        "operacional",
+        "pessoas",
+        "cliente"
+      ],
+      "default": "financeiro"
+    },
+    "value": {
+      "type": "number",
+      "default": 0
+    },
+    "unit": {
+      "type": "string",
+      "default": "R$"
+    },
+    "target_value": {
+      "type": "number",
+      "default": 0
+    },
+    "period": {
+      "type": "string",
+      "description": "Ex: 2026-07, 2026-Q3"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "trend": {
+      "type": "string",
+      "enum": [
+        "up",
+        "down",
+        "stable"
+      ],
+      "default": "stable"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "acima_meta",
+        "na_meta",
+        "abaixo_meta",
+        "critico"
+      ],
+      "default": "na_meta"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "auto",
+        "manual"
+      ],
+      "default": "auto"
+    },
+    "details": {
+      "type": "object"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

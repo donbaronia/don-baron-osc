@@ -1,0 +1,72 @@
+{
+  "name": "Scenario",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "scenario_type": {
+      "type": "string",
+      "enum": [
+        "preco",
+        "fornecedor",
+        "contratacao",
+        "expansao",
+        "equipamento",
+        "desperdicio",
+        "comissao",
+        "outros"
+      ],
+      "default": "outros"
+    },
+    "assumptions": {
+      "type": "string",
+      "description": "Premissas utilizadas"
+    },
+    "variables": {
+      "type": "object",
+      "description": "Variaveis de entrada do cenario"
+    },
+    "baseline_metrics": {
+      "type": "object",
+      "description": "Metricas atuais (baseline)"
+    },
+    "projected_metrics": {
+      "type": "object",
+      "description": "Projecoes financeiras e operacionais"
+    },
+    "impact_summary": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "rascunho",
+        "simulado",
+        "aprovado",
+        "rejeitado"
+      ],
+      "default": "rascunho"
+    },
+    "disclaimer": {
+      "type": "string",
+      "default": "Os resultados apresentados sao estimativas baseadas nas premissas definidas e nao garantem resultados futuros."
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

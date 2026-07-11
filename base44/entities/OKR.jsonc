@@ -1,0 +1,63 @@
+{
+  "name": "OKR",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "objective": {
+      "type": "string",
+      "description": "O (Objetivo estrategico)"
+    },
+    "description": {
+      "type": "string"
+    },
+    "key_results": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "[{description, target, current, unit, progress}]"
+    },
+    "responsible_name": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string",
+      "description": "Ex: 2026-Q3, 2026"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "rascunho",
+        "em_andamento",
+        "concluido",
+        "atrasado"
+      ],
+      "default": "rascunho"
+    },
+    "overall_progress": {
+      "type": "number",
+      "default": 0
+    },
+    "alignment": {
+      "type": "string",
+      "description": "Alinhamento com metas/projetos"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "objective"
+  ]
+}

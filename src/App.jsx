@@ -29,6 +29,7 @@ import FuncionariosDigitais from '@/pages/FuncionariosDigitais';
 import MissionControl from '@/pages/MissionControl';
 import HumanCapital from '@/pages/HumanCapital';
 import PeopleAnalytics from '@/pages/PeopleAnalytics';
+import EnterprisePlanning from '@/pages/EnterprisePlanning';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -80,6 +81,7 @@ const AuthenticatedApp = () => {
         <Route path="/missions" element={<MissionControl />} />
         <Route path="/rh" element={<HumanCapital />} />
         <Route path="/people-analytics" element={<PeopleAnalytics />} />
+        <Route path="/planejamento" element={<EnterprisePlanning />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

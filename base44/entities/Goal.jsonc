@@ -1,0 +1,107 @@
+{
+  "name": "Goal",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "scope_type": {
+      "type": "string",
+      "enum": [
+        "empresa",
+        "filial",
+        "departamento",
+        "equipe",
+        "colaborador",
+        "indicador",
+        "produto",
+        "categoria",
+        "fornecedor"
+      ],
+      "default": "empresa"
+    },
+    "scope_id": {
+      "type": "string"
+    },
+    "scope_name": {
+      "type": "string"
+    },
+    "responsible_name": {
+      "type": "string"
+    },
+    "indicator_name": {
+      "type": "string"
+    },
+    "expected_value": {
+      "type": "number",
+      "default": 0
+    },
+    "actual_value": {
+      "type": "number",
+      "default": 0
+    },
+    "unit": {
+      "type": "string",
+      "default": "%"
+    },
+    "progress_pct": {
+      "type": "number",
+      "default": 0
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "nao_iniciada",
+        "em_andamento",
+        "concluida",
+        "atrasada",
+        "cancelada"
+      ],
+      "default": "nao_iniciada"
+    },
+    "comments": {
+      "type": "string"
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "[{date, event, description, user}]"
+    },
+    "plan_id": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta",
+        "critica"
+      ],
+      "default": "media"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "name": "BudgetItem",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "budget_type": {
+      "type": "string",
+      "enum": [
+        "receita",
+        "despesa",
+        "investimento",
+        "capex",
+        "opex"
+      ],
+      "default": "despesa"
+    },
+    "category": {
+      "type": "string"
+    },
+    "expected_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "actual_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "variance": {
+      "type": "number",
+      "default": 0,
+      "description": "Realizado - Previsto"
+    },
+    "variance_pct": {
+      "type": "number",
+      "default": 0
+    },
+    "justification": {
+      "type": "string",
+      "description": "Justificativa do desvio"
+    },
+    "period": {
+      "type": "string",
+      "description": "Ex: 2026-07, 2026-Q3, 2026"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "responsible_name": {
+      "type": "string"
+    },
+    "cost_center": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "previsto",
+        "em_execucao",
+        "realizado",
+        "desviado"
+      ],
+      "default": "previsto"
+    },
+    "plan_id": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
