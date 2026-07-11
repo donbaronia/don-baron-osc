@@ -41,6 +41,21 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Baron Design System - Cores semânticas de botões */
+    --bds-save: 160 84% 39%;
+    --bds-save-fg: 0 0% 98%;
+    --bds-cancel: 0 0% 90%;
+    --bds-cancel-fg: 0 0% 20%;
+    --bds-delete: 0 72% 51%;
+    --bds-delete-fg: 0 0% 98%;
+    --bds-edit: 221 83% 53%;
+    --bds-edit-fg: 0 0% 98%;
+    --bds-duplicate: 263 70% 50%;
+    --bds-duplicate-fg: 0 0% 98%;
+    --bds-export: 25 95% 53%;
+    --bds-export-fg: 0 0% 10%;
+    --bds-print: 0 0% 20%;
+    --bds-print-fg: 0 0% 98%;
   }
 
   .dark {
@@ -76,6 +91,21 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Baron Design System - Cores semânticas de botões (mesmas em dark mode) */
+    --bds-save: 160 84% 39%;
+    --bds-save-fg: 0 0% 98%;
+    --bds-cancel: 0 0% 20%;
+    --bds-cancel-fg: 0 0% 80%;
+    --bds-delete: 0 72% 51%;
+    --bds-delete-fg: 0 0% 98%;
+    --bds-edit: 221 83% 53%;
+    --bds-edit-fg: 0 0% 98%;
+    --bds-duplicate: 263 70% 50%;
+    --bds-duplicate-fg: 0 0% 98%;
+    --bds-export: 25 95% 53%;
+    --bds-export-fg: 0 0% 10%;
+    --bds-print: 0 0% 20%;
+    --bds-print-fg: 0 0% 98%;
   }
 }
 

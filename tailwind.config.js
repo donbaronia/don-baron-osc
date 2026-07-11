@@ -59,8 +59,24 @@ module.exports = {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
-  			}
-  		},
+  				},
+  				bds: {
+  				save: 'hsl(var(--bds-save))',
+  				'save-fg': 'hsl(var(--bds-save-fg))',
+  				cancel: 'hsl(var(--bds-cancel))',
+  				'cancel-fg': 'hsl(var(--bds-cancel-fg))',
+  				delete: 'hsl(var(--bds-delete))',
+  				'delete-fg': 'hsl(var(--bds-delete-fg))',
+  				edit: 'hsl(var(--bds-edit))',
+  				'edit-fg': 'hsl(var(--bds-edit-fg))',
+  				duplicate: 'hsl(var(--bds-duplicate))',
+  				'duplicate-fg': 'hsl(var(--bds-duplicate-fg))',
+  				export: 'hsl(var(--bds-export))',
+  				'export-fg': 'hsl(var(--bds-export-fg))',
+  				print: 'hsl(var(--bds-print))',
+  				'print-fg': 'hsl(var(--bds-print-fg))'
+  				}
+  				},
   		fontFamily: {
   			heading: ['var(--font-heading)'],
   			body: ['var(--font-body)'],
