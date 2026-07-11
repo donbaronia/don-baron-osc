@@ -30,6 +30,7 @@ import MissionControl from '@/pages/MissionControl';
 import HumanCapital from '@/pages/HumanCapital';
 import PeopleAnalytics from '@/pages/PeopleAnalytics';
 import EnterprisePlanning from '@/pages/EnterprisePlanning';
+import BDSErrorBoundary from '@/components/bds/BDSErrorBoundary';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -57,6 +58,7 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
+    <BDSErrorBoundary>
     <Routes>
       <Route element={<AppLayout />}>
         <Route path="/" element={<CommandCenter />} />
@@ -85,6 +87,7 @@ const AuthenticatedApp = () => {
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+    </BDSErrorBoundary>
   );
 };
 

@@ -85,6 +85,7 @@ export default function GlobalSearch({ className }) {
           onChange={(e) => { setQuery(e.target.value); setOpen(true) }}
           onFocus={() => setOpen(true)}
           placeholder="Pesquisar funcionários, produtos, fornecedores, missões..."
+          data-bds-search
           className="h-9 w-full rounded-lg border border-neutral-200 bg-neutral-50 pl-9 pr-3 text-sm text-neutral-700 placeholder:text-neutral-400 transition-colors focus:border-amber-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-amber-400"
         />
         {loading && (

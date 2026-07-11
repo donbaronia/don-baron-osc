@@ -3,10 +3,12 @@ import { Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import GlobalSearch from "@/components/bds/GlobalSearch";
 import BDSAIPanel from "@/components/bds/BDSAIPanel";
+import BDSHelp from "@/components/bds/BDSHelp";
 import { useAuth } from "@/lib/AuthContext";
 import { getUserRole, ROLE_LABELS } from "@/lib/navigation";
+import { useKeyboardShortcuts } from "@/lib/useKeyboardShortcuts";
 import { base44 } from "@/api/base44Client";
-import { Menu, X, PanelLeftClose, PanelLeftOpen, Brain, Star, HelpCircle, Bell, LogOut, Moon, Sun } from "lucide-react";
+import { Menu, X, PanelLeftClose, PanelLeftOpen, Brain, Star, Bell, LogOut, Moon, Sun } from "lucide-react";
 
 export default function AppLayout() {
   const { user } = useAuth();
@@ -17,6 +19,12 @@ export default function AppLayout() {
   const [aiOpen, setAiOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+
+  useKeyboardShortcuts([
+    { combo: "ctrl+k", action: () => document.querySelector?.("[data-bds-search]")?.focus() },
+    { combo: "alt+i", action: () => setAiOpen(true) },
+    { combo: "escape", action: () => { setAiOpen(false); setShowProfile(false); } },
+  ]);
 
   const toggleDark = () => {
     const next = !darkMode;
@@ -94,14 +102,8 @@ export default function AppLayout() {
               {darkMode ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
             </button>
 
-            {/* Ajuda */}
-            <button
-              onClick={() => navigate("/administracao")}
-              className="rounded-md p-2 text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-700"
-              title="Ajuda"
-            >
-              <HelpCircle className="h-4.5 w-4.5" />
-            </button>
+            {/* Ajuda contextual */}
+            <BDSHelp />
 
             {/* Notificações */}
             <button

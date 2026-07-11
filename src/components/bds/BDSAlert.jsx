@@ -46,4 +46,33 @@ export function BDSAlert({ variant = "info", title, children, className, ...prop
   )
 }
 
+/**
+ * Alerta estruturado do Baron Design System.
+ * Cada alerta responde: O quê? Por quê? Impacto? Como resolver? Responsável?
+ */
+export function BDSStructuredAlert({ variant = "warning", title, what, why, impact, resolution, responsible, className }) {
+  const Icon = ICONS[variant]
+  const fields = [
+    { label: "O que aconteceu", value: what },
+    { label: "Por que aconteceu", value: why },
+    { label: "Qual o impacto", value: impact },
+    { label: "Como resolver", value: resolution },
+    { label: "Responsável", value: responsible },
+  ].filter((f) => f.value)
+  return (
+    <div role="alert" className={cn(bdsAlertVariants({ variant }), className)}>
+      <Icon />
+      {title && <p className="font-semibold leading-tight tracking-tight">{title}</p>}
+      <dl className="mt-2 space-y-1.5">
+        {fields.map((f, idx) => (
+          <div key={idx} className="flex gap-2 text-sm">
+            <dt className="shrink-0 font-medium opacity-70">{f.label}:</dt>
+            <dd className="flex-1">{f.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  )
+}
+
 export { bdsAlertVariants, LABELS as BDS_ALERT_LABELS }
