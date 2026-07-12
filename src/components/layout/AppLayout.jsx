@@ -139,7 +139,7 @@ export default function AppLayout() {
                       <p className="truncate text-xs text-neutral-400">{user?.email || ""}</p>
                     </div>
                     <button
-                      onClick={() => { setShowProfile(false); base44.auth.logout(); }}
+                      onClick={() => { setShowProfile(false); base44.auth.logout("/login"); }}
                       className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 transition-colors hover:bg-red-50"
                     >
                       <LogOut className="h-4 w-4" />
