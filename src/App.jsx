@@ -36,6 +36,7 @@ import HumanCapital from '@/pages/HumanCapital';
 import PeopleAnalytics from '@/pages/PeopleAnalytics';
 import EnterprisePlanning from '@/pages/EnterprisePlanning';
 import WhatsAppAssistant from '@/pages/WhatsAppAssistant';
+import WhatsAppConnector from '@/pages/WhatsAppConnector';
 import Motoboys from '@/pages/Motoboys';
 import Relatorios from '@/pages/Relatorios';
 import BDSErrorBoundary from '@/components/bds/BDSErrorBoundary';
@@ -89,6 +90,7 @@ const AuthenticatedApp = () => {
         <Route path="/people-analytics" element={<PeopleAnalytics />} />
         <Route path="/planejamento" element={<EnterprisePlanning />} />
         <Route path="/whatsapp" element={<WhatsAppAssistant />} />
+        <Route path="/whatsapp-connector" element={<WhatsAppConnector />} />
         <Route path="/motoboys" element={<Motoboys />} />
         <Route path="/relatorios" element={<Relatorios />} />
         </Route>
