@@ -1,80 +1,54 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useAuth } from "@/lib/AuthContext";
-import { getUserRole } from "@/lib/navigation";
-import { BI } from "@/lib/biEngine";
-import CommandGreeting from "@/components/command/CommandGreeting";
-import CommandExecutiveAI from "@/components/command/CommandExecutiveAI";
-import CommandQuickActions from "@/components/command/CommandQuickActions";
-import CommandSummary from "@/components/command/CommandSummary";
-import CommandFinancial from "@/components/command/CommandFinancial";
-import CommandStock from "@/components/command/CommandStock";
-import CommandProduction from "@/components/command/CommandProduction";
-import CommandTeam from "@/components/command/CommandTeam";
-import CommandClients from "@/components/command/CommandClients";
-import CommandAlerts from "@/components/command/CommandAlerts";
-import CommandForecasts from "@/components/command/CommandForecasts";
-
-const ROLE_SECTIONS = {
-  administrador: ["summary", "financial", "stock", "production", "team", "clients", "forecasts", "alerts"],
-  gerencia: ["summary", "financial", "stock", "production", "team", "clients", "forecasts", "alerts"],
-  financeiro: ["summary", "financial", "forecasts", "alerts"],
-  compras: ["stock", "alerts"],
-  producao: ["production", "stock", "alerts"],
-  estoque: ["stock", "alerts"],
-  operador: ["alerts"],
-};
+import BaronChat from "@/components/command/BaronChat";
+import DailySummary from "@/components/command/DailySummary";
+import RecentActivity from "@/components/command/RecentActivity";
+import NotificationCenter from "@/components/command/NotificationCenter";
 
 export default function CommandCenter() {
   const { user } = useAuth();
-  const role = getUserRole(user);
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [aiSummary, setAiSummary] = useState("");
-  const [aiLoading, setAiLoading] = useState(true);
-
-  useEffect(() => {
-    BI.getCommandCenter()
-      .then(r => {
-        setData(r);
-        setLoading(false);
-        BI.getExecutiveAISummary(r)
-          .then(summary => { setAiSummary(summary); setAiLoading(false); })
-          .catch(() => setAiLoading(false));
-      })
-      .catch(() => setLoading(false));
-  }, []);
-
-  const canSee = (section) => (ROLE_SECTIONS[role] || ["alerts"]).includes(section);
-
-  if (loading || !data) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-8">
-        <div className="h-28 animate-pulse rounded-2xl bg-neutral-200/60" />
-        <div className="mt-6 h-32 animate-pulse rounded-2xl bg-neutral-200/60" />
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-48 animate-pulse rounded-2xl bg-neutral-200/60" />
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+  const firstName = user?.full_name?.split(" ")[0] || "Usuário";
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-8">
-      <CommandGreeting data={data} user={user} />
-      <CommandExecutiveAI summary={aiSummary} loading={aiLoading} />
-      <CommandQuickActions />
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-4xl px-4 py-10 sm:py-16">
+        {/* Logo */}
+        <div className="mb-8 text-center">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/30">
+            <span className="text-lg font-black text-primary-foreground">DB</span>
+          </div>
+          <h1 className="mt-3 text-sm font-bold uppercase tracking-[0.3em] text-primary">DON BARON</h1>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Operating System</p>
+        </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        {canSee("summary") && <CommandSummary data={data} />}
-        {canSee("financial") && <CommandFinancial data={data} />}
-        {canSee("stock") && <CommandStock data={data} />}
-        {canSee("production") && <CommandProduction data={data} />}
-        {canSee("team") && <CommandTeam data={data} />}
-        {canSee("clients") && <CommandClients data={data} />}
-        {canSee("forecasts") && <CommandForecasts data={data} />}
-        {canSee("alerts") && <CommandAlerts alerts={data.alertas} />}
+        {/* Greeting */}
+        <div className="mb-8 text-center animate-fade-in">
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">{greeting}, {firstName}.</h2>
+          <p className="mt-2 text-base text-muted-foreground">Como posso ajudar hoje?</p>
+        </div>
+
+        {/* BARON Chat */}
+        <BaronChat />
+
+        {/* Resumo do dia */}
+        <div className="mt-10">
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Resumo do Dia</h3>
+          <DailySummary />
+        </div>
+
+        {/* Atividades + Notificações */}
+        <div className="mt-8 grid gap-6 md:grid-cols-2">
+          <div>
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Atividades Recentes</h3>
+            <RecentActivity />
+          </div>
+          <div>
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Notificações</h3>
+            <NotificationCenter />
+          </div>
+        </div>
       </div>
     </div>
   );
