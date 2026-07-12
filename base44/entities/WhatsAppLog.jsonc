@@ -1,0 +1,47 @@
+{
+  "name": "WhatsAppLog",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "log_type": {
+      "type": "string",
+      "enum": [
+        "connection",
+        "message",
+        "webhook",
+        "error",
+        "health",
+        "system"
+      ],
+      "default": "system"
+    },
+    "level": {
+      "type": "string",
+      "enum": [
+        "info",
+        "warning",
+        "error",
+        "debug"
+      ],
+      "default": "info"
+    },
+    "message": {
+      "type": "string"
+    },
+    "details": {
+      "type": "object",
+      "description": "Detalhes adicionais do log"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "log_type",
+    "message"
+  ]
+}

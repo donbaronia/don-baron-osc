@@ -7,6 +7,7 @@ import {
   Users,
   Bike,
   BarChart3,
+  MessageCircle,
   Settings,
 } from "lucide-react";
 
@@ -52,6 +53,18 @@ export const NAV_ITEMS = [
     icon: Bike,
     path: "/motoboys",
     roles: ["administrador", "gerencia", "operador"],
+  },
+  {
+    label: "Inteligência",
+    icon: BarChart3,
+    path: "/inteligencia",
+    roles: ["administrador", "gerencia", "financeiro"],
+  },
+  {
+    label: "WhatsApp",
+    icon: MessageCircle,
+    path: "/whatsapp-connector",
+    roles: ["administrador"],
   },
   {
     label: "Relatórios",

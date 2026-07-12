@@ -1,0 +1,88 @@
+{
+  "name": "WhatsAppMessage",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "received"
+      ],
+      "description": "Direcao da mensagem"
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "Numero do destinatario ou remetente"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "message_text": {
+      "type": "string"
+    },
+    "message_type": {
+      "type": "string",
+      "enum": [
+        "text",
+        "image",
+        "document",
+        "template",
+        "audio",
+        "video"
+      ],
+      "default": "text"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "sending",
+        "sent",
+        "delivered",
+        "read",
+        "failed"
+      ],
+      "default": "queued"
+    },
+    "provider_message_id": {
+      "type": "string",
+      "description": "ID da mensagem no provedor"
+    },
+    "source_module": {
+      "type": "string",
+      "description": "Modulo que originou a mensagem (financeiro, compras, producao, rh, etc.)"
+    },
+    "source_event": {
+      "type": "string",
+      "description": "Evento que gerou a mensagem (new_order, payment_made, boleto_due, etc.)"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "delivered_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "read_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "error_message": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "direction",
+    "phone_number",
+    "message_text"
+  ]
+}
