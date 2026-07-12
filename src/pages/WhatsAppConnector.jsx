@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import {
   MessageCircle, RefreshCw, WifiOff, Send, Inbox,
-  Webhook, ClipboardList, AlertCircle, CheckCircle2, XCircle, QrCode, Save, Zap,
+  Webhook, ClipboardList, AlertCircle, CheckCircle2, XCircle, QrCode, Save, Zap, RefreshCcw, Clock,
 } from "lucide-react";
 
 export default function WhatsAppConnector() {
@@ -28,7 +28,7 @@ export default function WhatsAppConnector() {
     instance_id: "",
     instance_token: "",
     client_token: "",
-    api_url: "https://api.z-api.com",
+    api_url: "https://api.z-api.io",
     webhook_url: "",
     notifications_enabled: true,
   });
@@ -51,7 +51,7 @@ export default function WhatsAppConnector() {
           instance_id: cfg.instance_id || "",
           instance_token: cfg.instance_token || "",
           client_token: cfg.client_token || "",
-          api_url: cfg.api_url || "https://api.z-api.com",
+          api_url: cfg.api_url || "https://api.z-api.io",
           webhook_url: cfg.webhook_url || "",
           notifications_enabled: cfg.notifications_enabled !== false,
         });
@@ -115,6 +115,19 @@ export default function WhatsAppConnector() {
     try {
       const res = await base44.functions.invoke("whatsappConnector", { action: "get_qr" });
       setStatus(res.data);
+      await loadData();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleReconnect = async () => {
+    setActionLoading(true);
+    setError(null);
+    try {
+      await base44.functions.invoke("whatsappConnector", { action: "reconnect" });
       await loadData();
     } catch (err) {
       setError(err.message);
@@ -227,16 +240,20 @@ export default function WhatsAppConnector() {
                 <p className="text-sm font-medium text-foreground">Z-API</p>
               </div>
               <div>
+                <p className="text-xs text-muted-foreground">Status</p>
+                <p className="text-sm font-medium text-foreground">{isConnected ? "Online" : "Offline"}</p>
+              </div>
+              <div>
                 <p className="text-xs text-muted-foreground">Número</p>
-                <p className="text-sm font-medium text-foreground">{status?.phone_number || "—"}</p>
+                <p className="text-sm font-medium text-foreground">{status?.phone_number || config?.phone_number || "—"}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Instance ID</p>
-                <p className="text-sm font-medium text-foreground truncate">{form.instance_id || "—"}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Notificações</p>
-                <p className="text-sm font-medium text-foreground">{form.notifications_enabled ? "Ativas" : "Inativas"}</p>
+                <p className="text-xs text-muted-foreground">Última Sincronização</p>
+                <p className="text-sm font-medium text-foreground">
+                  {status?.last_sync_at || config?.last_sync_at
+                    ? new Date(status?.last_sync_at || config?.last_sync_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
+                    : "—"}
+                </p>
               </div>
             </div>
 
@@ -246,10 +263,18 @@ export default function WhatsAppConnector() {
                   <QrCode className="h-4 w-4" />
                   Obter QR Code
                 </Button>
+                <Button variant="outline" onClick={handleReconnect} disabled={actionLoading}>
+                  <RefreshCcw className="h-4 w-4" />
+                  Reconectar
+                </Button>
               </div>
             )}
             {isConfigured && isConnected && (
               <div className="mt-4 flex flex-wrap gap-2">
+                <Button variant="outline" onClick={handleReconnect} disabled={actionLoading}>
+                  <RefreshCcw className="h-4 w-4" />
+                  Reconectar
+                </Button>
                 <Button variant="destructive" onClick={handleDisconnect} disabled={actionLoading}>
                   <WifiOff className="h-4 w-4" />
                   Desconectar
@@ -333,7 +358,7 @@ export default function WhatsAppConnector() {
                   <Label htmlFor="api_url">URL Base da API</Label>
                   <Input
                     id="api_url"
-                    placeholder="https://api.z-api.com"
+                    placeholder="https://api.z-api.io"
                     value={form.api_url}
                     onChange={(e) => setForm({ ...form, api_url: e.target.value })}
                   />
@@ -483,9 +508,9 @@ export default function WhatsAppConnector() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="rounded-lg border border-border p-3 text-xs text-muted-foreground space-y-1">
-              <p><strong className="text-foreground">Provedor:</strong> Z-API (https://z-api.com)</p>
-              <p><strong className="text-foreground">Documentação:</strong> https://z-api.com/api</p>
-              <p><strong className="text-foreground">Como obter credenciais:</strong> Crie uma conta em z-api.com → Instances → Nova Instância → copie Instance ID, Instance Token e Client Token.</p>
+              <p><strong className="text-foreground">Provedor:</strong> Z-API (https://z-api.io)</p>
+              <p><strong className="text-foreground">Documentação:</strong> https://z-api.io</p>
+              <p><strong className="text-foreground">Como obter credenciais:</strong> Crie uma conta em z-api.io → Instances → Nova Instância → copie Instance ID, Instance Token e Client Token.</p>
               <p><strong className="text-foreground">Webhook:</strong> Configure a URL de webhook acima na sua instância da Z-API para receber mensagens.</p>
             </div>
           </CardContent>

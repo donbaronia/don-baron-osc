@@ -2,7 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 // =====================================================
 // WHATSAPP CONNECTOR — DON BARON OS
-// Provedor: Z-API (https://z-api.com)
+// Provedor: Z-API (https://z-api.io)
 //
 // Credenciais sao configuradas via UI e armazenadas na entidade WhatsAppConnection.
 // Campos: instance_id, instance_token, client_token, api_url
@@ -13,6 +13,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 //   Send Text:  POST {api_url}/instances/{instance_id}/token/{instance_token}/send-text
 //   Webhook:    POST {api_url}/instances/{instance_id}/token/{instance_token}/update-webhook
 //   Disconnect: GET  {api_url}/instances/{instance_id}/token/{instance_token}/disconnect
+//   Reconnect:  GET  {api_url}/instances/{instance_id}/token/{instance_token}/reconnect
 //
 // Header Client-Token: client_token (quando utilizado)
 // =====================================================
@@ -36,7 +37,7 @@ function buildHeaders(clientToken) {
 }
 
 function buildBaseUrl(config) {
-  return (config.api_url || 'https://api.z-api.com').replace(/\/+$/, '');
+  return (config.api_url || 'https://api.z-api.io').replace(/\/+$/, '');
 }
 
 function buildInstancePath(config) {
@@ -107,7 +108,7 @@ Deno.serve(async (req) => {
         instance_id: instance_id || '',
         instance_token: instance_token || '',
         client_token: client_token || '',
-        api_url: api_url || 'https://api.z-api.com',
+        api_url: api_url || 'https://api.z-api.io',
         webhook_url: webhook_url || '',
         notifications_enabled: notifications_enabled !== false,
       };
@@ -207,10 +208,16 @@ Deno.serve(async (req) => {
           else if (state === 'qr-code' || state === 'QR_CODE') connStatus = 'qr_code';
         }
 
-        await saveConfig(svc, config.id, {
+        const updateData = {
           connection_status: connStatus,
           phone_number: data?.phone || config.phone_number,
-        });
+        };
+        if (connStatus === 'connected') {
+          updateData.last_sync_at = new Date().toISOString();
+          updateData.last_connected_at = new Date().toISOString();
+          updateData.error_message = '';
+        }
+        await saveConfig(svc, config.id, updateData);
 
         return Response.json({
           configured: true,
@@ -221,6 +228,7 @@ Deno.serve(async (req) => {
           api_url: config.api_url,
           webhook_url: config.webhook_url,
           notifications_enabled: config.notifications_enabled,
+          last_sync_at: updateData.last_sync_at || config.last_sync_at,
         });
       } catch (err) {
         return Response.json({
@@ -248,6 +256,22 @@ Deno.serve(async (req) => {
       } catch (err) {
         await log(svc, 'connection', 'error', `Erro ao obter QR: ${err.message}`);
         return Response.json({ success: false, error: `Erro ao obter QR Code: ${err.message}` }, { status: 500 });
+      }
+    }
+
+    // ---- ACTION: reconnect ----
+    if (action === 'reconnect') {
+      try {
+        const resp = await fetch(`${baseUrl}${instancePath}/reconnect`, { headers });
+        const data = await resp.json().catch(() => ({}));
+        await saveConfig(svc, config.id, {
+          connection_status: 'connecting',
+        });
+        await log(svc, 'connection', 'info', 'Reconexao solicitada');
+        return Response.json({ success: true, message: 'Reconexao iniciada', response: data });
+      } catch (err) {
+        await log(svc, 'connection', 'error', `Erro ao reconectar: ${err.message}`);
+        return Response.json({ success: false, error: `Erro ao reconectar: ${err.message}` }, { status: 500 });
       }
     }
 
@@ -339,7 +363,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    return Response.json({ error: 'Action not found. Use: save_config, get_config, test_connection, status, get_qr, disconnect, setup_webhook, send_message' }, { status: 400 });
+    return Response.json({ error: 'Action not found. Use: save_config, get_config, test_connection, status, get_qr, reconnect, disconnect, setup_webhook, send_message' }, { status: 400 });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
