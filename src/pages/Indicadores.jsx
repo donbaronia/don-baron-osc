@@ -33,7 +33,7 @@ export default function Indicadores() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
-      <PageHeader emoji="📊" title="Centro de Indicadores" subtitle="DRE, CMV, fluxo de caixa e indicadores estratégicos — consolidados automaticamente." />
+      <PageHeader title="Indicadores" subtitle="DRE, CMV, fluxo de caixa e indicadores estratégicos." />
       {loading ? (
         <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-neutral-200/60" />)}

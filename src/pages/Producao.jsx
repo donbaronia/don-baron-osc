@@ -29,7 +29,7 @@ export default function Producao() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
-      <PageHeader emoji="🏭" title="Centro de Produção Inteligente" subtitle="Controle de eficiência operacional, receitas, custos, margens e baixa automática de estoque." />
+      <PageHeader title="Produção" subtitle="Ordens de produção, fichas técnicas, custos e rendimento." />
       <div className="mt-6 space-y-6">
         <div className="overflow-x-auto -mx-1 px-1">
           <Tabs value={tab} onValueChange={setTab}>

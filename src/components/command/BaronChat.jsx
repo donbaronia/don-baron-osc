@@ -15,6 +15,8 @@ const FAST_ROUTES = [
   { keywords: ["rh", "pessoal", "ponto", "ferias", "férias"], path: "/rh", message: "Abrindo Recursos Humanos..." },
   { keywords: ["carne", "estoque", "insumo", "produto"], path: "/estoque", message: "Abrindo Estoque..." },
   { keywords: ["ifood", "delivery"], path: "/documentos", message: "Abrindo Pedidos do iFood..." },
+  { keywords: ["motoboy", "entregador", "motoboys", "entrega", "rota"], path: "/motoboys", message: "Abrindo Motoboys..." },
+  { keywords: ["relatório", "relatorio", "report", "consolidado"], path: "/relatorios", message: "Abrindo Relatórios..." },
   { keywords: ["produção", "producao", "produzir", "fabricar"], path: "/producao", message: "Abrindo Produção..." },
   { keywords: ["cmv", "custo", "margem"], path: "/cmv", message: "Abrindo Motor de CMV..." },
   { keywords: ["missão", "missao", "tarefa"], path: "/missions", message: "Abrindo Central de Missões..." },
@@ -70,7 +72,7 @@ export default function BaronChat() {
     // LLM path for complex queries
     try {
       const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é o BARON, o Diretor Operacional Virtual do DON BARON OS. O usuário disse: "${userMsg}"\n\nIdentifique qual módulo o usuário deseja e responda em JSON com a rota e uma mensagem curta.\nRotas: /compras, /financeiro, /estoque, /producao, /rh, /cmv, /documentos, /indicadores, /inteligencia, /decisoes, /planejamento, /brain, /workforce, /missions, /whatsapp, /cadastro, /event-bus, /kernel, /integracoes, /people-analytics, /administracao.\nSe for uma pergunta sobre dados (ex: "quanto tenho em caixa?"), use route: null e responda a pergunta com uma mensagem útil.\nResponda sempre em português, de forma amigável e concisa.`,
+        prompt: `Você é o BARON, o Diretor Operacional Virtual do DON BARON OS. O usuário disse: "${userMsg}"\n\nIdentifique qual módulo o usuário deseja e responda em JSON com a rota e uma mensagem curta.\nRotas: /compras, /financeiro, /estoque, /producao, /rh, /cmv, /documentos, /indicadores, /inteligencia, /decisoes, /planejamento, /brain, /workforce, /missions, /whatsapp, /cadastro, /event-bus, /kernel, /integracoes, /people-analytics, /administracao, /motoboys, /relatorios.\nSe for uma pergunta sobre dados (ex: "quanto tenho em caixa?"), use route: null e responda a pergunta com uma mensagem útil.\nResponda sempre em português, de forma amigável e concisa.`,
         response_json_schema: {
           type: "object",
           properties: {

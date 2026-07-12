@@ -2,14 +2,12 @@ import React from "react";
 import EmptyState from "./EmptyState";
 import { Inbox } from "lucide-react";
 
-// Tabela padrão usada em todos os centros.
-// columns: [{ key, label, render? , className? }]
 export default function DataTable({ columns, rows, loading, emptyTitle, emptyDescription }) {
   if (loading) {
     return (
       <div className="space-y-2">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="h-14 animate-pulse rounded-xl bg-neutral-200/60" />
+          <div key={i} className="h-14 animate-pulse rounded-xl bg-card" />
         ))}
       </div>
     );
@@ -20,23 +18,23 @@ export default function DataTable({ columns, rows, loading, emptyTitle, emptyDes
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-neutral-200 bg-neutral-50/80">
+            <tr className="border-b border-border bg-secondary/50">
               {columns.map((c) => (
-                <th key={c.key} className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">
-                  {c.label}
+                <th key={c.key} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {c.label || c.header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100">
-            {rows.map((row) => (
-              <tr key={row.id} className="transition-colors hover:bg-neutral-50/60">
+          <tbody className="divide-y divide-border">
+            {rows.map((row, idx) => (
+              <tr key={row.id || idx} className="transition-colors hover:bg-secondary/40">
                 {columns.map((c) => (
-                  <td key={c.key} className={`px-5 py-3.5 text-neutral-700 ${c.className || ""}`}>
+                  <td key={c.key} className="px-4 py-3 text-foreground">
                     {c.render ? c.render(row) : row[c.key]}
                   </td>
                 ))}

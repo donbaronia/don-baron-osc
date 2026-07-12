@@ -27,7 +27,7 @@ export default function Estoque() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
-      <PageHeader emoji="📦" title="Centro de Estoque Inteligente" subtitle="Controle patrimonial de itens físicos — toda movimentação passa pelo Inventory Engine." />
+      <PageHeader title="Estoque" subtitle="Controle de itens, movimentações, lotes, validade e inventário." />
       <div className="mt-6 space-y-6">
         <div className="overflow-x-auto -mx-1 px-1">
           <Tabs value={tab} onValueChange={setTab}>

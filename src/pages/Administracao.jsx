@@ -33,7 +33,7 @@ export default function Administracao() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
-      <PageHeader emoji="⚙️" title="Administração" subtitle="Perfis de acesso e trilha de auditoria de todas as ações." />
+      <PageHeader title="Configurações" subtitle="Usuários, perfis de acesso e trilha de auditoria." />
       <Tabs defaultValue="usuarios" className="mt-6">
         <TabsList>
           <TabsTrigger value="usuarios">Usuários & Perfis</TabsTrigger>

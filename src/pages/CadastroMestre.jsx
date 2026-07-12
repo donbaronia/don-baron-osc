@@ -10,7 +10,7 @@ import TagManager from "@/components/cadastro/TagManager";
 export default function CadastroMestre() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
-      <PageHeader emoji="🗃️" title="Cadastro Mestre" subtitle="Banco de dados central — produtos, fornecedores, categorias, unidades e tags reutilizáveis por todos os módulos." />
+      <PageHeader title="Cadastro" subtitle="Produtos, fornecedores, categorias, unidades e tags." />
       <Tabs defaultValue="produtos" className="mt-6">
         <TabsList>
           <TabsTrigger value="produtos">Produtos</TabsTrigger>

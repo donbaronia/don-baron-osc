@@ -25,7 +25,7 @@ export default function CMV() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
-      <PageHeader emoji="📊" title="Motor de CMV Inteligente" subtitle="Cálculo oficial do custo dos produtos vendidos, integrado com todos os módulos." />
+      <PageHeader title="CMV" subtitle="Cálculo do custo dos produtos vendidos, análise de perdas e simulações." />
       <div className="mt-6 space-y-6">
         <div className="overflow-x-auto -mx-1 px-1">
           <Tabs value={tab} onValueChange={setTab}>

@@ -27,7 +27,7 @@ export default function Financeiro() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
-      <PageHeader emoji="💰" title="Centro Financeiro" subtitle="Toda a vida financeira da empresa em um único lugar." />
+      <PageHeader title="Financeiro" subtitle="Gerencie contas, pagamentos, recebimentos e relatórios financeiros." />
       <div className="mt-6 space-y-6">
         <div className="overflow-x-auto -mx-1 px-1">
           <Tabs value={tab} onValueChange={setTab}>

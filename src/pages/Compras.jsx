@@ -27,7 +27,7 @@ export default function Compras() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
-      <PageHeader emoji="🛒" title="Centro de Compras Inteligente" subtitle="Solicitação → Cotação → Aprovação → Pedido → Recebimento → Conferência → Financeiro → Estoque → CMV." />
+      <PageHeader title="Compras" subtitle="Solicitações, cotações, pedidos, recebimento e fornecedores." />
       <div className="mt-6 space-y-6">
         <div className="overflow-x-auto -mx-1 px-1">
           <Tabs value={tab} onValueChange={setTab}>

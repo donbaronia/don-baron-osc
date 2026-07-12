@@ -43,17 +43,17 @@ export default function Dashboard() {
   const lucro = totalReceber - totalPagar;
 
   const cards = [
-    { icon: TrendingUp, label: "Venda da Semana", value: brl(receita * 0.4), hint: "Estimativa", accent: "bg-blue-50 text-blue-600" },
-    { icon: DollarSign, label: "Receita Líquida", value: brl(receita), accent: "bg-emerald-50 text-emerald-600" },
-    { icon: PiggyBank, label: "Lucro Estimado", value: brl(lucro), tone: lucro >= 0 ? "positive" : "negative", accent: "bg-amber-50 text-amber-600" },
-    { icon: Percent, label: "CMV", value: "—", hint: "Aguardando dados", accent: "bg-purple-50 text-purple-600" },
-    { icon: Wallet, label: "Fluxo de Caixa", value: brl(lucro), tone: lucro >= 0 ? "positive" : "negative", accent: "bg-teal-50 text-teal-600" },
-    { icon: ArrowUpCircle, label: "Contas a Pagar", value: brl(totalPagar), tone: "negative", hint: `${aPagar.length} pendentes`, accent: "bg-rose-50 text-rose-600" },
-    { icon: ArrowDownCircle, label: "Contas a Receber", value: brl(totalReceber), tone: "positive", hint: `${aReceber.length} pendentes`, accent: "bg-emerald-50 text-emerald-600" },
-    { icon: FileWarning, label: "Boletos Vencendo", value: boletosVencendo, tone: boletosVencendo > 0 ? "warning" : "neutral", accent: "bg-orange-50 text-orange-600" },
-    { icon: PackageX, label: "Estoque Crítico", value: estoqueCritico, tone: estoqueCritico > 0 ? "negative" : "neutral", accent: "bg-red-50 text-red-600" },
-    { icon: ShoppingCart, label: "Compras Pendentes", value: comprasPendentes, accent: "bg-indigo-50 text-indigo-600" },
-    { icon: Factory, label: "Produção do Dia", value: producaoHoje, accent: "bg-cyan-50 text-cyan-600" },
+    { icon: TrendingUp, label: "Venda da Semana", value: brl(receita * 0.4), hint: "Estimativa" },
+    { icon: DollarSign, label: "Receita Líquida", value: brl(receita) },
+    { icon: PiggyBank, label: "Lucro Estimado", value: brl(lucro), tone: lucro >= 0 ? "positive" : "negative" },
+    { icon: Percent, label: "CMV", value: "—", hint: "Aguardando dados" },
+    { icon: Wallet, label: "Fluxo de Caixa", value: brl(lucro), tone: lucro >= 0 ? "positive" : "negative" },
+    { icon: ArrowUpCircle, label: "Contas a Pagar", value: brl(totalPagar), tone: "negative", hint: `${aPagar.length} pendentes` },
+    { icon: ArrowDownCircle, label: "Contas a Receber", value: brl(totalReceber), tone: "positive", hint: `${aReceber.length} pendentes` },
+    { icon: FileWarning, label: "Boletos Vencendo", value: boletosVencendo, tone: boletosVencendo > 0 ? "warning" : "neutral" },
+    { icon: PackageX, label: "Estoque Crítico", value: estoqueCritico, tone: estoqueCritico > 0 ? "negative" : "neutral" },
+    { icon: ShoppingCart, label: "Compras Pendentes", value: comprasPendentes },
+    { icon: Factory, label: "Produção do Dia", value: producaoHoje },
   ];
 
   const alerts = [];
@@ -65,15 +65,14 @@ export default function Dashboard() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
       <PageHeader
-        emoji="🏠"
-        title={`Bem-vindo, ${(user?.full_name || "Gestor").split(" ")[0]}`}
-        subtitle="Visão executiva da Don Baron — o essencial, com velocidade e clareza."
+        title={`Olá, ${(user?.full_name || "Gestor").split(" ")[0]}`}
+        subtitle="Visão executiva do seu negócio."
       />
 
       {loading ? (
-        <div className="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-28 animate-pulse rounded-2xl bg-neutral-200/60" />
+            <div key={i} className="h-28 animate-pulse rounded-xl bg-card" />
           ))}
         </div>
       ) : (
@@ -84,15 +83,15 @@ export default function Dashboard() {
             ))}
           </div>
 
-          <div className="mt-6 overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-6">
+          <div className="mt-6 rounded-xl border border-border bg-card p-6">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-amber-500" />
-              <h2 className="text-sm font-semibold text-neutral-900">Alertas Inteligentes</h2>
+              <Sparkles className="h-5 w-5 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Alertas Inteligentes</h2>
             </div>
             <ul className="mt-4 space-y-2">
               {alerts.map((a, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-neutral-700">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
                   {a}
                 </li>
               ))}

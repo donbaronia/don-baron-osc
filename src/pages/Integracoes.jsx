@@ -28,9 +28,8 @@ export default function Integracoes() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <PageHeader
-        emoji="🔌"
-        title="API Gateway & Integration Hub"
-        subtitle="Ponto único de entrada e saída para todas as integrações externas"
+        title="Integrações"
+        subtitle="Integrações externas, webhooks, importação e exportação."
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>

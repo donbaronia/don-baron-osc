@@ -20,9 +20,8 @@ export default function Decisoes() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
       <PageHeader
-        emoji="🎯"
-        title="Motor de Decisões"
-        subtitle="Análise, simulação e priorização de decisões estratégicas — com IA explicativa, matriz de risco e histórico de aprendizado."
+        title="Decisões"
+        subtitle="Análise, simulação e priorização de decisões estratégicas."
       />
       <div className="mt-6 space-y-6">
         <div className="overflow-x-auto -mx-1 px-1">

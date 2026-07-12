@@ -96,9 +96,8 @@ export default function Documentos() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
       <PageHeader
-        emoji="📄"
-        title="Centro de Documentos Inteligente"
-        subtitle="Receba documentos, a IA extrai os dados automaticamente, você confere e confirma. Nenhum documento é perdido."
+        title="Documentos"
+        subtitle="Receba, confirme e arquive notas, boletos e recibos."
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
