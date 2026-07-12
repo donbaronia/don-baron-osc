@@ -9,16 +9,32 @@
     "provider": {
       "type": "string",
       "enum": [
-        "evolution_api",
-        "meta_cloud_api",
+        "z-api",
         "none"
       ],
-      "default": "none",
+      "default": "z-api",
       "description": "Provedor da API WhatsApp"
     },
-    "instance_name": {
+    "instance_id": {
       "type": "string",
-      "description": "Nome da instancia no provedor"
+      "description": "Instance ID da Z-API"
+    },
+    "instance_token": {
+      "type": "string",
+      "description": "Instance Token da Z-API"
+    },
+    "client_token": {
+      "type": "string",
+      "description": "Client Token da Z-API (header Client-Token)"
+    },
+    "api_url": {
+      "type": "string",
+      "default": "https://api.z-api.com",
+      "description": "URL base da Z-API"
+    },
+    "webhook_url": {
+      "type": "string",
+      "description": "URL de webhook configurada na Z-API"
     },
     "phone_number": {
       "type": "string",
@@ -37,19 +53,7 @@
     },
     "qr_code": {
       "type": "string",
-      "description": "QR Code para conexao (base64 ou texto)"
-    },
-    "api_url": {
-      "type": "string",
-      "description": "URL base da API do provedor"
-    },
-    "webhook_url": {
-      "type": "string",
-      "description": "URL de webhook configurada no provedor"
-    },
-    "webhook_secret": {
-      "type": "string",
-      "description": "Secret para validar webhooks recebidos"
+      "description": "URL do QR Code"
     },
     "last_connected_at": {
       "type": "string",
@@ -59,36 +63,18 @@
       "type": "string",
       "format": "date-time"
     },
-    "health_status": {
+    "last_test_at": {
       "type": "string",
-      "enum": [
-        "healthy",
-        "degraded",
-        "down",
-        "unknown"
-      ],
-      "default": "unknown"
+      "format": "date-time",
+      "description": "Ultimo teste de conexao"
     },
-    "health_checked_at": {
+    "last_test_result": {
       "type": "string",
-      "format": "date-time"
-    },
-    "health_latency_ms": {
-      "type": "number",
-      "default": 0
+      "description": "Resultado do ultimo teste"
     },
     "error_message": {
       "type": "string",
       "description": "Mensagem do ultimo erro"
-    },
-    "battery": {
-      "type": "number",
-      "default": 0,
-      "description": "Nivel de bateria do celular conectado"
-    },
-    "device_model": {
-      "type": "string",
-      "description": "Modelo do dispositivo conectado"
     },
     "auto_reconnect": {
       "type": "boolean",
