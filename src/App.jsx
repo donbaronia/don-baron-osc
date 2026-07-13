@@ -41,6 +41,7 @@ import WhatsAppAssistant from '@/pages/WhatsAppAssistant';
 import WhatsAppConnector from '@/pages/WhatsAppConnector';
 import Motoboys from '@/pages/Motoboys';
 import Relatorios from '@/pages/Relatorios';
+import BaronHistorico from '@/pages/BaronHistorico';
 import BDSErrorBoundary from '@/components/bds/BDSErrorBoundary';
 // Add page imports here
 
@@ -97,6 +98,7 @@ const AuthenticatedApp = () => {
         <Route path="/whatsapp-connector" element={<WhatsAppConnector />} />
         <Route path="/motoboys" element={<Motoboys />} />
         <Route path="/relatorios" element={<Relatorios />} />
+        <Route path="/baron-historico" element={<BaronHistorico />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

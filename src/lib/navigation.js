@@ -11,6 +11,7 @@ import {
   Settings,
   FileText,
   Zap,
+  History,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -91,6 +92,12 @@ export const NAV_ITEMS = [
     icon: Settings,
     path: "/administracao",
     roles: ["administrador"],
+  },
+  {
+    label: "BARON Histórico",
+    icon: History,
+    path: "/baron-historico",
+    roles: ["administrador", "financeiro", "compras", "estoque", "producao", "gerencia", "operador", "rh"],
   },
 ];
 

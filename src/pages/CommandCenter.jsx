@@ -1,8 +1,7 @@
 import React from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { getGreeting } from "@/lib/baronPersonality";
-import BaronChat from "@/components/command/BaronChat";
-import WhileAwaySummary from "@/components/command/WhileAwaySummary";
+import BaronConsole from "@/components/command/BaronConsole";
 import MorningMissions from "@/components/command/MorningMissions";
 
 export default function CommandCenter() {
@@ -10,25 +9,17 @@ export default function CommandCenter() {
   const g = getGreeting(user);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-2xl px-4 py-10 sm:py-16">
-        {/* Greeting */}
-        <div className="mb-8 text-center animate-fade-in">
-          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
-            {g.emoji && <span className="mr-1">👑</span>}{g.title}
-          </h2>
-          <p className="mt-2 text-base text-primary">{g.subtitle}</p>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
+      <div className="w-full max-w-2xl">
+        {/* Saudação compacta */}
+        <div className="mb-6 text-center animate-fade-in">
+          <div className="mb-1 text-sm font-semibold uppercase tracking-widest text-primary">👑 BARON</div>
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">{g.title}</h2>
+          {g.subtitle && <p className="mt-1 text-sm text-muted-foreground">{g.subtitle}</p>}
         </div>
 
-        {/* Enquanto você estava fora */}
-        <div className="mb-6 rounded-xl border border-border bg-card p-4">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Enquanto você estava fora</h3>
-          <WhileAwaySummary />
-        </div>
-
-        {/* Missões do dia */}
+        {/* Resumo operacional compacto */}
         <div className="mb-8 rounded-xl border border-border bg-card p-4">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Hoje existem</h3>
           <MorningMissions />
         </div>
 
@@ -40,7 +31,7 @@ export default function CommandCenter() {
         </div>
 
         {/* BARON */}
-        <BaronChat />
+        <BaronConsole />
       </div>
     </div>
   );
