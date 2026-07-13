@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Core } from "@/lib/coreEngine";
 import { brl, todayStr } from "@/lib/financialCenter";
+import { baronHumor } from "@/lib/baronHumor";
 import { formatBRL, isImageFile, isPDFFile, getCategoryEmoji } from "@/lib/documentUtils";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -87,6 +88,7 @@ export default function MarkAsPaidDialog({ open, onClose, payment, document: doc
         await Core.audit({ audit_action: "update", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Documento pago: ${brl(form.amount_paid)}` });
       }
 
+      baronHumor("boleto_pago");
       onPaid?.();
       onClose();
     } catch (e) {

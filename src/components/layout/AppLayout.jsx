@@ -7,7 +7,10 @@ import { useAuth } from "@/lib/AuthContext";
 import { getUserRole, ROLE_LABELS } from "@/lib/navigation";
 import { useKeyboardShortcuts } from "@/lib/useKeyboardShortcuts";
 import { base44 } from "@/api/base44Client";
-import { Menu, X, PanelLeftClose, PanelLeftOpen, Bell, LogOut, Home } from "lucide-react";
+import BaronPanel from "@/components/command/BaronPanel";
+import QuickActionsDialog from "@/components/command/QuickActionsDialog";
+import ModuleBar from "@/components/layout/ModuleBar";
+import { Menu, X, PanelLeftClose, PanelLeftOpen, Bell, LogOut, Home, Brain, Target, Zap } from "lucide-react";
 
 export default function AppLayout() {
   const { user } = useAuth();
@@ -16,10 +19,13 @@ export default function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showBaron, setShowBaron] = useState(false);
+  const [showQuickActions, setShowQuickActions] = useState(false);
 
   useKeyboardShortcuts([
     { combo: "ctrl+k", action: () => document.querySelector?.("[data-bds-search]")?.focus() },
-    { combo: "escape", action: () => { setShowProfile(false); } },
+    { combo: "ctrl+b", action: () => setShowBaron(true) },
+    { combo: "escape", action: () => { setShowProfile(false); setShowBaron(false); } },
   ]);
 
   return (
@@ -73,6 +79,34 @@ export default function AppLayout() {
 
           {/* Ações da barra superior */}
           <div className="flex items-center gap-0.5">
+            {/* BARON */}
+            <button
+              onClick={() => setShowBaron(true)}
+              className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-2 text-primary transition-all hover:bg-primary/20"
+              title="Conversar com BARON (Ctrl+B)"
+            >
+              <Brain className="h-4 w-4" />
+              <span className="hidden text-xs font-semibold sm:inline">BARON</span>
+            </button>
+
+            {/* Missões */}
+            <button
+              onClick={() => navigate("/missions")}
+              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              title="Missões"
+            >
+              <Target className="h-4 w-4" />
+            </button>
+
+            {/* Ações Rápidas */}
+            <button
+              onClick={() => setShowQuickActions(true)}
+              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              title="Nova Ação"
+            >
+              <Zap className="h-4 w-4" />
+            </button>
+
             {/* Ajuda contextual */}
             <BDSHelp />
 
@@ -123,9 +157,12 @@ export default function AppLayout() {
           </div>
         </header>
 
+        <ModuleBar />
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
+      <BaronPanel open={showBaron} onClose={() => setShowBaron(false)} />
+      <QuickActionsDialog open={showQuickActions} onClose={() => setShowQuickActions(false)} />
       </div>
     </div>
   );

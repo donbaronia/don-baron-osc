@@ -14,8 +14,29 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Sparkles, FileText, AlertTriangle, CheckCircle2, Brain,
-  Clock, Eye, Zap,
+  Clock, Eye, Zap, Lock, ShieldCheck,
 } from "lucide-react";
+
+const BLOCK_TYPES = ["duplicate", "linha_duplicada", "ja_pago", "boleto_igual", "cnpj_divergente"];
+
+function getApprovalStatus(doc) {
+  const alerts = doc.alerts || [];
+  const hasUrgent = alerts.some((a) => a.severity === "urgent" || a.severity === "critica");
+  const hasBlocked = alerts.some((a) => BLOCK_TYPES.includes(a.type));
+  const isProcessed = doc.status === "processado";
+  const isPending = doc.status === "aguardando_confirmacao";
+
+  if (hasUrgent || hasBlocked) {
+    return { tier: "blocked", label: "Bloqueado", icon: Lock, color: "text-destructive", bg: "bg-destructive/15", dot: "🔴" };
+  }
+  if (isPending) {
+    return { tier: "review", label: "Confirmação", icon: AlertTriangle, color: "text-amber-500", bg: "bg-amber-500/15", dot: "🟡" };
+  }
+  if (isProcessed) {
+    return { tier: "approved", label: "Aprovado", icon: ShieldCheck, color: "text-baron-success", bg: "bg-baron-success/15", dot: "🟢" };
+  }
+  return { tier: "review", label: "Confirmação", icon: AlertTriangle, color: "text-amber-500", bg: "bg-amber-500/15", dot: "🟡" };
+}
 
 export default function ProcessamentoDocumentos() {
   const { user } = useAuth();
@@ -45,9 +66,11 @@ export default function ProcessamentoDocumentos() {
   useEffect(() => { load(); }, [load]);
 
   const recent = documents.slice(0, 12);
-  const pendingCount = documents.filter((d) => d.status === "aguardando_confirmacao").length;
-  const autoCount = documents.filter((d) => d.status === "processado" && d.confirmed_by === "BARON IA").length;
-  const alertCount = documents.filter((d) => (d.alerts || []).length > 0).length;
+  const tierCounts = documents.reduce((acc, d) => {
+    const t = getApprovalStatus(d).tier;
+    acc[t] = (acc[t] || 0) + 1;
+    return acc;
+  }, {});
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
@@ -63,35 +86,37 @@ export default function ProcessamentoDocumentos() {
       />
 
       <div className="mt-6 space-y-6">
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-border bg-card p-4">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-primary" />
-              <p className="text-xs text-muted-foreground">Processados</p>
+        {/* Fila de Aprovação IA — três níveis */}
+        <div>
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Fila de Aprovação da IA</h3>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-xl border border-baron-success/20 bg-baron-success/5 p-4">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🟢</span>
+                <ShieldCheck className="h-4 w-4 text-baron-success" />
+                <p className="text-xs text-muted-foreground">Aprovado (IA)</p>
+              </div>
+              <p className="mt-1 text-2xl font-bold text-baron-success">{tierCounts.approved || 0}</p>
+              <p className="text-[10px] text-muted-foreground/70">Sem divergências</p>
             </div>
-            <p className="mt-1 text-2xl font-bold text-foreground">{documents.length}</p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-4">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-baron-success" />
-              <p className="text-xs text-muted-foreground">Auto-roteados (IA)</p>
+            <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🟡</span>
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                <p className="text-xs text-muted-foreground">Confirmação</p>
+              </div>
+              <p className="mt-1 text-2xl font-bold text-amber-500">{tierCounts.review || 0}</p>
+              <p className="text-[10px] text-muted-foreground/70">Pequenas diferenças</p>
             </div>
-            <p className="mt-1 text-2xl font-bold text-baron-success">{autoCount}</p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-4">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <p className="text-xs text-muted-foreground">Pendências</p>
+            <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🔴</span>
+                <Lock className="h-4 w-4 text-destructive" />
+                <p className="text-xs text-muted-foreground">Bloqueado</p>
+              </div>
+              <p className="mt-1 text-2xl font-bold text-destructive">{tierCounts.blocked || 0}</p>
+              <p className="text-[10px] text-muted-foreground/70">Valor, fornecedor, duplicidade</p>
             </div>
-            <p className="mt-1 text-2xl font-bold text-amber-500">{pendingCount}</p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-4">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-destructive" />
-              <p className="text-xs text-muted-foreground">Com Alertas</p>
-            </div>
-            <p className="mt-1 text-2xl font-bold text-destructive">{alertCount}</p>
           </div>
         </div>
 
@@ -132,9 +157,10 @@ export default function ProcessamentoDocumentos() {
           ) : (
             <div className="space-y-2">
               {recent.map((doc) => {
+                const approval = getApprovalStatus(doc);
                 const dueAlert = getDueAlert(doc.due_date);
-                const isAuto = doc.confirmed_by === "BARON IA";
                 const docAlerts = doc.alerts || [];
+                const ApprovalIcon = approval.icon;
 
                 return (
                   <div
@@ -148,11 +174,9 @@ export default function ProcessamentoDocumentos() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium text-foreground truncate">{doc.title}</p>
-                        {isAuto && (
-                          <span className="inline-flex items-center gap-0.5 rounded-full bg-baron-success/15 px-1.5 py-0.5 text-[10px] font-medium text-baron-success shrink-0">
-                            <Zap className="h-2.5 w-2.5" /> IA
-                          </span>
-                        )}
+                        <span className={`inline-flex items-center gap-0.5 rounded-full ${approval.bg} px-1.5 py-0.5 text-[10px] font-medium ${approval.color} shrink-0`}>
+                          <ApprovalIcon className="h-2.5 w-2.5" /> {approval.label}
+                        </span>
                       </div>
                       <p className="text-xs text-muted-foreground truncate">
                         {doc.supplier || "—"} · {doc.value ? formatBRL(doc.value) : "—"}
@@ -170,7 +194,6 @@ export default function ProcessamentoDocumentos() {
                           <Clock className="h-3 w-3" /> {dueAlert.label}
                         </span>
                       )}
-                      <StatusBadge status={doc.status} />
                       <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
                         <Eye className="h-4 w-4" />
                       </Button>

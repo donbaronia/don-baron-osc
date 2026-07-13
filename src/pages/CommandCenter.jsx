@@ -1,15 +1,22 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
+import { getGreeting, getLoginMessage } from "@/lib/baronPersonality";
 import BaronChat from "@/components/command/BaronChat";
+import CommandPriorities from "@/components/command/CommandPriorities";
 import DailySummary from "@/components/command/DailySummary";
 import RecentActivity from "@/components/command/RecentActivity";
 import NotificationCenter from "@/components/command/NotificationCenter";
 
 export default function CommandCenter() {
   const { user } = useAuth();
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
-  const firstName = user?.full_name?.split(" ")[0] || "Usuário";
+  const g = getGreeting(user);
+  const [loginMsg, setLoginMsg] = useState(null);
+
+  useEffect(() => {
+    if (!g.emoji) {
+      setLoginMsg(getLoginMessage());
+    }
+  }, [g.emoji]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -24,12 +31,25 @@ export default function CommandCenter() {
         </div>
 
         {/* Greeting */}
-        <div className="mb-8 text-center animate-fade-in">
-          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">{greeting}, {firstName}.</h2>
-          <p className="mt-2 text-base text-muted-foreground">Como posso ajudar hoje?</p>
+        <div className="mb-6 text-center animate-fade-in">
+          <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
+            {g.emoji && <span className="mr-1">👑</span>}{g.title}
+          </h2>
+          <p className="mt-2 text-base text-muted-foreground">{g.subtitle}</p>
+          {loginMsg && (
+            <p className="mt-1 text-sm text-primary/80">{loginMsg}</p>
+          )}
+        </div>
+
+        {/* Prioridades do dia */}
+        <div className="mb-8">
+          <CommandPriorities />
         </div>
 
         {/* BARON Chat */}
+        <div className="mb-2 text-center">
+          <p className="text-sm text-muted-foreground">O que vamos fazer hoje?</p>
+        </div>
         <BaronChat />
 
         {/* Resumo do dia */}
