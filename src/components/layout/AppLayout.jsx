@@ -17,7 +17,7 @@ export default function AppLayout() {
   const role = getUserRole(user);
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
   const [showBaron, setShowBaron] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);

@@ -1,93 +1,59 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { parseCommand, executeCommand } from "@/lib/baronCommandEngine";
+import { processDocument } from "@/lib/processamentoIA";
 import { Mic, Paperclip, Camera, Send, Loader2, ArrowRight } from "lucide-react";
+import BaronConversation from "@/components/command/BaronConversation";
 
-const FAST_ROUTES = [
-  { keywords: ["compra", "comprar", "pedir"], path: "/compras", message: "Abrindo Centro de Compras..." },
-  { keywords: ["cadastrar fornecedor", "novo fornecedor"], path: "/cadastro", message: "Abrindo Cadastro de Fornecedores..." },
-  { keywords: ["fornecedor"], path: "/cadastro", message: "Abrindo Cadastro de Fornecedores..." },
-  { keywords: ["dre", "demonstrativo"], path: "/financeiro", message: "Abrindo DRE..." },
-  { keywords: ["fluxo", "caixa"], path: "/financeiro", message: "Abrindo Fluxo de Caixa..." },
-  { keywords: ["pagamento", "pagar", "boleto", "contas a pagar"], path: "/financeiro", message: "Abrindo Financeiro..." },
-  { keywords: ["receber", "contas a receber"], path: "/financeiro", message: "Abrindo Contas a Receber..." },
-  { keywords: ["funcionário", "funcionario", "colaborador"], path: "/rh", message: "Abrindo Recursos Humanos..." },
-  { keywords: ["rh", "pessoal", "ponto", "ferias", "férias"], path: "/rh", message: "Abrindo Recursos Humanos..." },
-  { keywords: ["carne", "estoque", "insumo", "produto"], path: "/estoque", message: "Abrindo Estoque..." },
-  { keywords: ["ifood", "delivery"], path: "/documentos", message: "Abrindo Pedidos do iFood..." },
-  { keywords: ["motoboy", "entregador", "motoboys", "entrega", "rota"], path: "/motoboys", message: "Abrindo Motoboys..." },
-  { keywords: ["relatório", "relatorio", "report", "consolidado"], path: "/relatorios", message: "Abrindo Relatórios..." },
-  { keywords: ["produção", "producao", "produzir", "fabricar"], path: "/producao", message: "Abrindo Produção..." },
-  { keywords: ["cmv", "custo", "margem"], path: "/cmv", message: "Abrindo Motor de CMV..." },
-  { keywords: ["missão", "missao", "tarefa"], path: "/missions", message: "Abrindo Central de Missões..." },
-  { keywords: ["indicador", "kpi", "métrica", "metrica"], path: "/indicadores", message: "Abrindo Indicadores..." },
-  { keywords: ["documento", "nota fiscal", "recibo"], path: "/documentos", message: "Abrindo Documentos..." },
-  { keywords: ["decisão", "decisao", "decidir"], path: "/decisoes", message: "Abrindo Motor de Decisões..." },
-  { keywords: ["planejamento", "estratégia", "estrategia", "meta", "okr"], path: "/planejamento", message: "Abrindo Planejamento Estratégico..." },
-  { keywords: ["brain", "inteligência baron"], path: "/brain", message: "Abrindo Inteligência Baron..." },
-  { keywords: ["equipe digital", "robô", "robo", "worker"], path: "/workforce", message: "Abrindo Equipe Digital..." },
-  { keywords: ["whatsapp"], path: "/whatsapp", message: "Abrindo WhatsApp..." },
-  { keywords: ["configuração", "configuracao", "admin"], path: "/administracao", message: "Abrindo Configurações..." },
-  { keywords: ["evento"], path: "/event-bus", message: "Abrindo Central de Eventos..." },
-  { keywords: ["kernel", "núcleo", "nucleo"], path: "/kernel", message: "Abrindo Núcleo do Sistema..." },
-  { keywords: ["integração", "integracao"], path: "/integracoes", message: "Abrindo Integrações..." },
-  { keywords: ["people", "analytics", "pessoas"], path: "/people-analytics", message: "Abrindo Inteligência de Pessoas..." },
-  { keywords: ["cadastro", "categoria", "unidade"], path: "/cadastro", message: "Abrindo Cadastro Mestre..." },
-  { keywords: ["bi", "inteligência negócio", "analise"], path: "/inteligencia", message: "Abrindo Inteligência de Negócios..." },
-];
-
-function fastRoute(query) {
-  const q = query.toLowerCase();
-  for (const r of FAST_ROUTES) {
-    if (r.keywords.some(k => q.includes(k))) return r;
-  }
-  return null;
-}
+const CONV_KEY = "baron_conversation";
 
 export default function BaronChat() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState(null);
   const [listening, setListening] = useState(false);
+  const [conversation, setConversation] = useState([]);
   const fileRef = useRef(null);
   const cameraRef = useRef(null);
   const navigate = useNavigate();
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    try { setConversation(JSON.parse(localStorage.getItem(CONV_KEY) || "[]")); } catch { setConversation([]); }
+  }, []);
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [conversation]);
+
+  const addMessage = (role, content, route) => {
+    setConversation((prev) => {
+      const next = [...prev, { role, content, route, timestamp: Date.now() }].slice(-30);
+      localStorage.setItem(CONV_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
 
   const handleSend = async () => {
     if (!query.trim() || loading) return;
     const userMsg = query.trim();
+    setQuery("");
+    addMessage("user", userMsg);
     setLoading(true);
-    setResponse(null);
 
-    // Fast path: keyword matching
-    const fast = fastRoute(userMsg);
-    if (fast) {
-      setResponse({ message: fast.message, route: fast.path });
-      setQuery("");
-      setTimeout(() => navigate(fast.path), 1200);
-      setLoading(false);
-      return;
-    }
-
-    // LLM path for complex queries
     try {
-      const res = await base44.integrations.Core.InvokeLLM({
-        prompt: `Você é o BARON, o Diretor Operacional Virtual do DON BARON OS. O usuário disse: "${userMsg}"\n\nIdentifique qual módulo o usuário deseja e responda em JSON com a rota e uma mensagem curta.\nRotas: /compras, /financeiro, /estoque, /producao, /rh, /cmv, /documentos, /indicadores, /inteligencia, /decisoes, /planejamento, /brain, /workforce, /missions, /whatsapp, /cadastro, /event-bus, /kernel, /integracoes, /people-analytics, /administracao, /motoboys, /relatorios.\nSe for uma pergunta sobre dados (ex: "quanto tenho em caixa?"), use route: null e responda a pergunta com uma mensagem útil.\nResponda sempre em português, de forma amigável e concisa.`,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            route: { type: "string" },
-            message: { type: "string" }
-          }
-        }
-      });
-      setResponse(res);
-      setQuery("");
-      if (res.route) {
-        setTimeout(() => navigate(res.route), 1500);
+      const parsed = await parseCommand(userMsg);
+      const result = await executeCommand(parsed, { full_name: "Robson" });
+
+      addMessage("baron", result.message || "Pronto.", result.route);
+
+      // Auto-navigate for navigation intents
+      if (result.type === "navigate" && result.route) {
+        const filter = result.filter;
+        setTimeout(() => navigate(result.route + (filter ? `?filtro=${filter}` : "")), 1500);
       }
     } catch {
-      setResponse({ message: "Não consegui processar agora. Tente novamente.", route: null });
+      addMessage("baron", "Não consegui processar agora. Pode repetir?");
     } finally {
       setLoading(false);
     }
@@ -95,19 +61,12 @@ export default function BaronChat() {
 
   const handleMic = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setResponse({ message: "Reconhecimento de voz não disponível neste navegador.", route: null });
-      return;
-    }
+    if (!SpeechRecognition) { addMessage("baron", "Reconhecimento de voz não disponível neste navegador."); return; }
     const recognition = new SpeechRecognition();
     recognition.lang = "pt-BR";
     recognition.interimResults = false;
     setListening(true);
-    recognition.onresult = (e) => {
-      const text = e.results[0][0].transcript;
-      setQuery(text);
-      setListening(false);
-    };
+    recognition.onresult = (e) => { setQuery(e.results[0][0].transcript); setListening(false); };
     recognition.onerror = () => setListening(false);
     recognition.onend = () => setListening(false);
     recognition.start();
@@ -117,25 +76,15 @@ export default function BaronChat() {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = "";
+    addMessage("user", `📎 ${file.name}`);
     setLoading(true);
-    setResponse(null);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.entities.DBDocument.create({
-        title: file.name,
-        file_url,
-        file_type: file.type || "unknown",
-        source: "upload",
-        status: "recebido",
-        sent_at: new Date().toISOString(),
-      });
-      setResponse({
-        message: `Documento "${file.name}" recebido e enviado para a Central de Processamento. A IA vai identificar, classificar e encaminhar automaticamente.`,
-        route: "/processamento",
-      });
-      setTimeout(() => navigate("/processamento"), 2000);
+      const result = await processDocument(file, { full_name: "Robson" });
+      const conf = result.route?.confidence;
+      const tierLabel = conf?.tier === "green" ? "aprovado automaticamente" : conf?.tier === "yellow" ? "em revisão" : "bloqueado";
+      addMessage("baron", `✓ Documento recebido e processado.\n✓ Tipo: ${(result.doc?.category || "documento").replace(/_/g, " ")}\n✓ Confiança: ${conf?.score || 0}% — ${tierLabel}${result.route?.auto ? "\n✓ Ação executada automaticamente." : "\n⚠ Requer sua confirmação."}`, "/processamento");
     } catch {
-      setResponse({ message: "Não consegui enviar o documento. Tente pela Central de Documentos.", route: "/processamento" });
+      addMessage("baron", "Não consegui processar o documento. Tente pela Central de Processamento.", "/processamento");
     } finally {
       setLoading(false);
     }
@@ -143,10 +92,23 @@ export default function BaronChat() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      {/* Input area */}
+      {/* Conversation history */}
+      {conversation.length > 0 && (
+        <div ref={scrollRef} className="mb-3 max-h-64 overflow-y-auto rounded-2xl bg-background/50 p-2">
+          <BaronConversation messages={conversation} />
+        </div>
+      )}
+
+      {/* Loading indicator */}
+      {loading && (
+        <div className="mb-2 flex items-center gap-2 px-2 text-xs text-muted-foreground">
+          <Loader2 className="h-3 w-3 animate-spin" /> BARON processando...
+        </div>
+      )}
+
+      {/* Input area — mantida exatamente igual */}
       <div className="rounded-2xl border border-border bg-card p-2 shadow-xl shadow-black/20">
         <div className="flex items-center gap-2">
-          {/* Mic */}
           <button
             onClick={handleMic}
             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${listening ? "bg-baron-error text-white animate-pulse" : "text-muted-foreground hover:bg-secondary hover:text-foreground"}`}
@@ -154,8 +116,6 @@ export default function BaronChat() {
           >
             <Mic className="h-5 w-5" />
           </button>
-
-          {/* Attach */}
           <button
             onClick={() => fileRef.current?.click()}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
@@ -164,8 +124,6 @@ export default function BaronChat() {
             <Paperclip className="h-5 w-5" />
           </button>
           <input ref={fileRef} type="file" className="hidden" onChange={handleFile} />
-
-          {/* Camera */}
           <button
             onClick={() => cameraRef.current?.click()}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
@@ -174,8 +132,6 @@ export default function BaronChat() {
             <Camera className="h-5 w-5" />
           </button>
           <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFile} />
-
-          {/* Text input */}
           <input
             type="text"
             value={query}
@@ -185,8 +141,6 @@ export default function BaronChat() {
             className="flex-1 bg-transparent px-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             disabled={loading}
           />
-
-          {/* Send */}
           <button
             onClick={handleSend}
             disabled={!query.trim() || loading}
@@ -198,35 +152,13 @@ export default function BaronChat() {
         </div>
       </div>
 
-      {/* Response */}
-      {response && (
-        <div className="mt-4 animate-fade-in">
-          <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-xs font-bold text-primary">
-              BA
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm text-foreground">{response.message}</p>
-              {response.route && (
-                <button
-                  onClick={() => navigate(response.route)}
-                  className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                >
-                  Abrir agora <ArrowRight className="h-3 w-3" />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Suggestions */}
-      {!response && !loading && (
+      {/* Suggestions — apenas quando sem conversa */}
+      {conversation.length === 0 && !loading && (
         <div className="mt-4 flex flex-wrap justify-center gap-2">
-          {["Lançar compra", "Fluxo de caixa", "Estoque crítico", "Cadastrar funcionário", "Mostrar DRE"].map(s => (
+          {["Comprei 100kg de arroz a R$12,50", "Paguei a Equatorial pelo Inter via PIX", "Produzimos 18 geleias de bacon", "Abrir estoque", "Boletos vencendo"].map(s => (
             <button
               key={s}
-              onClick={() => { setQuery(s); }}
+              onClick={() => setQuery(s)}
               className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/30 hover:text-primary"
             >
               {s}
