@@ -3,28 +3,33 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { parseCommand, executeCommand } from "@/lib/baronCommandEngine";
 import { processDocument } from "@/lib/processamentoIA";
-import { Mic, Paperclip, Camera, Send, Loader2, ArrowRight } from "lucide-react";
+import { Mic, Paperclip, Camera, Send, Loader2 } from "lucide-react";
 import BaronConversation from "@/components/command/BaronConversation";
 
 const CONV_KEY = "baron_conversation";
+const CTX_KEY = "baron_pending_context";
 
 export default function BaronChat() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const [conversation, setConversation] = useState([]);
+  const [pendingContext, setPendingContext] = useState(null);
   const fileRef = useRef(null);
   const cameraRef = useRef(null);
   const navigate = useNavigate();
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    try { setConversation(JSON.parse(localStorage.getItem(CONV_KEY) || "[]")); } catch { setConversation([]); }
+    try {
+      setConversation(JSON.parse(localStorage.getItem(CONV_KEY) || "[]"));
+      setPendingContext(JSON.parse(localStorage.getItem(CTX_KEY) || "null"));
+    } catch { setConversation([]); }
   }, []);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [conversation]);
+  }, [conversation, loading]);
 
   const addMessage = (role, content, route) => {
     setConversation((prev) => {
@@ -32,6 +37,11 @@ export default function BaronChat() {
       localStorage.setItem(CONV_KEY, JSON.stringify(next));
       return next;
     });
+  };
+
+  const setContext = (ctx) => {
+    setPendingContext(ctx);
+    localStorage.setItem(CTX_KEY, JSON.stringify(ctx));
   };
 
   const handleSend = async () => {
@@ -42,20 +52,60 @@ export default function BaronChat() {
     setLoading(true);
 
     try {
-      const parsed = await parseCommand(userMsg);
-      const result = await executeCommand(parsed, { full_name: "Robson" });
-
-      addMessage("baron", result.message || "Pronto.", result.route);
-
-      // Auto-navigate for navigation intents
-      if (result.type === "navigate" && result.route) {
-        const filter = result.filter;
-        setTimeout(() => navigate(result.route + (filter ? `?filtro=${filter}` : "")), 1500);
+      // Multi-turn: respondendo a uma pergunta do BARON
+      if (pendingContext) {
+        // Oferta de comprovante
+        if (pendingContext.type === "attachment_offer") {
+          const ans = userMsg.toLowerCase();
+          if (ans.startsWith("n")) {
+            addMessage("baron", "✓ Pagamento finalizado.");
+          } else {
+            addMessage("baron", "Anexe o comprovante usando o botão 📎.");
+          }
+          setContext(null);
+          return;
+        }
+        // Preenchendo campo faltante
+        if (pendingContext.type === "missing_info" && pendingContext.needsField) {
+          const updatedParsed = { ...pendingContext.parsed, [pendingContext.needsField]: userMsg };
+          const result = await executeCommand(updatedParsed, { full_name: "Robson" });
+          handleResult(result, updatedParsed);
+          return;
+        }
       }
+
+      // Fluxo normal: parsear + executar
+      const parsed = await parseCommand(userMsg, pendingContext?.parsed?.intent);
+      const result = await executeCommand(parsed, { full_name: "Robson" });
+      handleResult(result, parsed);
     } catch {
       addMessage("baron", "Não consegui processar agora. Pode repetir?");
+      setContext(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResult = (result, parsed) => {
+    if (result.type === "needs_info" && result.needsField) {
+      const fullMsg = result.understood ? `${result.understood}\n\n${result.message}` : result.message;
+      addMessage("baron", fullMsg, result.route);
+      setContext({ type: "missing_info", parsed: result.parsed || parsed, needsField: result.needsField });
+    } else if (result.type === "needs_info") {
+      // Sem needsField → apenas informar, não há contexto pendente
+      addMessage("baron", result.message, result.route);
+      setContext(null);
+    } else {
+      addMessage("baron", result.message || "Pronto.", result.route);
+      if (result.follow_up) {
+        addMessage("baron", result.follow_up);
+        setContext({ type: "attachment_offer", parsed });
+      } else {
+        setContext(null);
+      }
+      if (result.type === "navigate" && result.route) {
+        setTimeout(() => navigate(result.route + (result.filter ? `?filtro=${result.filter}` : "")), 1500);
+      }
     }
   };
 
@@ -78,6 +128,8 @@ export default function BaronChat() {
     e.target.value = "";
     addMessage("user", `📎 ${file.name}`);
     setLoading(true);
+    // Se havia oferta de comprovante, limpar contexto
+    if (pendingContext?.type === "attachment_offer") setContext(null);
     try {
       const result = await processDocument(file, { full_name: "Robson" });
       const conf = result.route?.confidence;
@@ -137,7 +189,7 @@ export default function BaronChat() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Digite ou fale seu comando..."
+            placeholder={pendingContext ? "Responda ao BARON..." : "Digite ou fale seu comando..."}
             className="flex-1 bg-transparent px-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             disabled={loading}
           />

@@ -14,16 +14,13 @@ export default function WhileAwaySummary() {
       base44.entities.DBDocument.filter({ created_date: { $gte: since } }, "-created_date", 200).catch(() => []),
       base44.entities.Payment.filter({ created_date: { $gte: since } }, "-created_date", 100).catch(() => []),
       base44.entities.Product.filter({ updated_date: { $gte: since } }, "-updated_date", 500).catch(() => []),
-      base44.entities.ProductionRecord.filter({ created_date: { $gte: since } }, "-created_date", 100).catch(() => []),
-    ]).then(([docs, payments, products, production]) => {
-      const nfProcessed = docs.filter((d) => d.status === "processado" && (d.category === "nota_fiscal" || d.category === "xml")).length;
-      const boletosRegistered = payments.filter((p) => p.status === "pendente" || p.status === "pago").length;
+    ]).then(([docs, payments, products]) => {
+      const nfs = docs.filter((d) => d.category === "nota_fiscal" || d.category === "xml").length;
       setSummary({
-        docsAnalyzed: docs.length,
-        boletosRegistered,
-        productsUpdated: products.length,
-        nfsProcessed: nfProcessed,
-        production: production.length,
+        docsProcessed: docs.length,
+        boletosRegistered: payments.length,
+        nfsLancadas: nfs,
+        stockUpdated: products.length > 0,
       });
     });
   }, []);
@@ -36,24 +33,22 @@ export default function WhileAwaySummary() {
     );
   }
 
-  const items = [
-    summary.docsAnalyzed > 0 && { text: `Analisei ${summary.docsAnalyzed} documento(s).` },
-    summary.boletosRegistered > 0 && { text: `Cadastrei ${summary.boletosRegistered} boleto(s).` },
-    summary.productsUpdated > 0 && { text: `Atualizei ${summary.productsUpdated} produto(s).` },
-    summary.nfsProcessed > 0 && { text: `Processamos ${summary.nfsProcessed} nota(s) fiscal(is).` },
-    summary.production > 0 && { text: `Registramos ${summary.production} produção(ões).` },
-  ].filter(Boolean);
+  const lines = [];
+  if (summary.docsProcessed > 0) lines.push(`${summary.docsProcessed} documentos processados`);
+  if (summary.boletosRegistered > 0) lines.push(`${summary.boletosRegistered} boletos cadastrados`);
+  if (summary.nfsLancadas > 0) lines.push(`${summary.nfsLancadas} notas fiscais lançadas`);
+  if (summary.stockUpdated) lines.push("Estoque atualizado");
 
-  if (items.length === 0) {
+  if (lines.length === 0) {
     return <p className="text-xs text-muted-foreground">Nenhuma atividade nova desde sua última visita.</p>;
   }
 
   return (
     <div className="space-y-1">
-      {items.map((item, i) => (
+      {lines.map((line, i) => (
         <div key={i} className="flex items-center gap-2 text-sm text-foreground">
           <CheckCircle2 className="h-3.5 w-3.5 text-baron-success shrink-0" />
-          <span>{item.text}</span>
+          <span>{line}</span>
         </div>
       ))}
     </div>

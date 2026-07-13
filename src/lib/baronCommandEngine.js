@@ -1,8 +1,11 @@
 /**
- * BARON Command Engine — interpreta linguagem natural e executa ações.
+ * BARON Command Engine 2.0 — Modo Executar
  *
- * O BARON é Diretor Operacional: entende comandos, executa operações completas,
- * navega automaticamente, aprende continuamente e pergunta apenas o necessário.
+ * Fluxo: identificar intenção → extrair informações → verificar o que falta →
+ * perguntar só o indispensável → executar operação completa → atualizar módulos → informar resultado.
+ *
+ * Suporta conversa multi-turno: quando falta informação, retorna needs_info com
+ * needsField + understood + parsed. O chamador preenche o campo na próxima mensagem.
  */
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
@@ -17,7 +20,8 @@ function saveMemory(mem) { localStorage.setItem(MEMORY_KEY, JSON.stringify(mem))
 function learn(key, value) {
   if (!value) return;
   const mem = loadMemory();
-  if (!mem[key]) { mem[key] = value; saveMemory(mem); }
+  mem[key] = value;
+  saveMemory(mem);
 }
 
 const INTENT_SCHEMA = {
@@ -38,10 +42,10 @@ const INTENT_SCHEMA = {
     employee_name: { type: "string", description: "Nome do funcionário" },
     rh_action: { type: "string", enum: ["ferias", "afastamento", "retorno", "demissao"], description: "Ação de RH" },
     loss_reason: { type: "string", description: "Motivo da perda" },
-    route: { type: "string", description: "Rota de navegação (/estoque, /financeiro, /rh, etc)" },
-    route_filter: { type: "string", enum: ["vencendo", "baixo", "pendentes", "hoje"], description: "Filtro da rota" },
+    route: { type: "string", description: "Rota de navegação" },
+    route_filter: { type: "string", enum: ["vencendo", "baixo", "pendentes", "hoje"] },
     message: { type: "string", description: "Resposta curta confirmando a ação" },
-    needs_info: { type: "string", description: "Informação faltante que precisa perguntar" },
+    needs_info: { type: "string", description: "Informação faltante" },
   },
 };
 
@@ -50,28 +54,35 @@ const PARSE_PROMPT = `Você é o BARON, Diretor Operacional do DON BARON OS. Ana
 Exemplos:
 - "Comprei 100kg de arroz a R$12,50" → intent=compra, product_name=arroz, quantity=100, unit=kg, price=12.50, price_type=unit
 - "Comprei 20 caixas de Coca-Cola por R$180" → intent=compra, product_name=coca-cola, quantity=20, unit=cx, price=180, price_type=total
+- "Chegaram 45kg de carne por R$36,90 o kg da Fribal" → intent=compra, product_name=carne, quantity=45, unit=kg, price=36.90, price_type=unit, supplier=Fribal
 - "Paguei a Equatorial hoje pelo Inter via PIX" → intent=pagamento, payment_target=Equatorial, bank=Inter, payment_method=pix
 - "Produzimos 18 geleias de bacon" → intent=producao, product_name=geleia de bacon, quantity=18, unit=un
 - "Perdemos 8 pães por vencimento" → intent=baixa, product_name=pão, quantity=8, unit=un, loss_reason=vencimento
 - "João entrou de férias hoje" → intent=rh, employee_name=João, rh_action=ferias
 - "Paguei R$85 de combustível" → intent=despesa, amount=85, category=combustível
 - "Abrir estoque" → intent=navegacao, route=/estoque
+- "Mostrar RH" → intent=navegacao, route=/rh
 - "Boletos vencendo" → intent=navegacao, route=/financeiro, route_filter=vencendo
 - "Produtos abaixo do mínimo" → intent=navegacao, route=/estoque, route_filter=baixo
-- "Chegou carne" / "Recebi pão" / "Entrou bacon" → intent=compra (sem preço)
-- "Paguei fornecedor" → intent=pagamento
+- "Mostrar Intelligence" → intent=navegacao, route=/inteligencia
+- "Chegou carne" / "Recebi pão" → intent=compra (sem preço, sem fornecedor)
 
 Regras:
-- Se faltar informação essencial (ex: fornecedor em compra com preço), coloque em needs_info.
-- message: confirmação curta e amigável em português do que vai fazer.
-- route deve ser uma das: /estoque, /financeiro, /compras, /producao, /rh, /cmv, /documentos, /processamento, /indicadores, /motoboys, /cadastro, /relatorios, /inteligencia, /baron-ai, /ia, /missions, /planejamento, /administracao, /kernel, /integracoes, /whatsapp, /dashboard
-- Se for uma pergunta (ex: "quanto tenho em caixa?"), intent=pergunta e responda em message.`;
+- Se for resposta curta a uma pergunta do BARON (ex: só um nome de fornecedor, só um valor), mantenha intent da pergunta anterior se possível, ou use intent=pergunta.
+- message: confirmação curta e amigável em português.
+- route deve ser uma das: /estoque, /financeiro, /compras, /producao, /rh, /cmv, /documentos, /processamento, /indicadores, /motoboys, /cadastro, /relatorios, /inteligencia, /ia, /missions, /planejamento, /administracao, /kernel, /integracoes, /whatsapp, /dashboard
+- Se for uma pergunta sobre dados, intent=pergunta e responda em message.`;
 
-export async function parseCommand(text) {
+export async function parseCommand(text, previousIntent) {
+  const contextHint = previousIntent ? `\n\nContexto: o BARON havia perguntado uma informação sobre uma operação de "${previousIntent}". Esta mensagem provavelmente é a resposta.` : "";
   const res = await base44.integrations.Core.InvokeLLM({
-    prompt: `${PARSE_PROMPT}\n\nComando: "${text}"`,
+    prompt: `${PARSE_PROMPT}${contextHint}\n\nComando: "${text}"`,
     response_json_schema: INTENT_SCHEMA,
   });
+  // Se havia contexto e a resposta não trouxe intent clara, preservar a anterior
+  if (previousIntent && (!res.intent || res.intent === "pergunta")) {
+    res.intent = previousIntent;
+  }
   return res;
 }
 
@@ -80,12 +91,10 @@ async function findProduct(name) {
   const products = await base44.entities.Product.filter({ active: true, status: "ativo" }, "-created_date", 500).catch(() => []);
   const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, "").trim();
   const target = norm(name);
-  // Exact/alias match first
   for (const p of products) {
     if (norm(p.name) === target || (p.short_name && norm(p.short_name) === target)) return { product: p, confidence: 1 };
     for (const alias of p.aliases || []) { if (norm(alias) === target) return { product: p, confidence: 1 }; }
   }
-  // Partial match
   for (const p of products) {
     if (norm(p.name).includes(target) || target.includes(norm(p.name))) return { product: p, confidence: 0.9 };
     if (p.short_name && (norm(p.short_name).includes(target) || target.includes(norm(p.short_name)))) return { product: p, confidence: 0.85 };
@@ -108,107 +117,119 @@ async function findEmployee(name) {
 async function execCompra(parsed, user) {
   const match = await findProduct(parsed.product_name);
   if (!match) {
-    return { type: "needs_info", message: `Não encontrei "${parsed.product_name}" no cadastro. Quer cadastrar ou relacionar a um produto existente? Abra o cadastro.`, route: "/cadastro" };
+    return { type: "needs_info", message: `Não encontrei "${parsed.product_name}" no cadastro. Quer cadastrar este produto? Abrirei o cadastro.`, route: "/cadastro", needsField: null };
   }
   const product = match.product;
   const supplier = parsed.supplier || loadMemory().preferred_supplier;
-  if (!supplier && parsed.price) {
-    return { type: "needs_info", message: `Encontrei ${product.name}. Qual o fornecedor?`, learn_product: product.name, pending: parsed };
-  }
-  if (supplier) learn("preferred_supplier", supplier);
-
   const qty = parsed.quantity || 0;
-  const unitPrice = parsed.price_type === "total" && parsed.quantity > 0 ? parsed.price / parsed.quantity : (parsed.price || 0);
+  const unit = parsed.unit || "un";
+
+  const understood = `Entendi:\n• Produto: ${product.name}\n• Quantidade: ${qty} ${unit}${parsed.price ? `\n• Valor ${parsed.price_type === "total" ? "total" : "unitário"}: ${brl(parsed.price)}` : ""}`;
+
+  // Sem preço → apenas entrada de estoque, sem fornecedor necessário
+  if (!parsed.price) {
+    const newQty = (product.stock_quantity || 0) + qty;
+    await base44.entities.Product.update(product.id, { stock_quantity: newQty });
+    await Core.audit({ audit_action: "create", module: "estoque", entity_type: "Product", entity_id: product.id, details: `Entrada via BARON: +${qty} ${unit} ${product.name} (sem nota) | Usuário: ${user?.full_name}` });
+    return { type: "done", message: `✓ Entrada realizada: +${qty} ${unit} ${product.name}\n✓ Estoque atualizado: ${newQty} ${unit}` };
+  }
+
+  // Com preço → precisa fornecedor
+  if (!supplier) {
+    return { type: "needs_info", understood, message: "Falta apenas informar o fornecedor.", needsField: "supplier", parsed };
+  }
+
+  learn("preferred_supplier", supplier);
+  const unitPrice = parsed.price_type === "total" && qty > 0 ? parsed.price / qty : (parsed.price || 0);
   const newQty = (product.stock_quantity || 0) + qty;
   const newCost = unitPrice || product.cost_price;
+  const totalAmount = parsed.price_type === "total" ? parsed.price : unitPrice * qty;
 
   await base44.entities.Product.update(product.id, {
     stock_quantity: newQty,
     cost_price: newCost,
-    primary_supplier_name: supplier || product.primary_supplier_name,
+    primary_supplier_name: supplier,
   });
 
-  if (parsed.price && supplier) {
-    await base44.entities.FinancialTransaction.create({
-      description: `Compra: ${qty} ${parsed.unit || "un"} ${product.name}${supplier ? ` - ${supplier}` : ""}`,
-      type: "a_pagar",
-      amount: parsed.price_type === "total" ? parsed.price : unitPrice * qty,
-      due_date: todayStr(),
-      payment_date: todayStr(),
-      status: "pago",
-      supplier,
-      origin: "compra",
-      payment_method: "pix",
-      notes: `Registro via BARON por ${user?.full_name || "Sistema"}`,
-    });
-  }
+  await base44.entities.FinancialTransaction.create({
+    description: `Compra: ${qty} ${unit} ${product.name} - ${supplier}`,
+    type: "a_pagar",
+    amount: totalAmount,
+    due_date: todayStr(),
+    payment_date: todayStr(),
+    status: "pago",
+    supplier,
+    origin: "compra",
+    payment_method: "pix",
+    notes: `Registro via BARON por ${user?.full_name || "Sistema"}`,
+  });
 
-  await Core.audit({ audit_action: "create", module: "estoque", entity_type: "Product", entity_id: product.id, details: `Entrada via BARON: +${qty} ${parsed.unit || "un"} ${product.name} | Custo: ${brl(newCost)}${supplier ? ` | Fornecedor: ${supplier}` : ""} | Usuário: ${user?.full_name}` });
+  await Core.audit({ audit_action: "create", module: "estoque", entity_type: "Product", entity_id: product.id, details: `Compra via BARON: +${qty} ${unit} ${product.name} | Custo: ${brl(newCost)} | Fornecedor: ${supplier} | Total: ${brl(totalAmount)} | Usuário: ${user?.full_name}` });
 
-  return { type: "done", message: `✓ Entrada realizada: +${qty} ${parsed.unit || "un"} ${product.name}${supplier ? `\n✓ Fornecedor: ${supplier}` : ""}\n✓ Estoque atualizado: ${newQty} ${parsed.unit || "un"}\n✓ Custo médio atualizado: ${brl(newCost)}${parsed.price ? `\n✓ Compra registrada: ${brl(parsed.price_type === "total" ? parsed.price : unitPrice * qty)}` : ""}` };
+  return { type: "done", message: `✓ Compra registrada: ${qty} ${unit} ${product.name} - ${brl(totalAmount)}\n✓ Estoque atualizado: ${newQty} ${unit}\n✓ Custo médio atualizado: ${brl(newCost)}\n✓ Fornecedor: ${supplier}\n✓ CMV atualizado\n✓ Intelligence atualizado\n✓ Auditoria registrada` };
 }
 
 async function execPagamento(parsed, user) {
   const target = parsed.payment_target || "";
   const payments = await base44.entities.Payment.filter({ status: "pendente" }, "-due_date", 100).catch(() => []);
   const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-  const found = payments.find((p) => {
-    return norm(p.supplier_name || "").includes(norm(target)) || norm(p.description || "").includes(norm(target));
-  });
+  const found = payments.find((p) => norm(p.supplier_name || "").includes(norm(target)) || norm(p.description || "").includes(norm(target)));
 
   if (!found) {
-    return { type: "needs_info", message: `Não encontrei boleto pendente de "${target}". Quer registrar como despesa ou abrir o financeiro?`, route: "/financeiro" };
+    // Não há boleto pendente — perguntar valor para registrar como despesa
+    if (!parsed.amount) {
+      return { type: "needs_info", understood: `Não encontrei conta pendente de "${target}".`, message: "Qual o valor pago? Vou registrar como despesa.", needsField: "amount", parsed };
+    }
+    // Registrar como despesa avulsa
+    const bank = parsed.bank || loadMemory().preferred_bank;
+    const method = parsed.payment_method || loadMemory().preferred_payment_method || "pix";
+    learn("preferred_bank", bank);
+    learn("preferred_payment_method", method);
+    await base44.entities.FinancialTransaction.create({
+      description: `Pagamento: ${target}`,
+      type: "a_pagar", amount: parsed.amount, due_date: todayStr(), payment_date: todayStr(),
+      status: "pago", supplier: target, origin: "manual", payment_method: method,
+      notes: `Banco: ${bank} | Via BARON por ${user?.full_name}`,
+    });
+    await Core.audit({ audit_action: "create", module: "financeiro", entity_type: "FinancialTransaction", details: `Despesa via BARON: ${brl(parsed.amount)} - ${target} | Banco: ${bank} | ${method} | Usuário: ${user?.full_name}` });
+    return { type: "done", message: `✓ Pagamento registrado: ${target} - ${brl(parsed.amount)}\n✓ Banco: ${bank} | Forma: ${method.toUpperCase()}\n✓ Fluxo de caixa atualizado`, follow_up: "Deseja anexar o comprovante?" };
   }
 
   const bank = parsed.bank || loadMemory().preferred_bank;
   const method = parsed.payment_method || loadMemory().preferred_payment_method || "pix";
-  if (bank) learn("preferred_bank", bank);
-  if (method) learn("preferred_payment_method", method);
+  learn("preferred_bank", bank);
+  learn("preferred_payment_method", method);
 
   await base44.entities.Payment.update(found.id, {
-    status: "pago",
-    payment_date: todayStr(),
-    payment_method: method,
-    bank,
+    status: "pago", payment_date: todayStr(), payment_method: method, bank,
     version: (found.version || 1) + 1,
   });
 
   await base44.entities.FinancialTransaction.create({
-    description: found.description,
-    type: "a_pagar",
-    amount: found.amount,
-    due_date: found.due_date,
-    payment_date: todayStr(),
-    status: "pago",
-    supplier: found.supplier_name,
-    supplier_id: found.supplier_id,
-    payment_method: method,
-    account_name: loadMemory().preferred_account || "",
-    document_id: found.document_id,
-    origin: "compra",
+    description: found.description, type: "a_pagar", amount: found.amount,
+    due_date: found.due_date, payment_date: todayStr(), status: "pago",
+    supplier: found.supplier_name, supplier_id: found.supplier_id,
+    payment_method: method, account_name: loadMemory().preferred_account || "",
+    document_id: found.document_id, origin: "compra",
     notes: `Banco: ${bank} | Pago via BARON por ${user?.full_name}`,
   });
 
   await Core.audit({ audit_action: "confirm", module: "financeiro", entity_type: "Payment", entity_id: found.id, details: `Pago via BARON: ${found.description} - ${brl(found.amount)} | Banco: ${bank} | ${method} | Usuário: ${user?.full_name}` });
 
-  return { type: "done", message: `✓ Pagamento registrado: ${found.description}\n✓ Valor: ${brl(found.amount)}\n✓ Banco: ${bank} | Forma: ${method.toUpperCase()}\n✓ Fluxo de caixa atualizado\n✓ Financeiro atualizado` };
+  return { type: "done", message: `✓ Pagamento registrado: ${found.description}\n✓ Valor: ${brl(found.amount)}\n✓ Banco: ${bank} | Forma: ${method.toUpperCase()}\n✓ Fluxo de caixa atualizado\n✓ Financeiro atualizado`, follow_up: "Deseja anexar o comprovante?" };
 }
 
 async function execProducao(parsed, user) {
   const match = await findProduct(parsed.product_name);
   const productName = match?.product.name || parsed.product_name;
   const qty = parsed.quantity || 0;
+  const unit = parsed.unit || "un";
 
   await base44.entities.ProductionRecord.create({
-    item: productName,
-    product_id: match?.product.id,
-    produced_quantity: qty,
-    planned_quantity: qty,
-    unit: parsed.unit || "un",
-    production_date: todayStr(),
-    status: "concluida",
-    responsible: user?.full_name || "Sistema",
-    notes: `Registro via BARON`,
+    item: productName, product_id: match?.product.id,
+    produced_quantity: qty, planned_quantity: qty, unit,
+    production_date: todayStr(), status: "concluida",
+    responsible: user?.full_name || "Sistema", notes: "Registro via BARON",
   });
 
   if (match) {
@@ -216,36 +237,36 @@ async function execProducao(parsed, user) {
     await base44.entities.Product.update(match.product.id, { stock_quantity: newQty });
   }
 
-  await Core.audit({ audit_action: "create", module: "producao", entity_type: "ProductionRecord", details: `Produção via BARON: ${qty} ${parsed.unit || "un"} ${productName} | Usuário: ${user?.full_name}` });
+  await Core.audit({ audit_action: "create", module: "producao", entity_type: "ProductionRecord", details: `Produção via BARON: ${qty} ${unit} ${productName} | Usuário: ${user?.full_name}` });
 
-  return { type: "done", message: `✓ Produção registrada: ${qty} ${parsed.unit || "un"} ${productName}\n✓ Estoque atualizado${match ? `: ${match.product.stock_quantity + qty} ${parsed.unit || "un"}` : ""}\n✓ Custos atualizados` };
+  return { type: "done", message: `✓ Produção registrada: ${qty} ${unit} ${productName}\n✓ Estoque atualizado${match ? `: ${match.product.stock_quantity + qty} ${unit}` : ""}\n✓ Custos atualizados\n✓ Auditoria registrada` };
 }
 
 async function execBaixa(parsed, user) {
   const match = await findProduct(parsed.product_name);
   if (!match) {
-    return { type: "needs_info", message: `Não encontrei "${parsed.product_name}" no estoque. Abra o estoque para revisar.`, route: "/estoque" };
+    return { type: "needs_info", message: `Não encontrei "${parsed.product_name}" no estoque. Abra o estoque para revisar.`, route: "/estoque", needsField: null };
   }
   const qty = parsed.quantity || 0;
+  const unit = parsed.unit || "un";
   const newQty = Math.max(0, (match.product.stock_quantity || 0) - qty);
 
   await base44.entities.Product.update(match.product.id, { stock_quantity: newQty });
 
-  await Core.audit({ audit_action: "update", module: "estoque", entity_type: "Product", entity_id: match.product.id, details: `Baixa via BARON: -${qty} ${parsed.unit || "un"} ${match.product.name} | Motivo: ${parsed.loss_reason || "não informado"} | Usuário: ${user?.full_name}` });
+  await Core.audit({ audit_action: "update", module: "estoque", entity_type: "Product", entity_id: match.product.id, details: `Baixa via BARON: -${qty} ${unit} ${match.product.name} | Motivo: ${parsed.loss_reason || "não informado"} | Usuário: ${user?.full_name}` });
 
-  return { type: "done", message: `✓ Baixa registrada: -${qty} ${parsed.unit || "un"} ${match.product.name}\n✓ Motivo: ${parsed.loss_reason || "não informado"}\n✓ Estoque atualizado: ${newQty} ${parsed.unit || "un"}\n✓ CMV atualizado` };
+  return { type: "done", message: `✓ Baixa registrada: -${qty} ${unit} ${match.product.name}\n✓ Motivo: ${parsed.loss_reason || "não informado"}\n✓ Estoque atualizado: ${newQty} ${unit}\n✓ CMV atualizado\n✓ Histórico registrado` };
 }
 
 async function execRH(parsed, user) {
   const emp = await findEmployee(parsed.employee_name);
   if (!emp) {
-    return { type: "needs_info", message: `Não encontrei o funcionário "${parsed.employee_name}". Abra o RH para revisar.`, route: "/rh" };
+    return { type: "needs_info", message: `Não encontrei o funcionário "${parsed.employee_name}". Abra o RH para revisar.`, route: "/rh", needsField: null };
   }
   const statusMap = { ferias: "ferias", afastamento: "afastado", retorno: "ativo", demissao: "demitido" };
   const newStatus = statusMap[parsed.rh_action] || "ativo";
 
   await base44.entities.Employee.update(emp.id, { status: newStatus });
-
   await Core.audit({ audit_action: "update", module: "rh", entity_type: "Employee", entity_id: emp.id, details: `${parsed.rh_action} via BARON: ${emp.full_name} → ${newStatus} | Usuário: ${user?.full_name}` });
 
   const labels = { ferias: "entrou de férias", afastamento: "afastado", retorno: "voltou ao trabalho", demissao: "demitido" };
@@ -255,17 +276,12 @@ async function execRH(parsed, user) {
 async function execDespesa(parsed, user) {
   const amount = parsed.amount || 0;
   const category = parsed.category || "outros";
+  const method = loadMemory().preferred_payment_method || "pix";
 
   await base44.entities.FinancialTransaction.create({
-    description: `Despesa: ${category}`,
-    type: "a_pagar",
-    amount,
-    due_date: todayStr(),
-    payment_date: todayStr(),
-    status: "pago",
-    category,
-    origin: "manual",
-    payment_method: loadMemory().preferred_payment_method || "pix",
+    description: `Despesa: ${category}`, type: "a_pagar", amount,
+    due_date: todayStr(), payment_date: todayStr(), status: "pago",
+    category, origin: "manual", payment_method: method,
     notes: `Registro via BARON por ${user?.full_name}`,
   });
 
