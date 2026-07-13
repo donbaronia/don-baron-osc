@@ -13,7 +13,8 @@
       "type": "string"
     },
     "internal_code": {
-      "type": "string"
+      "type": "string",
+      "description": "Codigo automatico"
     },
     "barcode": {
       "type": "string"
@@ -27,8 +28,38 @@
     "subcategory": {
       "type": "string"
     },
-    "unit": {
+    "brand": {
       "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Foto do produto para reconhecimento IA"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unidade padrao (legado, mantida para compatibilidade)"
+    },
+    "purchase_unit": {
+      "type": "string",
+      "description": "Unidade de compra (ex: caixa, saco, peca)"
+    },
+    "control_unit": {
+      "type": "string",
+      "description": "Unidade de controle de estoque (ex: kg, un)"
+    },
+    "consumption_unit": {
+      "type": "string",
+      "description": "Unidade de consumo/producao (ex: g, un)"
+    },
+    "unit_conversions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Conversoes: [{from_unit, to_unit, factor, description}] ex: 1 cx = 12 un"
     },
     "weight": {
       "type": "number",
@@ -50,14 +81,9 @@
     "alternative_supplier_name": {
       "type": "string"
     },
-    "brand": {
-      "type": "string"
-    },
-    "description": {
-      "type": "string"
-    },
-    "image_url": {
-      "type": "string"
+    "preferred_supplier_name": {
+      "type": "string",
+      "description": "Fornecedor preferencial"
     },
     "active": {
       "type": "boolean",
@@ -83,6 +109,36 @@
       "type": "boolean",
       "default": true
     },
+    "is_perishable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Produto perecivel"
+    },
+    "used_in_production": {
+      "type": "boolean",
+      "default": false,
+      "description": "Utilizado na producao"
+    },
+    "is_raw_material": {
+      "type": "boolean",
+      "default": false,
+      "description": "Materia-prima"
+    },
+    "is_finished_product": {
+      "type": "boolean",
+      "default": false,
+      "description": "Produto acabado"
+    },
+    "is_resale_product": {
+      "type": "boolean",
+      "default": false,
+      "description": "Produto de revenda"
+    },
+    "stock_quantity": {
+      "type": "number",
+      "default": 0,
+      "description": "Estoque atual (em control_unit)"
+    },
     "min_quantity": {
       "type": "number",
       "default": 0
@@ -94,11 +150,6 @@
     "max_quantity": {
       "type": "number",
       "default": 0
-    },
-    "coverage_days": {
-      "type": "number",
-      "default": 0,
-      "description": "Dias de cobertura calculados"
     },
     "physical_location": {
       "type": "string"
@@ -118,6 +169,67 @@
     "location_posicao": {
       "type": "string"
     },
+    "cost_price": {
+      "type": "number",
+      "default": 0,
+      "description": "Custo medio atual (em control_unit)"
+    },
+    "last_price": {
+      "type": "number",
+      "default": 0,
+      "description": "Ultimo preco de compra"
+    },
+    "avg_price": {
+      "type": "number",
+      "default": 0,
+      "description": "Preco medio historico"
+    },
+    "max_price_paid": {
+      "type": "number",
+      "default": 0,
+      "description": "Preco maximo pago"
+    },
+    "min_price_paid": {
+      "type": "number",
+      "default": 0,
+      "description": "Preco minimo pago"
+    },
+    "last_purchase_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "accounting_account": {
+      "type": "string",
+      "description": "Conta contabil"
+    },
+    "cost_center": {
+      "type": "string",
+      "description": "Centro de custo"
+    },
+    "financial_category": {
+      "type": "string",
+      "description": "Categoria financeira"
+    },
+    "avg_consumption": {
+      "type": "number",
+      "default": 0,
+      "description": "Consumo medio (control_unit/dia)"
+    },
+    "stock_days": {
+      "type": "number",
+      "default": 0,
+      "description": "Dias de estoque calculado"
+    },
+    "last_adjustment": {
+      "type": "string",
+      "format": "date",
+      "description": "Ultimo reajuste de preco"
+    },
+    "coverage_days": {
+      "type": "number",
+      "default": 0,
+      "description": "Dias de cobertura calculados"
+    },
     "notes": {
       "type": "string"
     },
@@ -132,15 +244,21 @@
       "items": {
         "type": "string"
       },
-      "description": "Nomes alternativos aprendidos pela IA (ex: CHEDAR FATIADO -> Queijo Cheddar Fatiado)"
+      "description": "Nomes alternativos aprendidos pela IA (ex: Queijo Mussarela Fatiado Premium -> Mussarela)"
     },
-    "stock_quantity": {
-      "type": "number",
-      "default": 0
+    "purchase_history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Historico permanente: [{date, supplier, price, quantity, unit, total, user}]"
     },
-    "cost_price": {
-      "type": "number",
-      "default": 0
+    "movement_history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Historico permanente: [{date, type, quantity, unit, reason, user}]"
     },
     "status": {
       "type": "string",

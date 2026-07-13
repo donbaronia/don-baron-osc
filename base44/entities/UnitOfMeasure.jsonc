@@ -4,13 +4,32 @@
   "properties": {
     "company_id": {
       "type": "string",
-      "description": "Multi-tenant: empresa proprietaria"
+      "description": "Multi-tenant"
     },
     "name": {
-      "type": "string"
+      "type": "string",
+      "description": "Nome por extenso (ex: Quilograma)"
     },
     "abbreviation": {
-      "type": "string"
+      "type": "string",
+      "description": "Sigla (ex: kg)"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "peso",
+        "volume",
+        "unidade",
+        "embalagem",
+        "comprimento"
+      ],
+      "default": "unidade",
+      "description": "Categoria da unidade"
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "Unidade padrao do sistema"
     },
     "status": {
       "type": "string",

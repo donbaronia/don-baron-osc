@@ -7,17 +7,45 @@ export const BR_STATES = [
 ];
 
 export const DEFAULT_UNITS = [
-  { name: "Quilograma", abbreviation: "kg" },
-  { name: "Grama", abbreviation: "g" },
-  { name: "Litro", abbreviation: "L" },
-  { name: "Mililitro", abbreviation: "ml" },
-  { name: "Unidade", abbreviation: "un" },
-  { name: "Caixa", abbreviation: "cx" },
-  { name: "Pacote", abbreviation: "pct" },
-  { name: "Saco", abbreviation: "sco" },
-  { name: "Fardo", abbreviation: "far" },
-  { name: "Balde", abbreviation: "bld" },
+  { name: "Unidade", abbreviation: "UN", category: "unidade", is_default: true },
+  { name: "Quilograma", abbreviation: "KG", category: "peso" },
+  { name: "Grama", abbreviation: "G", category: "peso" },
+  { name: "Litro", abbreviation: "L", category: "volume" },
+  { name: "Mililitro", abbreviation: "ML", category: "volume" },
+  { name: "Caixa", abbreviation: "CX", category: "embalagem" },
+  { name: "Pacote", abbreviation: "PCT", category: "embalagem" },
+  { name: "Fardo", abbreviation: "FD", category: "embalagem" },
+  { name: "Saco", abbreviation: "SC", category: "embalagem" },
+  { name: "Garrafa", abbreviation: "GF", category: "embalagem" },
+  { name: "Lata", abbreviation: "LT", category: "embalagem" },
+  { name: "Balde", abbreviation: "BD", category: "embalagem" },
+  { name: "Bandeja", abbreviation: "BJ", category: "embalagem" },
+  { name: "Caixa Master", abbreviation: "CXM", category: "embalagem" },
+  { name: "Rolo", abbreviation: "RL", category: "embalagem" },
+  { name: "Metro", abbreviation: "M", category: "comprimento" },
+  { name: "Centímetro", abbreviation: "CM", category: "comprimento" },
+  { name: "Par", abbreviation: "PR", category: "unidade" },
+  { name: "Dúzia", abbreviation: "DZ", category: "unidade" },
+  { name: "Cento", abbreviation: "CTO", category: "unidade" },
 ];
+
+/**
+ * Converte quantidade entre unidades usando as conversões cadastradas no produto.
+ * Ex: 3 caixas → 36 unidades (se 1 CX = 12 UN).
+ * Se não houver conversão cadastrada e as unidades forem iguais, retorna o original.
+ */
+export function convertQuantity(qty, fromUnit, toUnit, conversions) {
+  if (!qty || fromUnit === toUnit) return qty;
+  const fu = (fromUnit || "").toUpperCase();
+  const tu = (toUnit || "").toUpperCase();
+  if (fu === tu) return qty;
+  const conv = (conversions || []).find((c) => (c.from_unit || "").toUpperCase() === fu && (c.to_unit || "").toUpperCase() === tu);
+  if (conv) return qty * conv.factor;
+  const rev = (conversions || []).find((c) => (c.from_unit || "").toUpperCase() === tu && (c.to_unit || "").toUpperCase() === fu);
+  if (rev) return qty / rev.factor;
+  // Sem conversão — retorna original (o BARON perguntará se necessário)
+  return qty;
+}
 
 export const DEFAULT_CATEGORIES = [
   "Carnes", "Pães", "Laticínios", "Molhos", "Bebidas",

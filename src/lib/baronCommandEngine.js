@@ -10,6 +10,7 @@
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
 import { todayStr, brl } from "@/lib/financialCenter";
+import { convertQuantity } from "@/lib/masterData";
 
 const MEMORY_KEY = "baron_operational_memory";
 
@@ -96,10 +97,17 @@ async function findProduct(name) {
     for (const alias of p.aliases || []) { if (norm(alias) === target) return { product: p, confidence: 1 }; }
   }
   for (const p of products) {
-    if (norm(p.name).includes(target) || target.includes(norm(p.name))) return { product: p, confidence: 0.9 };
-    if (p.short_name && (norm(p.short_name).includes(target) || target.includes(norm(p.short_name)))) return { product: p, confidence: 0.85 };
+    if (norm(p.name).includes(target) || target.includes(norm(p.name))) { await learnAlias(p, name); return { product: p, confidence: 0.9 }; }
+    if (p.short_name && (norm(p.short_name).includes(target) || target.includes(norm(p.short_name)))) { await learnAlias(p, name); return { product: p, confidence: 0.85 }; }
   }
   return null;
+}
+
+async function learnAlias(product, aliasName) {
+  const aliases = product.aliases || [];
+  const norm = (s) => s.toLowerCase().trim();
+  if (aliases.some((a) => norm(a) === norm(aliasName))) return;
+  try { await base44.entities.Product.update(product.id, { aliases: [...aliases, aliasName] }); } catch {}
 }
 
 async function findEmployee(name) {
@@ -121,17 +129,25 @@ async function execCompra(parsed, user) {
   }
   const product = match.product;
   const supplier = parsed.supplier || loadMemory().preferred_supplier;
-  const qty = parsed.quantity || 0;
-  const unit = parsed.unit || "un";
 
-  const understood = `Entendi:\n• Produto: ${product.name}\n• Quantidade: ${qty} ${unit}${parsed.price ? `\n• Valor ${parsed.price_type === "total" ? "total" : "unitário"}: ${brl(parsed.price)}` : ""}`;
+  // Unidades: o BARON usa o cadastro, nunca pergunta unidade
+  const purchaseUnit = (parsed.unit || product.purchase_unit || product.control_unit || "UN").toUpperCase();
+  const controlUnit = (product.control_unit || product.unit || "UN").toUpperCase();
+  const qty = parsed.quantity || 0;
+  const controlQty = convertQuantity(qty, purchaseUnit, controlUnit, product.unit_conversions);
+  const unitConverted = purchaseUnit !== controlUnit;
+
+  const understood = `Entendi:\n• Produto: ${product.name}\n• Quantidade: ${qty} ${purchaseUnit}${unitConverted ? ` → ${controlQty} ${controlUnit}` : ""}${parsed.price ? `\n• Valor ${parsed.price_type === "total" ? "total" : "unitário"}: ${brl(parsed.price)}` : ""}`;
 
   // Sem preço → apenas entrada de estoque, sem fornecedor necessário
   if (!parsed.price) {
-    const newQty = (product.stock_quantity || 0) + qty;
-    await base44.entities.Product.update(product.id, { stock_quantity: newQty });
-    await Core.audit({ audit_action: "create", module: "estoque", entity_type: "Product", entity_id: product.id, details: `Entrada via BARON: +${qty} ${unit} ${product.name} (sem nota) | Usuário: ${user?.full_name}` });
-    return { type: "done", message: `✓ Entrada realizada: +${qty} ${unit} ${product.name}\n✓ Estoque atualizado: ${newQty} ${unit}` };
+    const newQty = (product.stock_quantity || 0) + controlQty;
+    await base44.entities.Product.update(product.id, {
+      stock_quantity: newQty,
+      movement_history: [...(product.movement_history || []), { date: todayStr(), type: "entrada", quantity: controlQty, unit: controlUnit, reason: "compra sem nota", user: user?.full_name }],
+    });
+    await Core.audit({ audit_action: "create", module: "estoque", entity_type: "Product", entity_id: product.id, details: `Entrada via BARON: +${qty} ${purchaseUnit}${unitConverted ? ` → ${controlQty} ${controlUnit}` : ""} ${product.name} (sem nota) | Usuário: ${user?.full_name}` });
+    return { type: "done", message: `✓ Entrada realizada: +${qty} ${purchaseUnit}${unitConverted ? ` → ${controlQty} ${controlUnit}` : ""}\n✓ Estoque atualizado: ${newQty} ${controlUnit}` };
   }
 
   // Com preço → precisa fornecedor
@@ -140,19 +156,38 @@ async function execCompra(parsed, user) {
   }
 
   learn("preferred_supplier", supplier);
-  const unitPrice = parsed.price_type === "total" && qty > 0 ? parsed.price / qty : (parsed.price || 0);
-  const newQty = (product.stock_quantity || 0) + qty;
-  const newCost = unitPrice || product.cost_price;
-  const totalAmount = parsed.price_type === "total" ? parsed.price : unitPrice * qty;
+  const totalAmount = parsed.price_type === "total" ? parsed.price : (parsed.price || 0) * qty;
+  const unitPriceControl = controlQty > 0 ? totalAmount / controlQty : 0;
+  const newQty = (product.stock_quantity || 0) + controlQty;
+  const newCost = unitPriceControl || product.cost_price;
+  const prevMax = product.max_price_paid || 0;
+  const prevMin = product.min_price_paid || 0;
+  const newMax = Math.max(prevMax, unitPriceControl);
+  const newMin = prevMin > 0 ? Math.min(prevMin, unitPriceControl) : unitPriceControl;
+  const history = product.purchase_history || [];
+  const newAvg = history.length > 0
+    ? ([...history, { price: unitPriceControl }].reduce((s, e) => s + (e.price || 0), 0)) / (history.length + 1)
+    : unitPriceControl;
+
+  const purchaseEntry = { date: todayStr(), supplier, price: unitPriceControl, quantity: qty, unit: purchaseUnit, total: totalAmount, user: user?.full_name };
+  const movementEntry = { date: todayStr(), type: "entrada", quantity: controlQty, unit: controlUnit, reason: "compra", user: user?.full_name };
 
   await base44.entities.Product.update(product.id, {
     stock_quantity: newQty,
     cost_price: newCost,
     primary_supplier_name: supplier,
+    last_price: unitPriceControl,
+    avg_price: newAvg,
+    max_price_paid: newMax,
+    min_price_paid: newMin,
+    last_purchase_date: todayStr(),
+    last_adjustment: todayStr(),
+    purchase_history: [...history, purchaseEntry],
+    movement_history: [...(product.movement_history || []), movementEntry],
   });
 
   await base44.entities.FinancialTransaction.create({
-    description: `Compra: ${qty} ${unit} ${product.name} - ${supplier}`,
+    description: `Compra: ${qty} ${purchaseUnit} ${product.name} - ${supplier}`,
     type: "a_pagar",
     amount: totalAmount,
     due_date: todayStr(),
@@ -164,9 +199,9 @@ async function execCompra(parsed, user) {
     notes: `Registro via BARON por ${user?.full_name || "Sistema"}`,
   });
 
-  await Core.audit({ audit_action: "create", module: "estoque", entity_type: "Product", entity_id: product.id, details: `Compra via BARON: +${qty} ${unit} ${product.name} | Custo: ${brl(newCost)} | Fornecedor: ${supplier} | Total: ${brl(totalAmount)} | Usuário: ${user?.full_name}` });
+  await Core.audit({ audit_action: "create", module: "estoque", entity_type: "Product", entity_id: product.id, details: `Compra via BARON: +${qty} ${purchaseUnit}${unitConverted ? ` → ${controlQty} ${controlUnit}` : ""} ${product.name} | Custo: ${brl(newCost)}/${controlUnit} | Fornecedor: ${supplier} | Total: ${brl(totalAmount)} | Usuário: ${user?.full_name}` });
 
-  return { type: "done", message: `✓ Compra registrada: ${qty} ${unit} ${product.name} - ${brl(totalAmount)}\n✓ Estoque atualizado: ${newQty} ${unit}\n✓ Custo médio atualizado: ${brl(newCost)}\n✓ Fornecedor: ${supplier}\n✓ CMV atualizado\n✓ Intelligence atualizado\n✓ Auditoria registrada` };
+  return { type: "done", message: `✓ Compra registrada: ${qty} ${purchaseUnit} ${product.name}${unitConverted ? ` → ${controlQty} ${controlUnit}` : ""} - ${brl(totalAmount)}\n✓ Estoque atualizado: ${newQty} ${controlUnit}\n✓ Custo médio atualizado: ${brl(newCost)}/${controlUnit}\n✓ Fornecedor: ${supplier}\n✓ CMV atualizado\n✓ Intelligence atualizado\n✓ Histórico registrado\n✓ Auditoria registrada` };
 }
 
 async function execPagamento(parsed, user) {
@@ -222,24 +257,28 @@ async function execPagamento(parsed, user) {
 async function execProducao(parsed, user) {
   const match = await findProduct(parsed.product_name);
   const productName = match?.product.name || parsed.product_name;
-  const qty = parsed.quantity || 0;
-  const unit = parsed.unit || "un";
+  const controlUnit = match ? (match.product.control_unit || match.product.unit || "UN").toUpperCase() : (parsed.unit || "UN").toUpperCase();
+  const qty = match ? convertQuantity(parsed.quantity || 0, (parsed.unit || controlUnit).toUpperCase(), controlUnit, match.product.unit_conversions) : (parsed.quantity || 0);
+  const unit = parsed.unit || controlUnit;
 
   await base44.entities.ProductionRecord.create({
     item: productName, product_id: match?.product.id,
-    produced_quantity: qty, planned_quantity: qty, unit,
+    produced_quantity: qty, planned_quantity: qty, unit: controlUnit,
     production_date: todayStr(), status: "concluida",
     responsible: user?.full_name || "Sistema", notes: "Registro via BARON",
   });
 
   if (match) {
     const newQty = (match.product.stock_quantity || 0) + qty;
-    await base44.entities.Product.update(match.product.id, { stock_quantity: newQty });
+    await base44.entities.Product.update(match.product.id, {
+      stock_quantity: newQty,
+      movement_history: [...(match.product.movement_history || []), { date: todayStr(), type: "producao", quantity: qty, unit: controlUnit, reason: "produção", user: user?.full_name }],
+    });
   }
 
-  await Core.audit({ audit_action: "create", module: "producao", entity_type: "ProductionRecord", details: `Produção via BARON: ${qty} ${unit} ${productName} | Usuário: ${user?.full_name}` });
+  await Core.audit({ audit_action: "create", module: "producao", entity_type: "ProductionRecord", details: `Produção via BARON: ${qty} ${controlUnit} ${productName} | Usuário: ${user?.full_name}` });
 
-  return { type: "done", message: `✓ Produção registrada: ${qty} ${unit} ${productName}\n✓ Estoque atualizado${match ? `: ${match.product.stock_quantity + qty} ${unit}` : ""}\n✓ Custos atualizados\n✓ Auditoria registrada` };
+  return { type: "done", message: `✓ Produção registrada: ${qty} ${controlUnit} ${productName}\n✓ Estoque atualizado${match ? `: ${match.product.stock_quantity + qty} ${controlUnit}` : ""}\n✓ Custos atualizados\n✓ Auditoria registrada` };
 }
 
 async function execBaixa(parsed, user) {
@@ -247,15 +286,19 @@ async function execBaixa(parsed, user) {
   if (!match) {
     return { type: "needs_info", message: `Não encontrei "${parsed.product_name}" no estoque. Abra o estoque para revisar.`, route: "/estoque", needsField: null };
   }
-  const qty = parsed.quantity || 0;
-  const unit = parsed.unit || "un";
-  const newQty = Math.max(0, (match.product.stock_quantity || 0) - qty);
+  const product = match.product;
+  const controlUnit = (product.control_unit || product.unit || "UN").toUpperCase();
+  const qty = convertQuantity(parsed.quantity || 0, (parsed.unit || controlUnit).toUpperCase(), controlUnit, product.unit_conversions);
+  const newQty = Math.max(0, (product.stock_quantity || 0) - qty);
 
-  await base44.entities.Product.update(match.product.id, { stock_quantity: newQty });
+  await base44.entities.Product.update(product.id, {
+    stock_quantity: newQty,
+    movement_history: [...(product.movement_history || []), { date: todayStr(), type: "baixa", quantity: qty, unit: controlUnit, reason: parsed.loss_reason || "não informado", user: user?.full_name }],
+  });
 
-  await Core.audit({ audit_action: "update", module: "estoque", entity_type: "Product", entity_id: match.product.id, details: `Baixa via BARON: -${qty} ${unit} ${match.product.name} | Motivo: ${parsed.loss_reason || "não informado"} | Usuário: ${user?.full_name}` });
+  await Core.audit({ audit_action: "update", module: "estoque", entity_type: "Product", entity_id: product.id, details: `Baixa via BARON: -${qty} ${controlUnit} ${product.name} | Motivo: ${parsed.loss_reason || "não informado"} | Usuário: ${user?.full_name}` });
 
-  return { type: "done", message: `✓ Baixa registrada: -${qty} ${unit} ${match.product.name}\n✓ Motivo: ${parsed.loss_reason || "não informado"}\n✓ Estoque atualizado: ${newQty} ${unit}\n✓ CMV atualizado\n✓ Histórico registrado` };
+  return { type: "done", message: `✓ Baixa registrada: -${qty} ${controlUnit} ${product.name}\n✓ Motivo: ${parsed.loss_reason || "não informado"}\n✓ Estoque atualizado: ${newQty} ${controlUnit}\n✓ CMV atualizado\n✓ Histórico registrado` };
 }
 
 async function execRH(parsed, user) {
