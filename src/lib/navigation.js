@@ -9,6 +9,7 @@ import {
   BarChart3,
   MessageCircle,
   Settings,
+  FileText,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -23,6 +24,12 @@ export const NAV_ITEMS = [
     icon: Wallet,
     path: "/financeiro",
     roles: ["administrador", "financeiro", "gerencia"],
+  },
+  {
+    label: "Documentos",
+    icon: FileText,
+    path: "/documentos-financeiros",
+    roles: ["administrador", "financeiro", "gerencia", "compras"],
   },
   {
     label: "Estoque",

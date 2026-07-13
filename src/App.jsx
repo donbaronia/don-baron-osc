@@ -20,6 +20,7 @@ import Producao from '@/pages/Producao';
 import CMV from '@/pages/CMV';
 import Compras from '@/pages/Compras';
 import Documentos from '@/pages/Documentos';
+import DocumentosFinanceiros from '@/pages/DocumentosFinanceiros';
 import Indicadores from '@/pages/Indicadores';
 import BaronAI from '@/pages/BaronAI';
 import Inteligencia from '@/pages/Inteligencia';
@@ -74,6 +75,7 @@ const AuthenticatedApp = () => {
         <Route path="/cmv" element={<CMV />} />
         <Route path="/compras" element={<Compras />} />
         <Route path="/documentos" element={<Documentos />} />
+        <Route path="/documentos-financeiros" element={<DocumentosFinanceiros />} />
         <Route path="/indicadores" element={<Indicadores />} />
         <Route path="/ia" element={<BaronAI />} />
         <Route path="/inteligencia" element={<Inteligencia />} />

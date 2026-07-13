@@ -89,7 +89,7 @@ export default function DocumentConfirmDialog({ open, onClose, document: doc, on
       await Core.audit({ audit_action: "confirm", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Confirmou: ${form.title || doc.title}` });
 
       if (isBoleto && form.value > 0) {
-        await base44.entities.Payment.create({
+        const payment = await base44.entities.Payment.create({
           description: `${form.supplier || "Documento"}${form.document_number ? ` - ${form.document_number}` : ""}`.trim(),
           supplier_name: form.supplier,
           amount: form.value,
@@ -99,10 +99,14 @@ export default function DocumentConfirmDialog({ open, onClose, document: doc, on
           pix_key: form.pix_copia_cola,
           barcode: form.codigo_barras,
           document_number: form.document_number,
+          document_id: doc.id,
           payment_method: form.category === "boleto" ? "boleto" : "pix",
           status: "pendente",
         });
-        await Core.audit({ audit_action: "create", module: "financeiro", entity_type: "Payment", details: `Conta a pagar via documento: ${formatBRL(form.value)} - ${form.supplier}` });
+        await base44.entities.DBDocument.update(doc.id, {
+          related_entities: [...(doc.related_entities || []), { entity_type: "Payment", entity_id: payment.id, entity_name: payment.description, relationship: "conta_a_pagar" }],
+        });
+        await Core.audit({ audit_action: "create", module: "financeiro", entity_type: "Payment", entity_id: payment.id, details: `Conta a pagar via documento: ${formatBRL(form.value)} - ${form.supplier} (doc: ${doc.id})` });
       }
 
       onConfirmed?.();
