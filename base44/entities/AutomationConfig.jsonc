@@ -1,0 +1,63 @@
+{
+  "name": "AutomationConfig",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "auto_approve_boletos": {
+      "type": "boolean",
+      "default": true,
+      "description": "Aprovar boletos automaticamente quando alta confianca"
+    },
+    "auto_create_accounts": {
+      "type": "boolean",
+      "default": true,
+      "description": "Criar contas a pagar automaticamente"
+    },
+    "auto_approve_nf_known_products": {
+      "type": "boolean",
+      "default": true,
+      "description": "Aprovar notas fiscais com produtos conhecidos"
+    },
+    "auto_update_stock": {
+      "type": "boolean",
+      "default": true,
+      "description": "Atualizar estoque automaticamente"
+    },
+    "auto_update_cmv": {
+      "type": "boolean",
+      "default": true,
+      "description": "Atualizar CMV automaticamente"
+    },
+    "learn_aliases": {
+      "type": "boolean",
+      "default": true,
+      "description": "Aprender equivalencias de produtos permanentemente"
+    },
+    "auto_create_suppliers": {
+      "type": "boolean",
+      "default": false,
+      "description": "Criar fornecedores automaticamente (risco - off por padr\u00e3o)"
+    },
+    "auto_create_products": {
+      "type": "boolean",
+      "default": false,
+      "description": "Criar produtos automaticamente (risco - off por padr\u00e3o)"
+    },
+    "min_confidence_auto_approve": {
+      "type": "number",
+      "default": 95,
+      "description": "Confianca minima para aprovacao automatica (0-100)"
+    },
+    "updated_by": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": []
+}

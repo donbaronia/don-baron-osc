@@ -12,24 +12,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Check, Download, Eye, X, CreditCard } from "lucide-react";
+import { Check, Download, Eye, X, CreditCard, Copy, QrCode } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+
 const PAYMENT_METHODS = [
   { v: "pix", l: "PIX" },
-  { v: "codigo_barras", l: "Código de Barras" },
-  { v: "transferencia", l: "Transferência" },
-  { v: "ted", l: "TED" },
+  { v: "boleto", l: "Código de Barras" },
+  { v: "transferencia", l: "TED / Transferência" },
+  { v: "cartao_credito", l: "Cartão de Crédito" },
+  { v: "cartao_debito", l: "Cartão de Débito" },
   { v: "dinheiro", l: "Dinheiro" },
-  { v: "cartao_credito", l: "Cartão" },
 ];
+
+const BANKS = ["Banco do Brasil", "Caixa", "Bradesco", "Itaú", "Santander", "Inter", "Nubank", "Mercado Pago", "Sicredi", "Sicoob", "Outro"];
+const ACCOUNTS = ["Conta Operacional", "Conta PJ", "Conta Caixa", "Conta Digital", "Outra"];
 
 export default function MarkAsPaidDialog({ open, onClose, payment, document: doc, onPaid }) {
   const { user } = useAuth();
   const [form, setForm] = useState({
     payment_method: "pix",
     bank: "",
+    account: "",
     payment_date: todayStr(),
     amount_paid: 0,
     notes: "",
@@ -41,6 +46,7 @@ export default function MarkAsPaidDialog({ open, onClose, payment, document: doc
       setForm({
         payment_method: payment.payment_method || "pix",
         bank: payment.bank || "",
+        account: payment.financial_account_name || "",
         payment_date: todayStr(),
         amount_paid: payment.amount || 0,
         notes: "",
@@ -52,23 +58,30 @@ export default function MarkAsPaidDialog({ open, onClose, payment, document: doc
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
+  const copyToClipboard = (text, label) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    toast({ title: `${label} copiado`, description: "Cole no app do banco para pagar." });
+  };
+
+  const pixCopiaCola = doc?.pix_copia_cola || payment?.pix_key || "";
+  const linhaDigitavel = doc?.linha_digitavel || payment?.barcode || "";
+
   const confirm = async () => {
-    if (form.payment_method === "pix" && !form.bank.trim()) {
-      return;
-    }
+    if (!form.bank.trim()) return;
+    if (!form.account.trim()) return;
     setSaving(true);
     try {
-      // 1. Atualizar Payment
       await base44.entities.Payment.update(payment.id, {
         status: "pago",
         payment_date: form.payment_date,
         payment_method: form.payment_method,
         bank: form.bank,
+        financial_account_name: form.account,
         notes: form.notes,
         version: (payment.version || 1) + 1,
       });
 
-      // 2. Criar transação no Fluxo de Caixa
       await base44.entities.FinancialTransaction.create({
         description: payment.description,
         type: "a_pagar",
@@ -79,16 +92,19 @@ export default function MarkAsPaidDialog({ open, onClose, payment, document: doc
         supplier: payment.supplier_name,
         supplier_id: payment.supplier_id,
         payment_method: form.payment_method,
+        account_name: form.account,
         document_id: payment.document_id,
         document_number: payment.document_number,
         origin: "compra",
-        notes: form.notes,
+        notes: `Banco: ${form.bank} | Conta: ${form.account}${form.notes ? " | " + form.notes : ""}`,
       });
 
-      // 3. Auditoria
-      await Core.audit({ audit_action: "confirm", module: "financeiro", entity_type: "Payment", entity_id: payment.id, details: `Pagou: ${payment.description} - ${brl(form.amount_paid)} via ${form.payment_method}` });
+      await Core.audit({
+        audit_action: "confirm", module: "financeiro", entity_type: "Payment", entity_id: payment.id,
+        details: `Pago: ${payment.description} - ${brl(form.amount_paid)} via ${form.payment_method} | Banco: ${form.bank} | Conta: ${form.account} | Usuário: ${user?.full_name}`,
+      });
       if (doc) {
-        await Core.audit({ audit_action: "update", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Documento pago: ${brl(form.amount_paid)}` });
+        await Core.audit({ audit_action: "update", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Documento pago: ${brl(form.amount_paid)} via ${form.payment_method}` });
       }
 
       baronHumor("boleto_pago");
@@ -96,6 +112,7 @@ export default function MarkAsPaidDialog({ open, onClose, payment, document: doc
       onClose();
     } catch (e) {
       console.error(e);
+      toast({ title: "Erro ao registrar pagamento", variant: "destructive" });
     }
     setSaving(false);
   };
@@ -111,7 +128,6 @@ export default function MarkAsPaidDialog({ open, onClose, payment, document: doc
         </DialogHeader>
 
         <div className="grid grid-cols-1 gap-4 py-2 sm:grid-cols-2">
-          {/* Documento original preview */}
           {doc && (
             <div className="sm:col-span-2 rounded-xl border border-border p-3">
               <div className="flex items-center gap-3">
@@ -138,6 +154,37 @@ export default function MarkAsPaidDialog({ open, onClose, payment, document: doc
             </div>
           )}
 
+          {/* Botões de copiar PIX / Linha Digitável */}
+          {(pixCopiaCola || linhaDigitavel) && (
+            <div className="sm:col-span-2 space-y-2">
+              {pixCopiaCola && (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <QrCode className="h-4 w-4 text-primary shrink-0" />
+                      <span className="text-xs font-medium text-primary shrink-0">PIX Copia e Cola</span>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => copyToClipboard(pixCopiaCola, "Código PIX")} className="h-7 gap-1 text-xs">
+                      <Copy className="h-3 w-3" /> Copiar
+                    </Button>
+                  </div>
+                  <p className="mt-1 truncate text-[10px] text-muted-foreground">{pixCopiaCola}</p>
+                </div>
+              )}
+              {linhaDigitavel && (
+                <div className="rounded-lg border border-border bg-secondary/30 p-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-medium">Linha Digitável</span>
+                    <Button size="sm" variant="outline" onClick={() => copyToClipboard(linhaDigitavel, "Linha digitável")} className="h-7 gap-1 text-xs">
+                      <Copy className="h-3 w-3" /> Copiar
+                    </Button>
+                  </div>
+                  <p className="mt-1 truncate text-[10px] text-muted-foreground">{linhaDigitavel}</p>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label className="text-xs">Forma de Pagamento</Label>
             <select className={SEL} value={form.payment_method} onChange={(e) => set("payment_method", e.target.value)}>
@@ -145,13 +192,18 @@ export default function MarkAsPaidDialog({ open, onClose, payment, document: doc
             </select>
           </div>
           <div className="space-y-2">
-            <Label className="text-xs">
-              Banco Utilizado {form.payment_method === "pix" && <span className="text-destructive">*</span>}
-            </Label>
-            <Input value={form.bank} onChange={(e) => set("bank", e.target.value)} placeholder="Ex: Banco do Brasil" />
-            {form.payment_method === "pix" && (
-              <p className="text-[10px] text-muted-foreground">Obrigatório para PIX — usado para rastreamento futuro</p>
-            )}
+            <Label className="text-xs">Banco Utilizado <span className="text-destructive">*</span></Label>
+            <select className={SEL} value={form.bank} onChange={(e) => set("bank", e.target.value)}>
+              <option value="">Selecione...</option>
+              {BANKS.map((b) => <option key={b} value={b}>{b}</option>)}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs">Conta Utilizada <span className="text-destructive">*</span></Label>
+            <select className={SEL} value={form.account} onChange={(e) => set("account", e.target.value)}>
+              <option value="">Selecione...</option>
+              {ACCOUNTS.map((a) => <option key={a} value={a}>{a}</option>)}
+            </select>
           </div>
           <div className="space-y-2">
             <Label className="text-xs">Data do Pagamento</Label>
@@ -171,7 +223,7 @@ export default function MarkAsPaidDialog({ open, onClose, payment, document: doc
           <Button variant="outline" onClick={onClose} className="gap-2">
             <X className="h-4 w-4" /> Cancelar
           </Button>
-          <Button onClick={confirm} disabled={saving || (form.payment_method === "pix" && !form.bank.trim())} className="gap-2">
+          <Button onClick={confirm} disabled={saving || !form.bank.trim() || !form.account.trim()} className="gap-2">
             {saving ? "Registrando..." : <><Check className="h-4 w-4" /> Confirmar Pagamento</>}
           </Button>
         </DialogFooter>
