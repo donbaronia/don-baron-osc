@@ -10,8 +10,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { Plus, Check, Pencil, Ban } from "lucide-react";
+import { Plus, Check, Pencil, Ban, FileText, ExternalLink, Eye } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
+import { isImageFile, isPDFFile, getCategoryEmoji } from "@/lib/documentUtils";
+import MarkAsPaidDialog from "@/components/documentos/MarkAsPaidDialog";
 
 const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 const METHODS = [
@@ -30,14 +32,28 @@ export default function ContasPagar() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
+  const [docMap, setDocMap] = useState({});
+  const [paidDialog, setPaidDialog] = useState({ open: false, payment: null, doc: null });
 
   const load = async () => {
     setLoading(true);
-    try { setRows(await base44.entities.Payment.list("-due_date", 300)); }
-    catch { toast({ title: "Erro", description: "Falha ao carregar", variant: "destructive" }); }
+    try {
+      const [payments, docs] = await Promise.all([
+        base44.entities.Payment.list("-due_date", 300),
+        base44.entities.DBDocument.filter({ category: { $in: ["boleto", "comprovante_pix", "nota_fiscal", "recibo"] } }, "-created_date", 200),
+      ]);
+      setRows(payments);
+      const map = {};
+      docs.forEach(d => { if (d.id) map[d.id] = d; });
+      // também indexa por payment.document_id
+      payments.forEach(p => { if (p.document_id && map[p.document_id]) { /* ok */ } });
+      setDocMap(map);
+    } catch { toast({ title: "Erro", description: "Falha ao carregar", variant: "destructive" }); }
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
+
+  const getDocFor = (r) => (r.document_id && docMap[r.document_id]) || null;
 
   const filtered = rows.filter(r => (tab === "todos" || r.status === tab) && (!search || (r.description || "").toLowerCase().includes(search.toLowerCase()) || (r.supplier_name || "").toLowerCase().includes(search.toLowerCase())));
 
@@ -61,12 +77,12 @@ export default function ContasPagar() {
     setSaving(false);
   };
 
-  const markPaid = async (r) => {
-    try {
-      await base44.entities.Payment.update(r.id, { status: "pago", payment_date: todayStr() });
-      await Core.audit({ audit_action: "confirm", module: "financeiro", entity_type: "Payment", entity_id: r.id, details: `Pagou: ${r.description} - ${brl(r.amount)}` });
-      toast({ title: "Pago!", description: r.description }); load();
-    } catch { toast({ title: "Erro", variant: "destructive" }); }
+  const openPaidDialog = (r) => {
+    setPaidDialog({ open: true, payment: r, doc: getDocFor(r) });
+  };
+  const onPaid = () => {
+    setPaidDialog({ open: false, payment: null, doc: null });
+    load();
   };
 
   const cancel = async (r) => {
@@ -84,10 +100,22 @@ export default function ContasPagar() {
     { key: "amount", label: "Valor", render: r => <span className="font-medium">{brl(r.amount)}</span> },
     { key: "due_date", label: "Vencimento", render: r => r.due_date ? new Date(r.due_date).toLocaleDateString("pt-BR") : "—" },
     { key: "payment_method", label: "Forma", render: r => (r.payment_method || "").replace(/_/g, " ") },
+    { key: "doc", label: "Boleto", render: r => {
+      const doc = getDocFor(r);
+      if (!doc && !r.attachment_url) return <span className="text-muted-foreground text-xs">—</span>;
+      const url = doc?.file_url || r.attachment_url;
+      return (
+        <a href={url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs font-medium text-primary hover:bg-secondary transition-colors" title="Abrir documento em nova aba">
+          {isImageFile(doc?.file_type, url) ? <Eye className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}
+          <span className="max-w-[80px] truncate">{doc?.title || "Ver boleto"}</span>
+          <ExternalLink className="h-3 w-3 opacity-60" />
+        </a>
+      );
+    }},
     { key: "status", label: "Status", render: r => <StatusBadge status={r.status} /> },
     { key: "actions", label: "", render: r => (
       <div className="flex items-center gap-1">
-        {r.status === "pendente" && <Button variant="ghost" size="icon" onClick={() => markPaid(r)} title="Marcar pago"><Check className="h-4 w-4 text-emerald-600" /></Button>}
+        {r.status === "pendente" && <Button variant="ghost" size="icon" onClick={() => openPaidDialog(r)} title="Marcar pago"><Check className="h-4 w-4 text-emerald-600" /></Button>}
         <Button variant="ghost" size="icon" onClick={() => openEdit(r)}><Pencil className="h-4 w-4" /></Button>
         {r.status === "pendente" && <Button variant="ghost" size="icon" onClick={() => cancel(r)}><Ban className="h-4 w-4 text-rose-600" /></Button>}
       </div>
@@ -130,6 +158,14 @@ export default function ContasPagar() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <MarkAsPaidDialog
+        open={paidDialog.open}
+        onClose={() => setPaidDialog({ open: false, payment: null, doc: null })}
+        payment={paidDialog.payment}
+        document={paidDialog.doc}
+        onPaid={onPaid}
+      />
     </div>
   );
 }

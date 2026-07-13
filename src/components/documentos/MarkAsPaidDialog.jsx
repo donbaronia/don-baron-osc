@@ -53,6 +53,9 @@ export default function MarkAsPaidDialog({ open, onClose, payment, document: doc
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const confirm = async () => {
+    if (form.payment_method === "pix" && !form.bank.trim()) {
+      return;
+    }
     setSaving(true);
     try {
       // 1. Atualizar Payment
@@ -142,8 +145,13 @@ export default function MarkAsPaidDialog({ open, onClose, payment, document: doc
             </select>
           </div>
           <div className="space-y-2">
-            <Label className="text-xs">Banco Utilizado</Label>
+            <Label className="text-xs">
+              Banco Utilizado {form.payment_method === "pix" && <span className="text-destructive">*</span>}
+            </Label>
             <Input value={form.bank} onChange={(e) => set("bank", e.target.value)} placeholder="Ex: Banco do Brasil" />
+            {form.payment_method === "pix" && (
+              <p className="text-[10px] text-muted-foreground">Obrigatório para PIX — usado para rastreamento futuro</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label className="text-xs">Data do Pagamento</Label>
@@ -163,7 +171,7 @@ export default function MarkAsPaidDialog({ open, onClose, payment, document: doc
           <Button variant="outline" onClick={onClose} className="gap-2">
             <X className="h-4 w-4" /> Cancelar
           </Button>
-          <Button onClick={confirm} disabled={saving} className="gap-2">
+          <Button onClick={confirm} disabled={saving || (form.payment_method === "pix" && !form.bank.trim())} className="gap-2">
             {saving ? "Registrando..." : <><Check className="h-4 w-4" /> Confirmar Pagamento</>}
           </Button>
         </DialogFooter>
