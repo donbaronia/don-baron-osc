@@ -113,11 +113,32 @@ export default function BaronChat() {
     recognition.start();
   };
 
-  const handleFile = (e) => {
+  const handleFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setResponse({ message: `Arquivo "${file.name}" recebido. Processando...`, route: null });
     e.target.value = "";
+    setLoading(true);
+    setResponse(null);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.DBDocument.create({
+        title: file.name,
+        file_url,
+        file_type: file.type || "unknown",
+        source: "upload",
+        status: "recebido",
+        sent_at: new Date().toISOString(),
+      });
+      setResponse({
+        message: `Documento "${file.name}" recebido e enviado para a Central de Processamento. A IA vai identificar, classificar e encaminhar automaticamente.`,
+        route: "/processamento",
+      });
+      setTimeout(() => navigate("/processamento"), 2000);
+    } catch {
+      setResponse({ message: "Não consegui enviar o documento. Tente pela Central de Documentos.", route: "/processamento" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
