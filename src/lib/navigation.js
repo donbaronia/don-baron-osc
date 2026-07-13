@@ -10,6 +10,7 @@ import {
   MessageCircle,
   Settings,
   FileText,
+  Zap,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -24,6 +25,12 @@ export const NAV_ITEMS = [
     icon: Wallet,
     path: "/financeiro",
     roles: ["administrador", "financeiro", "gerencia"],
+  },
+  {
+    label: "Processar Documento",
+    icon: Zap,
+    path: "/processamento",
+    roles: ["administrador", "financeiro", "gerencia", "compras", "estoque"],
   },
   {
     label: "Documentos",

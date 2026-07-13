@@ -127,6 +127,13 @@
         "type": "string"
       }
     },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Nomes alternativos aprendidos pela IA (ex: CHEDAR FATIADO -> Queijo Cheddar Fatiado)"
+    },
     "stock_quantity": {
       "type": "number",
       "default": 0
