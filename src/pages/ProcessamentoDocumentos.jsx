@@ -65,6 +65,16 @@ export default function ProcessamentoDocumentos() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Sincroniza drawerDoc com dados atualizados após reload
+  useEffect(() => {
+    if (drawerDoc && documents.length > 0) {
+      const updated = documents.find((d) => d.id === drawerDoc.id);
+      if (updated && updated.status !== drawerDoc.status) {
+        setDrawerDoc(updated);
+      }
+    }
+  }, [documents]);
+
   const recent = documents.slice(0, 12);
   const tierCounts = documents.reduce((acc, d) => {
     const t = getApprovalStatus(d).tier;

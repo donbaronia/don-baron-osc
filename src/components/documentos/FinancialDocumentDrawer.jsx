@@ -8,6 +8,7 @@ import {
 } from "@/lib/documentUtils";
 import { compareDocumentVsPayment, getDueAlert } from "@/lib/documentConferencia";
 import StatusBadge from "@/components/shared/StatusBadge";
+import DocumentReviewActions from "@/components/documentos/DocumentReviewActions";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
@@ -28,14 +29,26 @@ export default function FinancialDocumentDrawer({ open, onClose, document: doc, 
   const [savingNotes, setSavingNotes] = useState(false);
   const [payment, setPayment] = useState(null);
   const [loadingPayment, setLoadingPayment] = useState(false);
+  const [liveDoc, setLiveDoc] = useState(doc);
 
   useEffect(() => {
+    setLiveDoc(doc);
     if (open && doc) {
       setAnnotations(doc.annotations || "");
       setZoom(1);
       loadPayment(doc);
     }
   }, [open, doc]);
+
+  const reloadDoc = async () => {
+    if (!doc?.id) return;
+    try {
+      const updated = await base44.entities.DBDocument.get(doc.id);
+      setLiveDoc(updated);
+      setAnnotations(updated.annotations || "");
+      loadPayment(updated);
+    } catch { /* ignore */ }
+  };
 
   const loadPayment = async (d) => {
     if (!d) return;
@@ -50,9 +63,10 @@ export default function FinancialDocumentDrawer({ open, onClose, document: doc, 
   };
 
   if (!doc) return null;
+  const d = liveDoc || doc;
 
-  const conferencia = compareDocumentVsPayment(doc, payment);
-  const dueAlert = getDueAlert(doc.due_date);
+  const conferencia = compareDocumentVsPayment(d, payment);
+  const dueAlert = getDueAlert(d.due_date);
 
   const saveAnnotations = async () => {
     setSavingNotes(true);
@@ -63,12 +77,13 @@ export default function FinancialDocumentDrawer({ open, onClose, document: doc, 
     });
     await Core.audit({ audit_action: "update", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: "Anotação atualizada" });
     setSavingNotes(false);
+    reloadDoc();
   };
 
   const linkToPayment = async (paymentId) => {
     await base44.entities.Payment.update(paymentId, { document_id: doc.id });
     await Core.audit({ audit_action: "update", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Vinculado ao pagamento ${paymentId}` });
-    loadPayment(doc);
+    reloadDoc();
     onLinked?.();
   };
 
@@ -77,27 +92,28 @@ export default function FinancialDocumentDrawer({ open, onClose, document: doc, 
     await base44.entities.Payment.update(payment.id, { document_id: null });
     await Core.audit({ audit_action: "update", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Desvinculado do pagamento ${payment.id}` });
     setPayment(null);
+    reloadDoc();
     onLinked?.();
   };
 
   const auditRows = [
-    { label: "Anexado por", value: doc.sent_by, date: doc.sent_at, icon: FileText },
-    { label: "Conferido por", value: doc.confirmed_by, date: doc.confirmed_at, icon: CheckCircle2 },
-    { label: "Editado por", value: doc.edited_by, date: doc.edited_at, icon: User },
-    { label: "Rejeitado por", value: doc.rejected_by, date: null, icon: XCircle },
+    { label: "Anexado por", value: d.sent_by, date: d.sent_at, icon: FileText },
+    { label: "Conferido por", value: d.confirmed_by, date: d.confirmed_at, icon: CheckCircle2 },
+    { label: "Editado por", value: d.edited_by, date: d.edited_at, icon: User },
+    { label: "Rejeitado por", value: d.rejected_by, date: null, icon: XCircle },
     { label: "Pago por", value: payment?.status === "pago" ? user?.full_name : null, date: payment?.payment_date, icon: CreditCard },
   ].filter((r) => r.value);
 
-  const alerts = doc.alerts || [];
+  const alerts = d.alerts || [];
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
       <SheetContent side="right" className="w-full sm:max-w-5xl p-0 flex flex-col">
         <SheetHeader className="border-b border-border px-6 py-4 shrink-0">
           <SheetTitle className="flex items-center gap-2">
-            <span className="text-lg">{getCategoryEmoji(doc.category)}</span>
-            <span className="truncate">{doc.title}</span>
-            <StatusBadge status={doc.status} />
+            <span className="text-lg">{getCategoryEmoji(d.category)}</span>
+            <span className="truncate">{d.title}</span>
+            <StatusBadge status={d.status} />
           </SheetTitle>
         </SheetHeader>
 
@@ -110,21 +126,21 @@ export default function FinancialDocumentDrawer({ open, onClose, document: doc, 
                 <button onClick={() => setZoom((z) => Math.max(0.5, z - 0.25))} className="rounded-md p-1.5 text-muted-foreground hover:bg-secondary"><ZoomOut className="h-4 w-4" /></button>
                 <span className="w-10 text-center text-xs text-muted-foreground">{Math.round(zoom * 100)}%</span>
                 <button onClick={() => setZoom((z) => Math.min(3, z + 0.25))} className="rounded-md p-1.5 text-muted-foreground hover:bg-secondary"><ZoomIn className="h-4 w-4" /></button>
-                <a href={doc.file_url} target="_blank" rel="noreferrer" download className="ml-2 inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-foreground hover:bg-secondary">
+                <a href={d.file_url} target="_blank" rel="noreferrer" download className="ml-2 inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-foreground hover:bg-secondary">
                   <Download className="h-3.5 w-3.5" /> Baixar
                 </a>
               </div>
             </div>
             <div className="flex flex-1 items-center justify-center overflow-auto rounded-xl border border-border bg-background p-2">
-              {isImageFile(doc.file_type, doc.file_url) ? (
-                <img src={doc.file_url} alt={doc.title} style={{ transform: `scale(${zoom})`, transformOrigin: "center" }} className="max-h-full max-w-full object-contain transition-transform" />
-              ) : isPDFFile(doc.file_type, doc.file_url) ? (
-                <iframe src={doc.file_url} title={doc.title} className="h-full w-full" style={{ minHeight: "400px" }} />
+              {isImageFile(d.file_type, d.file_url) ? (
+                <img src={d.file_url} alt={d.title} style={{ transform: `scale(${zoom})`, transformOrigin: "center" }} className="max-h-full max-w-full object-contain transition-transform" />
+              ) : isPDFFile(d.file_type, d.file_url) ? (
+                <iframe src={d.file_url} title={d.title} className="h-full w-full" style={{ minHeight: "400px" }} />
               ) : (
                 <div className="flex flex-col items-center gap-2 py-12 text-muted-foreground">
                   <FileText className="h-10 w-10" />
                   <p className="text-sm">Pré-visualização não disponível</p>
-                  <a href={doc.file_url} target="_blank" rel="noreferrer" className="text-sm font-medium text-primary hover:underline">Abrir arquivo original</a>
+                  <a href={d.file_url} target="_blank" rel="noreferrer" className="text-sm font-medium text-primary hover:underline">Abrir arquivo original</a>
                 </div>
               )}
             </div>
@@ -156,20 +172,26 @@ export default function FinancialDocumentDrawer({ open, onClose, document: doc, 
               </div>
             )}
 
+            {/* Ações de Revisão — Aprovar / Editar / Reprocessar / Rejeitar */}
+            <DocumentReviewActions
+              doc={d}
+              onAction={() => { reloadDoc(); onLinked?.(); }}
+            />
+
             {/* Dados extraídos */}
             <div>
               <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Dados Extraídos (OCR + IA)</p>
               <div className="grid grid-cols-2 gap-3 rounded-xl border border-border p-3">
-                <div><p className="text-[10px] uppercase text-muted-foreground">Categoria</p><p className="text-sm font-medium">{getCategoryEmoji(doc.category)} {getCategoryLabel(doc.category)}</p></div>
-                <div><p className="text-[10px] uppercase text-muted-foreground">Valor</p><p className="text-sm font-semibold">{doc.value ? formatBRL(doc.value) : "—"}</p></div>
-                <div><p className="text-[10px] uppercase text-muted-foreground">Fornecedor</p><p className="text-sm">{doc.supplier || "—"}</p></div>
-                <div><p className="text-[10px] uppercase text-muted-foreground">CNPJ</p><p className="text-sm">{doc.cnpj || "—"}</p></div>
-                <div><p className="text-[10px] uppercase text-muted-foreground">Nº Documento</p><p className="text-sm">{doc.document_number || "—"}</p></div>
-                <div><p className="text-[10px] uppercase text-muted-foreground">Vencimento</p><p className="text-sm">{formatDate(doc.due_date)}</p></div>
-                {doc.bank && <div><p className="text-[10px] uppercase text-muted-foreground">Banco</p><p className="text-sm">{doc.bank}</p></div>}
-                {doc.beneficiario && <div><p className="text-[10px] uppercase text-muted-foreground">Beneficiário</p><p className="text-sm">{doc.beneficiario}</p></div>}
-                {doc.linha_digitavel && <div className="col-span-2"><p className="text-[10px] uppercase text-muted-foreground">Linha Digitável</p><p className="text-xs font-mono break-all">{doc.linha_digitavel}</p></div>}
-                {doc.pix_copia_cola && <div className="col-span-2"><p className="text-[10px] uppercase text-muted-foreground">PIX Copia e Cola</p><p className="text-xs font-mono break-all">{doc.pix_copia_cola}</p></div>}
+                <div><p className="text-[10px] uppercase text-muted-foreground">Categoria</p><p className="text-sm font-medium">{getCategoryEmoji(d.category)} {getCategoryLabel(d.category)}</p></div>
+                <div><p className="text-[10px] uppercase text-muted-foreground">Valor</p><p className="text-sm font-semibold">{d.value ? formatBRL(d.value) : "—"}</p></div>
+                <div><p className="text-[10px] uppercase text-muted-foreground">Fornecedor</p><p className="text-sm">{d.supplier || "—"}</p></div>
+                <div><p className="text-[10px] uppercase text-muted-foreground">CNPJ</p><p className="text-sm">{d.cnpj || "—"}</p></div>
+                <div><p className="text-[10px] uppercase text-muted-foreground">Nº Documento</p><p className="text-sm">{d.document_number || "—"}</p></div>
+                <div><p className="text-[10px] uppercase text-muted-foreground">Vencimento</p><p className="text-sm">{formatDate(d.due_date)}</p></div>
+                {d.bank && <div><p className="text-[10px] uppercase text-muted-foreground">Banco</p><p className="text-sm">{d.bank}</p></div>}
+                {d.beneficiario && <div><p className="text-[10px] uppercase text-muted-foreground">Beneficiário</p><p className="text-sm">{d.beneficiario}</p></div>}
+                {d.linha_digitavel && <div className="col-span-2"><p className="text-[10px] uppercase text-muted-foreground">Linha Digitável</p><p className="text-xs font-mono break-all">{d.linha_digitavel}</p></div>}
+                {d.pix_copia_cola && <div className="col-span-2"><p className="text-[10px] uppercase text-muted-foreground">PIX Copia e Cola</p><p className="text-xs font-mono break-all">{d.pix_copia_cola}</p></div>}
               </div>
             </div>
 
@@ -250,7 +272,7 @@ export default function FinancialDocumentDrawer({ open, onClose, document: doc, 
                 })}
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="h-3.5 w-3.5" />
-                  <span>Recebido em {formatDateTime(doc.sent_at || doc.created_date)}</span>
+                  <span>Recebido em {formatDateTime(d.sent_at || d.created_date)}</span>
                 </div>
               </div>
             </div>

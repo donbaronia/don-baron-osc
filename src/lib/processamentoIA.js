@@ -292,9 +292,24 @@ export async function processDocument(file, user) {
     sent_at: new Date().toISOString(),
   });
 
-  // 3. IA extrai
-  const extracted = await analyzeDocument(file_url);
-  const mapped = mapExtractedToDocument(extracted);
+  // 3. IA extrai (com fallback — jamais deixar em "em_analise" para sempre)
+  let extracted, mapped;
+  try {
+    extracted = await analyzeDocument(file_url);
+    mapped = mapExtractedToDocument(extracted);
+  } catch (iaError) {
+    await base44.entities.DBDocument.update(doc.id, {
+      status: "aguardando_confirmacao",
+      alerts: [{ type: "ilegivel", severity: "urgent", message: "IA não conseguiu extrair dados — documento pode estar ilegível. Edite manualmente ou reprocesse." }],
+    });
+    await Core.audit({ audit_action: "update", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Falha na extração IA: ${iaError.message}` });
+    return {
+      doc: { ...doc, id: doc.id, status: "aguardando_confirmacao", alerts: [{ type: "ilegivel", severity: "urgent", message: "IA não conseguiu extrair dados" }] },
+      extracted: null,
+      route: { routed: "pendencia", auto: false, divergencias: [{ type: "ilegivel", severity: "critica", message: "Documento ilegível ou extração falhou" }], alerts: [{ type: "ilegivel", severity: "urgent", message: "IA não conseguiu extrair dados" }] },
+      duplicate: null,
+    };
+  }
   const title = mapped.supplier
     ? `${mapped.supplier}${mapped.document_date ? ` - ${mapped.document_date}` : ""}`
     : file.name;
@@ -321,9 +336,12 @@ export async function processDocument(file, user) {
   } else if (NF_TYPES.includes(docType)) {
     route = await processarNotaFiscal(fullDoc, mapped, user);
   } else {
-    // Outros documentos — apenas armazenar
-    await base44.entities.DBDocument.update(doc.id, { status: "aguardando_confirmacao" });
-    route = { routed: "documento", auto: false, divergencias: [], alerts: [] };
+    // Outros documentos — armazenar com alerta para revisão manual
+    await base44.entities.DBDocument.update(doc.id, {
+      status: "aguardando_confirmacao",
+      alerts: [{ type: "manual_review", severity: "warning", message: "Documento sem roteamento automático — revise e aprove manualmente" }],
+    });
+    route = { routed: "documento", auto: false, divergencias: [{ type: "manual_review", severity: "media", message: "Tipo não roteado automaticamente" }], alerts: [{ type: "manual_review", severity: "warning", message: "Documento sem roteamento automático" }] };
   }
 
   return { doc: { ...fullDoc, ...route }, extracted, route, duplicate };
