@@ -97,7 +97,7 @@ export function getGreeting(user) {
   const role = user?.role || "user";
   const isBoss = ["administrador", "admin", "gerencia", "gerente"].includes(role);
 
-  if (isBoss && hour < 12) {
+  if (isBoss) {
     return {
       period,
       firstName,
