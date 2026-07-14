@@ -1,0 +1,161 @@
+{
+  "name": "EnterpriseProcess",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant: empresa proprietaria"
+    },
+    "process_code": {
+      "type": "string",
+      "description": "ID unico sequencial do comando (PRC-AAAA-NNNNNNNNN). Obrigatorio para toda operacao."
+    },
+    "command": {
+      "type": "string",
+      "description": "Comando natural recebido pelo Baron (texto bruto)"
+    },
+    "intent": {
+      "type": "string",
+      "description": "Intent classificada pelo IntentEngine (stock_entry, payment, production, etc)"
+    },
+    "module": {
+      "type": "string",
+      "enum": [
+        "estoque",
+        "financeiro",
+        "dre",
+        "cmv",
+        "compras",
+        "producao",
+        "rh",
+        "motoboys",
+        "documentos",
+        "ia",
+        "dashboard",
+        "geral"
+      ],
+      "default": "geral",
+      "description": "Modulo de destino do comando. Todos os modulos usam o mesmo motor."
+    },
+    "current_state": {
+      "type": "string",
+      "enum": [
+        "RECEBIDO",
+        "VALIDANDO",
+        "OCR",
+        "PROCESSANDO",
+        "AGUARDANDO_APROVACAO",
+        "AGUARDANDO_CADASTRO",
+        "EXECUTANDO",
+        "REPROCESSANDO",
+        "CONCLUIDO",
+        "ERRO",
+        "CANCELADO"
+      ],
+      "default": "RECEBIDO",
+      "description": "Estado persistente da maquina de estados. Gravado a cada transicao."
+    },
+    "previous_state": {
+      "type": "string",
+      "description": "Estado anterior (para retomada sem reinicio)"
+    },
+    "context": {
+      "type": "object",
+      "description": "Dados persistentes do fluxo: { parsed, entities, file_url, needs_field, result_parcial }"
+    },
+    "results": {
+      "type": "object",
+      "description": "Resultados das etapas: { executed, read_back, message, route, filter, data }"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Etapas persistentes. Cada etapa: { id, date, time, duration_ms, user, ai_agent, module, state, status, error, attempts, next_step, reason }"
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Auditoria por transicao de estado: [{ state, previous_state, timestamp, actor, duration_ms, reason, errors, retry_count }]"
+    },
+    "pending": {
+      "type": "object",
+      "description": "Pendencia atual (AGUARDANDO_*): { type, reason, field, product_name, requested_by, requested_at, resolved_by, resolved_at }"
+    },
+    "next_step": {
+      "type": "string",
+      "description": "Descricao da proxima etapa"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "ia_agent": {
+      "type": "string",
+      "default": "BARON IA",
+      "description": "IA responsavel pela execucao da etapa"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "baixa",
+        "media",
+        "alta",
+        "critica"
+      ],
+      "default": "media"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "processing_time_ms": {
+      "type": "number",
+      "default": 0
+    },
+    "retry_count": {
+      "type": "number",
+      "default": 0
+    },
+    "max_retries": {
+      "type": "number",
+      "default": 3
+    },
+    "recovery_attempts": {
+      "type": "number",
+      "default": 0
+    },
+    "last_recovered_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "pausado",
+        "concluido",
+        "erro",
+        "cancelado"
+      ],
+      "default": "ativo"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "process_code",
+    "current_state"
+  ]
+}
