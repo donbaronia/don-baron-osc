@@ -5,43 +5,38 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   Database, RefreshCw, CheckCircle2, XCircle, AlertTriangle,
-  Activity, Clock, FileText, Loader2, ChevronDown, ChevronUp
+  Activity, Clock, FileText, Loader2, ChevronDown, ChevronUp,
+  Table, Link2, Shield, AlertCircle
 } from "lucide-react";
 
-const STATUS_CONFIG = {
+const STATUS_CFG = {
   ok: { icon: CheckCircle2, color: "text-baron-success", bg: "bg-baron-success/10", label: "OK" },
   error: { icon: XCircle, color: "text-baron-error", bg: "bg-baron-error/10", label: "Erro" },
-  mismatch: { icon: AlertTriangle, color: "text-baron-alert", bg: "bg-baron-alert/10", label: "Divergência" },
   warning: { icon: AlertTriangle, color: "text-baron-alert", bg: "bg-baron-alert/10", label: "Atenção" },
   critical: { icon: XCircle, color: "text-baron-error", bg: "bg-baron-error/10", label: "Crítico" },
 };
 
-const MODULE_LABELS = {
-  Product: "Produtos", Stock: "Estoque", Inventory: "Inventário", Movement: "Movimentações",
-  Purchase: "Compras", PurchaseRequest: "Requisições", Quotation: "Cotações",
-  ProductionRecord: "Produção", Recipe: "Receitas", Payment: "Boletos/Pagamentos",
-  FinancialTransaction: "Financeiro", DBDocument: "Documentos", Employee: "Funcionários",
-  Courier: "Motoboys", Sale: "Vendas/Pedidos", Customer: "Clientes", Supplier: "Fornecedores",
-  AuditLog: "Auditoria", Mission: "Missões", Category: "Categorias", Tag: "Tags",
-  CMVRecord: "CMV", PriceHistory: "Histórico Preços", FinancialAccount: "Contas Financeiras",
-  CostCenter: "Centros de Custo", FinancialCategory: "Categorias Financeiras",
-  Ingredient: "Ingredientes", Indicator: "Indicadores", Notification: "Notificações",
-  Conciliation: "Conciliação", KPIRecord: "KPIs", IFoodReceipt: "Recibos iFood"
+const MODULE_ICONS = {
+  "Produtos": "📦", "Estoque": "📊", "Movimentações": "🔄", "Compras": "🛒",
+  "Produção": "🏭", "Receitas": "📖", "Boletos": "💳", "Financeiro": "💰",
+  "Contas a Receber": "📥", "Fornecedores": "🚚", "Documentos": "📄",
+  "Clientes": "👤", "Motoboys": "🛵", "Pedidos": "📋", "RH": "👷", "Intelligence": "🧠"
 };
 
 export default function SaudeSistema() {
   const { user } = useAuth();
-  const [diagnostic, setDiagnostic] = useState(null);
+  const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [expandedEntity, setExpandedEntity] = useState(null);
+  const [expandedModule, setExpandedModule] = useState(null);
+  const [showAllTables, setShowAllTables] = useState(false);
 
   const runDiagnostic = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const res = await base44.functions.invoke("systemDiagnostic", {});
-      setDiagnostic(res.data);
+      setReport(res.data);
     } catch (e) {
       setError(e.message || "Falha ao executar diagnóstico");
     } finally {
@@ -51,9 +46,10 @@ export default function SaudeSistema() {
 
   useEffect(() => { runDiagnostic(); }, [runDiagnostic]);
 
-  const overall = diagnostic?.overallStatus || "unknown";
-  const overallCfg = STATUS_CONFIG[overall] || STATUS_CONFIG.warning;
+  const overall = report?.overallStatus || "unknown";
+  const overallCfg = STATUS_CFG[overall] || STATUS_CFG.warning;
   const OverallIcon = overallCfg.icon;
+  const s = report?.summary;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
@@ -64,23 +60,21 @@ export default function SaudeSistema() {
             <Database className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground">Saúde do Sistema</h1>
-            <p className="text-xs text-muted-foreground">
-              Diagnóstico de persistência — {user?.full_name || user?.email}
-            </p>
+            <h1 className="text-xl font-bold text-foreground">🔧 Diagnóstico do Sistema</h1>
+            <p className="text-xs text-muted-foreground">Auditoria completa de persistência — {user?.full_name || user?.email}</p>
           </div>
         </div>
         <Button onClick={runDiagnostic} disabled={loading} variant="outline" size="sm" className="gap-2">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-          {loading ? "Diagnosticando..." : "Reexecutar"}
+          {loading ? "Executando..." : "Executar Diagnóstico"}
         </Button>
       </div>
 
-      {loading && !diagnostic ? (
+      {loading && !report ? (
         <Card className="p-8 text-center">
           <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Executando testes de persistência em todas as entidades...</p>
-          <p className="mt-1 text-xs text-muted-foreground">Criando, lendo, verificando e excluindo registros de teste.</p>
+          <p className="text-sm text-muted-foreground">Executando bateria de testes em todos os módulos...</p>
+          <p className="mt-1 text-xs text-muted-foreground">CRUD completo: criar → ler → atualizar → ler → excluir → confirmar</p>
         </Card>
       ) : error ? (
         <Card className="p-6 border-baron-error/30 bg-baron-error/5">
@@ -92,7 +86,7 @@ export default function SaudeSistema() {
             </div>
           </div>
         </Card>
-      ) : diagnostic ? (
+      ) : report ? (
         <>
           {/* Status Geral */}
           <Card className={`mb-4 p-5 ${overallCfg.bg} border-0`}>
@@ -101,18 +95,16 @@ export default function SaudeSistema() {
                 <OverallIcon className={`h-8 w-8 ${overallCfg.color}`} />
                 <div>
                   <p className="text-lg font-bold text-foreground">
-                    {overall === "ok" ? "Sistema Operacional" : overall === "warning" ? "Atenção Necessária" : "Sistema Crítico"}
+                    {overall === "ok" ? "Sistema Operacional — 100% Persistente" : overall === "warning" ? "Atenção Necessária" : "Sistema Crítico"}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {diagnostic.summary.writeOk}/{diagnostic.summary.writeTested} escritas OK ·
-                    {" "}{diagnostic.summary.readOk}/{diagnostic.summary.totalEntities} leituras OK ·
-                    {" "}{diagnostic.summary.totalErrors} erro(s)
+                    {s?.modulesPassed}/{s?.modulesTested} módulos OK · {s?.totalTables} tabelas · {s?.totalRecords} registros · {s?.totalErrors} erro(s)
                   </p>
                 </div>
               </div>
               <div className="text-right text-xs text-muted-foreground">
-                <p>{new Date(diagnostic.timestamp).toLocaleString("pt-BR")}</p>
-                <p className="flex items-center justify-end gap-1 mt-1">
+                <p>{new Date(report.timestamp).toLocaleString("pt-BR")}</p>
+                <p className="mt-1 flex items-center justify-end gap-1">
                   <Database className="h-3 w-3 text-baron-success" /> Banco conectado
                 </p>
               </div>
@@ -121,50 +113,49 @@ export default function SaudeSistema() {
 
           {/* Métricas */}
           <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <MetricCard icon={Clock} label="Tempo médio escrita" value={`${diagnostic.summary.avgWriteTimeMs}ms`} />
-            <MetricCard icon={Activity} label="Tempo médio leitura" value={`${diagnostic.summary.avgReadTimeMs}ms`} />
-            <MetricCard icon={CheckCircle2} label="Escritas confirmadas" value={`${diagnostic.summary.writeOk}/${diagnostic.summary.writeTested}`} />
-            <MetricCard icon={FileText} label="Total registros" value={diagnostic.readResults.reduce((a, r) => a + (r.recordCount || 0), 0)} />
+            <MetricCard icon={Clock} label="Tempo médio CRUD" value={`${s?.avgCrudTimeMs || 0}ms`} />
+            <MetricCard icon={CheckCircle2} label="Módulos aprovados" value={`${s?.modulesPassed}/${s?.modulesTested}`} />
+            <MetricCard icon={Table} label="Tabelas acessíveis" value={`${s?.accessibleTables}/${s?.totalTables}`} />
+            <MetricCard icon={Link2} label="Relacionamento" value={s?.relationshipTestPassed ? "Íntegro" : "Falha"} />
           </div>
 
-          {/* Teste de Escrita — ETAPA 2 e 6 */}
+          {/* FASE 2: Teste CRUD por módulo */}
           <div className="mb-4">
-            <h2 className="mb-2 text-sm font-semibold text-foreground">Teste de Persistência (Create → Read-back → Verify → Delete)</h2>
+            <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Shield className="h-4 w-4 text-primary" /> Teste CRUD por Módulo (Create → Read → Update → Read → Delete → Confirm)
+            </h2>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {diagnostic.writeResults.map((wr) => {
-                const cfg = STATUS_CONFIG[wr.status] || STATUS_CONFIG.error;
+              {report.crudResults.map((r) => {
+                const cfg = r.passed ? STATUS_CFG.ok : STATUS_CFG.error;
                 const Icon = cfg.icon;
-                const label = MODULE_LABELS[wr.entity] || wr.entity;
-                const isOpen = expandedEntity === wr.entity;
+                const isOpen = expandedModule === r.module;
                 return (
-                  <div key={wr.entity} className={`rounded-lg border p-3 ${wr.status === "ok" ? "border-baron-success/20" : wr.status === "mismatch" ? "border-baron-alert/30" : "border-baron-error/30"}`}>
-                    <button
-                      onClick={() => setExpandedEntity(isOpen ? null : wr.entity)}
-                      className="flex w-full items-center justify-between"
-                    >
+                  <div key={r.module} className={`rounded-lg border p-3 ${r.passed ? "border-baron-success/20" : "border-baron-error/30"}`}>
+                    <button onClick={() => setExpandedModule(isOpen ? null : r.module)} className="flex w-full items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Icon className={`h-4 w-4 ${cfg.color}`} />
-                        <span className="text-sm font-medium text-foreground">{label}</span>
+                        <span className="text-sm font-medium text-foreground">{MODULE_ICONS[r.module] || "📋"} {r.module}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">{wr.writeTimeMs}ms</span>
+                        <span className="text-xs text-muted-foreground">{r.elapsedMs}ms</span>
                         {isOpen ? <ChevronUp className="h-3 w-3 text-muted-foreground" /> : <ChevronDown className="h-3 w-3 text-muted-foreground" />}
                       </div>
                     </button>
                     {isOpen && (
-                      <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                        <p>Status: <span className={cfg.color}>{cfg.label}</span></p>
-                        <p>ID teste: {wr.testId || "—"}</p>
-                        <p>Verificado: {wr.verified ? "Sim" : "Não"}</p>
-                        {wr.error && <p className="text-baron-error">Erro: {wr.error}</p>}
-                        {wr.mismatches?.length > 0 && (
-                          <div>
-                            <p className="text-baron-alert">Divergências:</p>
-                            {wr.mismatches.map((m, i) => (
-                              <p key={i} className="ml-2">• {m.field}: esperado={String(m.expected)}, retornado={String(m.actual)}</p>
-                            ))}
+                      <div className="mt-2 space-y-1 text-xs">
+                        {r.steps.map((st, i) => (
+                          <div key={i} className="flex items-center gap-2">
+                            {st.status === "ok" ? (
+                              <CheckCircle2 className="h-3 w-3 text-baron-success" />
+                            ) : (
+                              <XCircle className="h-3 w-3 text-baron-error" />
+                            )}
+                            <span className="text-muted-foreground">{st.step}</span>
+                            {st.id && <span className="text-muted-foreground/50">· {st.id.slice(0, 8)}</span>}
+                            {st.verified && <span className="text-baron-success">✓ verificado</span>}
+                            {st.error && <span className="text-baron-error">{st.error}</span>}
                           </div>
-                        )}
+                        ))}
                       </div>
                     )}
                   </div>
@@ -173,46 +164,86 @@ export default function SaudeSistema() {
             </div>
           </div>
 
-          {/* Teste de Leitura — todas as entidades */}
+          {/* FASE 7: Relacionamento */}
           <div className="mb-4">
-            <h2 className="mb-2 text-sm font-semibold text-foreground">Contagem de Registros por Entidade</h2>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {diagnostic.readResults.map((rr) => {
-                const cfg = STATUS_CONFIG[rr.status] || STATUS_CONFIG.error;
-                const Icon = cfg.icon;
-                const label = MODULE_LABELS[rr.entity] || rr.entity;
-                return (
-                  <div key={rr.entity} className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Icon className={`h-3.5 w-3.5 shrink-0 ${cfg.color}`} />
-                      <span className="truncate text-xs text-foreground">{label}</span>
-                    </div>
-                    <span className="shrink-0 text-xs font-medium text-muted-foreground">{rr.recordCount}</span>
-                  </div>
-                );
-              })}
-            </div>
+            <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Link2 className="h-4 w-4 text-primary" /> Integridade de Relacionamentos (Product → Stock → Movement)
+            </h2>
+            <Card className={`p-3 ${report.relationshipTest.passed ? "border-baron-success/20" : "border-baron-error/30"}`}>
+              <div className="flex items-center gap-2">
+                {report.relationshipTest.passed ? (
+                  <CheckCircle2 className="h-4 w-4 text-baron-success" />
+                ) : (
+                  <XCircle className="h-4 w-4 text-baron-error" />
+                )}
+                <span className="text-sm font-medium text-foreground">
+                  {report.relationshipTest.passed ? "Relacionamentos íntegros — chaves estrangeiras preservadas" : "Falha na integridade"}
+                </span>
+              </div>
+              {report.relationshipTest.steps?.map((st, i) => (
+                <div key={i} className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                  <CheckCircle2 className="h-3 w-3 text-baron-success" />
+                  {st.step} {st.links !== undefined && (st.links ? "✓ link OK" : "✗ link quebrado")}
+                </div>
+              ))}
+            </Card>
           </div>
 
-          {/* Logs de Auditoria — ETAPA 4 e 8 */}
+          {/* FASE 1: Mapa de Tabelas */}
           <div className="mb-4">
-            <h2 className="mb-2 text-sm font-semibold text-foreground">Auditoria Recente</h2>
+            <button onClick={() => setShowAllTables(!showAllTables)} className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Table className="h-4 w-4 text-primary" /> Mapeamento de Tabelas ({report.tableMap.length})
+              {showAllTables ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+            </button>
+            {showAllTables && (
+              <Card className="p-0 overflow-hidden">
+                <div className="max-h-80 overflow-y-auto">
+                  <table className="w-full text-xs">
+                    <thead className="sticky top-0 bg-card">
+                      <tr className="border-b border-border">
+                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Tabela</th>
+                        <th className="px-3 py-2 text-right font-medium text-muted-foreground">Registros</th>
+                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">PK</th>
+                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Última atualização</th>
+                        <th className="px-3 py-2 text-center font-medium text-muted-foreground">Acesso</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {report.tableMap.map((t) => (
+                        <tr key={t.entity} className="border-b border-border/50">
+                          <td className="px-3 py-1.5 font-medium text-foreground">{t.entity}</td>
+                          <td className="px-3 py-1.5 text-right text-muted-foreground">{t.recordCount}</td>
+                          <td className="px-3 py-1.5 text-muted-foreground">{t.primaryKey}</td>
+                          <td className="px-3 py-1.5 text-muted-foreground">{t.lastUpdate ? new Date(t.lastUpdate).toLocaleDateString("pt-BR") : "—"}</td>
+                          <td className="px-3 py-1.5 text-center">
+                            {t.accessible ? <CheckCircle2 className="mx-auto h-3 w-3 text-baron-success" /> : <XCircle className="mx-auto h-3 w-3 text-baron-error" />}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            )}
+          </div>
+
+          {/* FASE 4: Logs de Auditoria */}
+          <div className="mb-4">
+            <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
+              <FileText className="h-4 w-4 text-primary" /> Logs de Auditoria
+            </h2>
             <Card className="p-0 overflow-hidden">
               <div className="max-h-64 overflow-y-auto">
-                {diagnostic.recentAuditLogs.length === 0 ? (
+                {report.recentAuditLogs.length === 0 ? (
                   <p className="p-4 text-center text-xs text-muted-foreground">Nenhum log registrado.</p>
                 ) : (
-                  diagnostic.recentAuditLogs.map((log) => (
+                  report.recentAuditLogs.map((log) => (
                     <div key={log.id} className="flex items-center gap-3 border-b border-border px-4 py-2 last:border-0">
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-foreground">{log.action}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {log.user_name} · {log.entity_type} · {log.entity_id?.slice(0, 8) || "—"}
-                        </p>
+                        <p className="text-xs text-muted-foreground">{log.user_name} · {log.module} · {log.entity_type}</p>
                       </div>
-                      <span className="shrink-0 text-xs text-muted-foreground">
-                        {log.created_date ? new Date(log.created_date).toLocaleString("pt-BR") : ""}
-                      </span>
+                      <span className="shrink-0 text-xs text-muted-foreground">{log.created_date ? new Date(log.created_date).toLocaleString("pt-BR") : ""}</span>
                     </div>
                   ))
                 )}
@@ -220,16 +251,18 @@ export default function SaudeSistema() {
             </Card>
           </div>
 
-          {/* Erros — ETAPA 4 */}
-          {diagnostic.errors.length > 0 && (
-            <div>
-              <h2 className="mb-2 text-sm font-semibold text-baron-error">Erros Detectados ({diagnostic.errors.length})</h2>
+          {/* Erros */}
+          {report.errors.length > 0 && (
+            <div className="mb-4">
+              <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-baron-error">
+                <AlertCircle className="h-4 w-4" /> Falhas Detectadas ({report.errors.length})
+              </h2>
               <Card className="p-0 border-baron-error/30">
-                {diagnostic.errors.map((err, i) => (
+                {report.errors.map((err, i) => (
                   <div key={i} className="flex items-start gap-3 border-b border-border px-4 py-2 last:border-0">
                     <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-baron-error" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-foreground">{err.entity} — {err.phase}</p>
+                      <p className="text-xs font-medium text-foreground">{err.module || err.entity}</p>
                       <p className="text-xs text-muted-foreground">{err.error}</p>
                     </div>
                   </div>
@@ -237,6 +270,14 @@ export default function SaudeSistema() {
               </Card>
             </div>
           )}
+
+          {/* Relatório salvo */}
+          <Card className="p-3 bg-secondary/30">
+            <p className="flex items-center gap-2 text-xs text-muted-foreground">
+              <CheckCircle2 className="h-3 w-3 text-baron-success" />
+              Relatório salvo automaticamente na tabela AuditLog para auditoria futura.
+            </p>
+          </Card>
         </>
       ) : null}
     </div>
