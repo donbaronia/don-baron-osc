@@ -264,7 +264,7 @@ export const PE = {
   // ===== OPERATIONAL DASHBOARD =====
   async getOperationalDashboard() {
     const [productions, recipes] = await Promise.all([
-      base44.entities.ProductionRecord.filter({ deleted_at: { $exists: false } }, "-production_date", 500).catch(() => []),
+      base44.entities.ProductionRecord.filter({ deleted_at: null }, "-production_date", 500).catch(() => []),
       base44.entities.Recipe.filter({ active: true }, "name", 500).catch(() => []),
     ]);
 
@@ -384,8 +384,8 @@ export const PE = {
   // ===== SMART PRODUCTION SUGGESTIONS =====
   async getSuggestions() {
     const [productions, stocks, recipes] = await Promise.all([
-      base44.entities.ProductionRecord.filter({ status: "concluida", deleted_at: { $exists: false } }, "-production_date", 500).catch(() => []),
-      base44.entities.Stock.filter({ deleted_at: { $exists: false } }, "product_name", 500).catch(() => []),
+      base44.entities.ProductionRecord.filter({ status: "concluida", deleted_at: null }, "-production_date", 500).catch(() => []),
+      base44.entities.Stock.filter({ deleted_at: null }, "product_name", 500).catch(() => []),
       base44.entities.Recipe.filter({ active: true }, "name", 500).catch(() => []),
     ]);
 
@@ -456,7 +456,7 @@ export const PE = {
       // Buscar custo medio do estoque
       const stock = await base44.entities.Stock.filter({
         product_id: ing.product_id || ing.ingredient_id,
-        deleted_at: { $exists: false },
+        deleted_at: null,
       }, "-created_date", 1).catch(() => []);
 
       const unitCost = stock[0]?.average_cost || ing.unit_cost || ing.cost || 0;

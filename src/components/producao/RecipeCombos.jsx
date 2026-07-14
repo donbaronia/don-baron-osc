@@ -28,8 +28,8 @@ export default function RecipeCombos() {
   const load = async () => {
     setLoading(true);
     const [combos, recs] = await Promise.all([
-      base44.entities.Recipe.filter({ is_combo: true, deleted_at: { $exists: false } }, "name", 500).catch(() => []),
-      base44.entities.Recipe.filter({ active: true, is_combo: { $ne: true }, is_addition: { $ne: true }, deleted_at: { $exists: false } }, "name", 500).catch(() => []),
+      base44.entities.Recipe.filter({ is_combo: true, deleted_at: null }, "name", 500).catch(() => []),
+      base44.entities.Recipe.filter({ active: true, is_combo: { $ne: true }, is_addition: { $ne: true }, deleted_at: null }, "name", 500).catch(() => []),
     ]);
     setRows(combos); setRecipes(recs);
     setLoading(false);

@@ -42,16 +42,16 @@ export const BI = {
   // ===== COLLECT ALL DATA =====
   async _collectAll(range) {
     const [sales, tx, products, purchases, productions, movements, stocks, recipes, customers, ifood, payments, receipts] = await Promise.all([
-      base44.entities.Sale.filter({ deleted_at: { $exists: false } }, "-sale_date", 500).catch(() => []),
+      base44.entities.Sale.filter({ deleted_at: null }, "-sale_date", 500).catch(() => []),
       base44.entities.FinancialTransaction.list("-created_date", 500).catch(() => []),
-      base44.entities.Product.filter({ deleted_at: { $exists: false } }, "name", 500).catch(() => []),
-      base44.entities.Purchase.filter({ deleted_at: { $exists: false } }, "-order_date", 500).catch(() => []),
-      base44.entities.ProductionRecord.filter({ deleted_at: { $exists: false } }, "-production_date", 500).catch(() => []),
-      base44.entities.Movement.filter({ deleted_at: { $exists: false } }, "-movement_date", 1000).catch(() => []),
-      base44.entities.Stock.filter({ deleted_at: { $exists: false } }, "product_name", 500).catch(() => []),
-      base44.entities.Recipe.filter({ active: true, deleted_at: { $exists: false } }, "name", 500).catch(() => []),
-      base44.entities.Customer.filter({ deleted_at: { $exists: false } }, "name", 500).catch(() => []),
-      base44.entities.IFoodReceipt.filter({ deleted_at: { $exists: false } }, "-created_date", 200).catch(() => []),
+      base44.entities.Product.filter({ deleted_at: null }, "name", 500).catch(() => []),
+      base44.entities.Purchase.filter({ deleted_at: null }, "-order_date", 500).catch(() => []),
+      base44.entities.ProductionRecord.filter({ deleted_at: null }, "-production_date", 500).catch(() => []),
+      base44.entities.Movement.filter({ deleted_at: null }, "-movement_date", 1000).catch(() => []),
+      base44.entities.Stock.filter({ deleted_at: null }, "product_name", 500).catch(() => []),
+      base44.entities.Recipe.filter({ active: true, deleted_at: null }, "name", 500).catch(() => []),
+      base44.entities.Customer.filter({ deleted_at: null }, "name", 500).catch(() => []),
+      base44.entities.IFoodReceipt.filter({ deleted_at: null }, "-created_date", 200).catch(() => []),
       base44.entities.Payment.list("-due_date", 300).catch(() => []),
       base44.entities.Receipt.list("-expected_date", 300).catch(() => []),
     ]);
@@ -561,7 +561,7 @@ export const BI = {
 
   // ===== GET SNAPSHOTS =====
   async getSnapshots(periodType = null, limit = 30) {
-    const query = { dataset: "bi_kpis", deleted_at: { $exists: false } };
+    const query = { dataset: "bi_kpis", deleted_at: null };
     if (periodType) query.period_type = periodType;
     return base44.entities.DataSnapshot.filter(query, "-period_date", limit).catch(() => []);
   },
@@ -581,16 +581,16 @@ export const BI = {
   // ===== COMMAND CENTER (Documento 011) =====
   async _collectRaw() {
     const [sales, tx, products, purchases, productions, movements, stocks, recipes, customers, ifood, payments, receipts, accounts] = await Promise.all([
-      base44.entities.Sale.filter({ deleted_at: { $exists: false } }, "-sale_date", 500).catch(() => []),
+      base44.entities.Sale.filter({ deleted_at: null }, "-sale_date", 500).catch(() => []),
       base44.entities.FinancialTransaction.list("-created_date", 500).catch(() => []),
-      base44.entities.Product.filter({ deleted_at: { $exists: false } }, "name", 500).catch(() => []),
-      base44.entities.Purchase.filter({ deleted_at: { $exists: false } }, "-order_date", 500).catch(() => []),
-      base44.entities.ProductionRecord.filter({ deleted_at: { $exists: false } }, "-production_date", 500).catch(() => []),
-      base44.entities.Movement.filter({ deleted_at: { $exists: false } }, "-movement_date", 1000).catch(() => []),
-      base44.entities.Stock.filter({ deleted_at: { $exists: false } }, "product_name", 500).catch(() => []),
-      base44.entities.Recipe.filter({ active: true, deleted_at: { $exists: false } }, "name", 500).catch(() => []),
-      base44.entities.Customer.filter({ deleted_at: { $exists: false } }, "name", 500).catch(() => []),
-      base44.entities.IFoodReceipt.filter({ deleted_at: { $exists: false } }, "-created_date", 200).catch(() => []),
+      base44.entities.Product.filter({ deleted_at: null }, "name", 500).catch(() => []),
+      base44.entities.Purchase.filter({ deleted_at: null }, "-order_date", 500).catch(() => []),
+      base44.entities.ProductionRecord.filter({ deleted_at: null }, "-production_date", 500).catch(() => []),
+      base44.entities.Movement.filter({ deleted_at: null }, "-movement_date", 1000).catch(() => []),
+      base44.entities.Stock.filter({ deleted_at: null }, "product_name", 500).catch(() => []),
+      base44.entities.Recipe.filter({ active: true, deleted_at: null }, "name", 500).catch(() => []),
+      base44.entities.Customer.filter({ deleted_at: null }, "name", 500).catch(() => []),
+      base44.entities.IFoodReceipt.filter({ deleted_at: null }, "-created_date", 200).catch(() => []),
       base44.entities.Payment.list("-due_date", 300).catch(() => []),
       base44.entities.Receipt.list("-expected_date", 300).catch(() => []),
       base44.entities.FinancialAccount.list("-created_date", 100).catch(() => []),

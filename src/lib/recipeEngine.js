@@ -34,7 +34,7 @@ export const RE = {
       // Buscar custo medio do estoque
       const stocks = await base44.entities.Stock.filter({
         product_id: ing.product_id || ing.ingredient_id,
-        deleted_at: { $exists: false },
+        deleted_at: null,
       }, "-created_date", 1).catch(() => []);
 
       const unitCost = stocks[0]?.average_cost || stocks[0]?.last_cost || ing.unit_cost || 0;
@@ -175,7 +175,7 @@ export const RE = {
     const productions = await base44.entities.ProductionRecord.filter({
       recipe_id: recipeId,
       status: "concluida",
-      deleted_at: { $exists: false },
+      deleted_at: null,
     }, "-production_date", 500).catch(() => []);
 
     const thirtyDaysAgo = new Date();
@@ -389,7 +389,7 @@ export const RE = {
 
   // ===== DASHBOARD (Rentabilidade) =====
   async getDashboard() {
-    const recipes = await base44.entities.Recipe.filter({ active: true, deleted_at: { $exists: false } }, "name", 500).catch(() => []);
+    const recipes = await base44.entities.Recipe.filter({ active: true, deleted_at: null }, "name", 500).catch(() => []);
 
     const withMargin = recipes.filter(r => !r.is_addition && r.sale_price > 0);
 
@@ -457,8 +457,8 @@ export const RE = {
   // ===== ALERTS =====
   async getAlerts() {
     const [recipes, stocks, suppliers] = await Promise.all([
-      base44.entities.Recipe.filter({ active: true, deleted_at: { $exists: false } }, "name", 500).catch(() => []),
-      base44.entities.Stock.filter({ deleted_at: { $exists: false } }, "product_name", 500).catch(() => []),
+      base44.entities.Recipe.filter({ active: true, deleted_at: null }, "name", 500).catch(() => []),
+      base44.entities.Stock.filter({ deleted_at: null }, "product_name", 500).catch(() => []),
       base44.entities.Supplier.filter({ active: true }, "name", 500).catch(() => []),
     ]);
 
@@ -528,7 +528,7 @@ export const RE = {
 
   // ===== RECALCULATE ALL COSTS =====
   async recalculateAllCosts() {
-    const recipes = await base44.entities.Recipe.filter({ active: true, deleted_at: { $exists: false } }, "name", 500).catch(() => []);
+    const recipes = await base44.entities.Recipe.filter({ active: true, deleted_at: null }, "name", 500).catch(() => []);
     const results = [];
 
     for (const recipe of recipes) {
@@ -546,9 +546,9 @@ export const RE = {
   // ===== AI INSIGHTS =====
   async getAIInsights() {
     const [recipes, stocks, productions] = await Promise.all([
-      base44.entities.Recipe.filter({ active: true, deleted_at: { $exists: false } }, "name", 500).catch(() => []),
-      base44.entities.Stock.filter({ deleted_at: { $exists: false } }, "product_name", 500).catch(() => []),
-      base44.entities.ProductionRecord.filter({ status: "concluida", deleted_at: { $exists: false } }, "-production_date", 500).catch(() => []),
+      base44.entities.Recipe.filter({ active: true, deleted_at: null }, "name", 500).catch(() => []),
+      base44.entities.Stock.filter({ deleted_at: null }, "product_name", 500).catch(() => []),
+      base44.entities.ProductionRecord.filter({ status: "concluida", deleted_at: null }, "-production_date", 500).catch(() => []),
     ]);
 
     const insights = [];

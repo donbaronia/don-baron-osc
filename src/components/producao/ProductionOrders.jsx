@@ -38,7 +38,7 @@ export default function ProductionOrders() {
     setLoading(true);
     try {
       const [prods, recs] = await Promise.all([
-        base44.entities.ProductionRecord.filter({ deleted_at: { $exists: false } }, "-production_date", 300).catch(() => []),
+        base44.entities.ProductionRecord.filter({ deleted_at: null }, "-production_date", 300).catch(() => []),
         base44.entities.Recipe.filter({ active: true }, "name", 500).catch(() => []),
       ]);
       setRows(prods); setRecipes(recs);

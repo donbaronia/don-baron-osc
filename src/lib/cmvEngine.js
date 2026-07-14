@@ -21,12 +21,12 @@ export const CMV = {
 
     // Buscar todas as fontes de dados
     const [sales, productions, movements, recipes, ifoodReceipts, goals] = await Promise.all([
-      base44.entities.Sale.filter({ deleted_at: { $exists: false } }, "-sale_date", 500).catch(() => []),
-      base44.entities.ProductionRecord.filter({ status: "concluida", deleted_at: { $exists: false } }, "-production_date", 500).catch(() => []),
-      base44.entities.Movement.filter({ deleted_at: { $exists: false } }, "-movement_date", 1000).catch(() => []),
-      base44.entities.Recipe.filter({ active: true, deleted_at: { $exists: false } }, "name", 500).catch(() => []),
-      base44.entities.IFoodReceipt.filter({ deleted_at: { $exists: false } }, "-created_date", 500).catch(() => []),
-      base44.entities.CMVGoal.filter({ active: true, period_type: periodType, deleted_at: { $exists: false } }, "name", 50).catch(() => []),
+      base44.entities.Sale.filter({ deleted_at: null }, "-sale_date", 500).catch(() => []),
+      base44.entities.ProductionRecord.filter({ status: "concluida", deleted_at: null }, "-production_date", 500).catch(() => []),
+      base44.entities.Movement.filter({ deleted_at: null }, "-movement_date", 1000).catch(() => []),
+      base44.entities.Recipe.filter({ active: true, deleted_at: null }, "name", 500).catch(() => []),
+      base44.entities.IFoodReceipt.filter({ deleted_at: null }, "-created_date", 500).catch(() => []),
+      base44.entities.CMVGoal.filter({ active: true, period_type: periodType, deleted_at: null }, "name", 50).catch(() => []),
     ]);
 
     // Filtrar por periodo
@@ -210,7 +210,7 @@ export const CMV = {
   async _getPreviousPeriod(periodType, currentRange) {
     const records = await base44.entities.CMVRecord.filter({
       period_type: periodType,
-      deleted_at: { $exists: false },
+      deleted_at: null,
     }, "-period_date", 500).catch(() => []);
     const previous = records.find(r => r.period_end < currentRange.start);
     return previous || null;
@@ -404,9 +404,9 @@ export const CMV = {
   // ===== SIMULATE =====
   async simulate(ingredientName, priceChangePct) {
     const [recipes, productions, lastCMV] = await Promise.all([
-      base44.entities.Recipe.filter({ active: true, deleted_at: { $exists: false } }, "name", 500).catch(() => []),
-      base44.entities.ProductionRecord.filter({ status: "concluida", deleted_at: { $exists: false } }, "-production_date", 500).catch(() => []),
-      base44.entities.CMVRecord.filter({ status: "ativo", deleted_at: { $exists: false } }, "-calculated_at", 1).catch(() => []),
+      base44.entities.Recipe.filter({ active: true, deleted_at: null }, "name", 500).catch(() => []),
+      base44.entities.ProductionRecord.filter({ status: "concluida", deleted_at: null }, "-production_date", 500).catch(() => []),
+      base44.entities.CMVRecord.filter({ status: "ativo", deleted_at: null }, "-calculated_at", 1).catch(() => []),
     ]);
 
     if (!lastCMV[0]) return null;
@@ -558,7 +558,7 @@ export const CMV = {
 
   // ===== GET LATEST =====
   async getLatest(periodType = null) {
-    const filter = { status: "ativo", deleted_at: { $exists: false } };
+    const filter = { status: "ativo", deleted_at: null };
     if (periodType) filter.period_type = periodType;
     const records = await base44.entities.CMVRecord.filter(filter, "-calculated_at", 10).catch(() => []);
     return records[0] || null;
@@ -566,7 +566,7 @@ export const CMV = {
 
   // ===== HISTORY =====
   async getHistory(limit = 30) {
-    return await base44.entities.CMVRecord.filter({ status: "ativo", deleted_at: { $exists: false } }, "-calculated_at", limit).catch(() => []);
+    return await base44.entities.CMVRecord.filter({ status: "ativo", deleted_at: null }, "-calculated_at", limit).catch(() => []);
   },
 };
 

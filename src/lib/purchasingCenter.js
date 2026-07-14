@@ -19,9 +19,9 @@ export const PC = {
   // ===== DASHBOARD =====
   async getDashboardData() {
     const [purchases, requests, quotations, suppliers, priceHistory] = await Promise.all([
-      base44.entities.Purchase.filter({ deleted_at: { $exists: false } }, "-order_date", 500).catch(() => []),
-      base44.entities.PurchaseRequest.filter({ deleted_at: { $exists: false } }, "-created_date", 200).catch(() => []),
-      base44.entities.Quotation.filter({ deleted_at: { $exists: false } }, "-created_date", 300).catch(() => []),
+      base44.entities.Purchase.filter({ deleted_at: null }, "-order_date", 500).catch(() => []),
+      base44.entities.PurchaseRequest.filter({ deleted_at: null }, "-created_date", 200).catch(() => []),
+      base44.entities.Quotation.filter({ deleted_at: null }, "-created_date", 300).catch(() => []),
       base44.entities.Supplier.filter({ active: true }, "-created_date", 500).catch(() => []),
       base44.entities.PriceHistory.filter({}, "-date", 500).catch(() => []),
     ]);
@@ -214,7 +214,7 @@ export const PC = {
     if (!supplier) return null;
 
     const purchases = await base44.entities.Purchase.filter(
-      { supplier_id: supplierId, status: { $ne: "cancelada" }, deleted_at: { $exists: false } },
+      { supplier_id: supplierId, status: { $ne: "cancelada" }, deleted_at: null },
       "-order_date", 500
     ).catch(() => []);
 

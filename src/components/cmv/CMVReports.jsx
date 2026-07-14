@@ -30,7 +30,7 @@ export default function CMVReports() {
   const load = async () => {
     setLoading(true);
     const [g, h] = await Promise.all([
-      base44.entities.CMVGoal.filter({ active: true, deleted_at: { $exists: false } }, "name", 100).catch(() => []),
+      base44.entities.CMVGoal.filter({ active: true, deleted_at: null }, "name", 100).catch(() => []),
       CMV.getHistory(30).catch(() => []),
     ]);
     setGoals(g); setHistory(h);

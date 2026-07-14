@@ -28,7 +28,7 @@ export default function CMVIFoodImport() {
 
   const load = async () => {
     setLoading(true);
-    const recs = await base44.entities.IFoodReceipt.filter({ deleted_at: { $exists: false } }, "-created_date", 500).catch(() => []);
+    const recs = await base44.entities.IFoodReceipt.filter({ deleted_at: null }, "-created_date", 500).catch(() => []);
     setRows(recs);
     setLoading(false);
   };

@@ -35,7 +35,7 @@ export default function Quotations() {
     setLoading(true);
     try {
       const [reqs, quotes, sups] = await Promise.all([
-        base44.entities.PurchaseRequest.filter({ status: { $in: ["em_cotacao", "cotada"] }, deleted_at: { $exists: false } }, "-created_date", 100).catch(() => []),
+        base44.entities.PurchaseRequest.filter({ status: { $in: ["em_cotacao", "cotada"] }, deleted_at: null }, "-created_date", 100).catch(() => []),
         base44.entities.Quotation.list("-created_date", 300).catch(() => []),
         base44.entities.Supplier.filter({ active: true }, "-created_date", 500).catch(() => []),
       ]);

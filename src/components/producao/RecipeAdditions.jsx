@@ -29,7 +29,7 @@ export default function RecipeAdditions() {
   const load = async () => {
     setLoading(true);
     const [adcs, prods] = await Promise.all([
-      base44.entities.Recipe.filter({ is_addition: true, deleted_at: { $exists: false } }, "name", 500).catch(() => []),
+      base44.entities.Recipe.filter({ is_addition: true, deleted_at: null }, "name", 500).catch(() => []),
       base44.entities.Product.filter({ active: true }, "name", 500).catch(() => []),
     ]);
     setRows(adcs); setProducts(prods);

@@ -21,7 +21,7 @@ export default function RecipeSimulator() {
 
   const load = async () => {
     setLoading(true);
-    const recs = await base44.entities.Recipe.filter({ active: true, is_addition: { $ne: true }, deleted_at: { $exists: false } }, "name", 500).catch(() => []);
+    const recs = await base44.entities.Recipe.filter({ active: true, is_addition: { $ne: true }, deleted_at: null }, "name", 500).catch(() => []);
     setRecipes(recs);
     setLoading(false);
   };

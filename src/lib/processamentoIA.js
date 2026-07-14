@@ -102,7 +102,7 @@ export async function validarBoleto(doc, extracted) {
 
   if (extracted.linha_digitavel) {
     const existing = await base44.entities.DBDocument.filter(
-      { linha_digitavel: extracted.linha_digitavel, deleted_at: { $exists: false } }, "-created_date", 10
+      { linha_digitavel: extracted.linha_digitavel, deleted_at: null }, "-created_date", 10
     ).catch(() => []);
     const dup = existing.find((d) => d.id !== doc.id);
     if (dup) divergencias.push({ type: "linha_duplicada", severity: "critica", message: `Linha digitável duplicada (doc: ${dup.title})` });
@@ -110,7 +110,7 @@ export async function validarBoleto(doc, extracted) {
 
   if (extracted.supplier && extracted.value && extracted.due_date) {
     const similar = await base44.entities.DBDocument.filter(
-      { supplier: extracted.supplier, value: extracted.value, due_date: extracted.due_date, deleted_at: { $exists: false } }, "-created_date", 10
+      { supplier: extracted.supplier, value: extracted.value, due_date: extracted.due_date, deleted_at: null }, "-created_date", 10
     ).catch(() => []);
     const dup = similar.find((d) => d.id !== doc.id);
     if (dup) divergencias.push({ type: "boleto_igual", severity: "critica", message: `Boleto igual já cadastrado (${dup.title})` });

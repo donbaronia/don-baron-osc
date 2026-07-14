@@ -18,7 +18,7 @@ import { base44 } from "@/api/base44Client";
 export async function detectDuplicate(doc) {
   if (!doc.document_number && !doc.chave_nota) return null;
   const existing = await base44.entities.DBDocument.filter(
-    { status: { $ne: "rejeitado" }, deleted_at: { $exists: false } },
+    { status: { $ne: "rejeitado" }, deleted_at: null },
     "-created_date",
     200
   ).catch(() => []);
