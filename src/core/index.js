@@ -15,3 +15,7 @@ export { CacheManager } from "./CacheManager";
 export { LocalEventBus } from "./EventBus";
 export { SyncManager } from "./SyncManager";
 export { NotificationManager, useNotificationInit } from "./NotificationManager";
+export { IntentEngine } from "./IntentEngine";
+export { ExecutionEngine } from "./ExecutionEngine";
+export { OperationalMemory } from "./OperationalMemory";
+export { BaronCOO } from "./BaronCOO";
