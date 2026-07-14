@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
+import { recoverProcesses } from "@/lib/documentWorkflow";
 import Sidebar from "./Sidebar";
 import GlobalSearch from "@/components/bds/GlobalSearch";
 import BDSHelp from "@/components/bds/BDSHelp";
@@ -23,6 +24,20 @@ export default function AppLayout() {
   const [showProfile, setShowProfile] = useState(false);
   const [showBaron, setShowBaron] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
+
+  // RECUPERAÇÃO AUTOMÁTICA: ao iniciar o sistema, retoma processos pausados cujo bloqueio já foi resolvido
+  useEffect(() => {
+    let mounted = true;
+    recoverProcesses(user)
+      .then((res) => {
+        if (mounted && res.resumed?.length > 0) {
+          console.log(`[BARON Workflow] ${res.scanned} processo(s) verificado(s), ${res.resumed.length} retomado(s) automaticamente.`);
+        }
+      })
+      .catch((e) => console.warn("[BARON Workflow] Recuperação automática falhou:", e.message));
+    return () => { mounted = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useKeyboardShortcuts([
     { combo: "ctrl+k", action: () => document.querySelector?.("[data-bds-search]")?.focus() },

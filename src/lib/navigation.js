@@ -14,6 +14,7 @@ import {
   History,
   HeartPulse,
   Brain,
+  Activity,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -45,6 +46,12 @@ export const NAV_ITEMS = [
     label: "Pendências da IA",
     icon: Brain,
     path: "/pendencias-ia",
+    roles: ["administrador", "financeiro", "gerencia", "compras", "estoque"],
+  },
+  {
+    label: "Workflow de Processos",
+    icon: Activity,
+    path: "/processos",
     roles: ["administrador", "financeiro", "gerencia", "compras", "estoque"],
   },
   {

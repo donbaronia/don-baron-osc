@@ -23,6 +23,7 @@ import Documentos from '@/pages/Documentos';
 import DocumentosFinanceiros from '@/pages/DocumentosFinanceiros';
 import ProcessamentoDocumentos from '@/pages/ProcessamentoDocumentos';
 import PendenciasIA from '@/pages/PendenciasIA';
+import ProcessosWorkflow from '@/pages/ProcessosWorkflow';
 import Indicadores from '@/pages/Indicadores';
 import BaronAI from '@/pages/BaronAI';
 import Inteligencia from '@/pages/Inteligencia';
@@ -82,6 +83,7 @@ const AuthenticatedApp = () => {
         <Route path="/documentos-financeiros" element={<DocumentosFinanceiros />} />
         <Route path="/processamento" element={<ProcessamentoDocumentos />} />
         <Route path="/pendencias-ia" element={<PendenciasIA />} />
+        <Route path="/processos" element={<ProcessosWorkflow />} />
         <Route path="/indicadores" element={<Indicadores />} />
         <Route path="/ia" element={<BaronAI />} />
         <Route path="/inteligencia" element={<Inteligencia />} />

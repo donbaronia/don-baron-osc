@@ -1,0 +1,97 @@
+{
+  "name": "DocumentProcess",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "process_id": {
+      "type": "string",
+      "description": "ID unico sequencial (PROC-AAAA-NNNNNN)"
+    },
+    "document_id": {
+      "type": "string",
+      "description": "DBDocument vinculado"
+    },
+    "document_title": {
+      "type": "string"
+    },
+    "route_type": {
+      "type": "string",
+      "description": "Tipo roteado: boleto / nota_fiscal / nota_boleto / cupom_fiscal / comprovante_pix / outros"
+    },
+    "current_state": {
+      "type": "string",
+      "enum": [
+        "RECEBIDO",
+        "OCR_CONCLUIDO",
+        "PRODUTOS_EXTRAIDOS",
+        "AGUARDANDO_CADASTRO_PRODUTO",
+        "AGUARDANDO_APROVACAO",
+        "AGUARDANDO_PROCESSAMENTO",
+        "PRODUTO_CRIADO",
+        "ESTOQUE_PROCESSADO",
+        "CMV_PROCESSADO",
+        "DRE_PROCESSADO",
+        "FINANCEIRO_PROCESSADO",
+        "DOCUMENTO_ARQUIVADO",
+        "CONCLUIDO",
+        "ERRO"
+      ],
+      "default": "RECEBIDO"
+    },
+    "previous_state": {
+      "type": "string"
+    },
+    "context": {
+      "type": "object",
+      "description": "Dados persistentes do fluxo: { extracted, products, supplier, value, due_date, document_date, document_number, bank, linha_digitavel, codigo_barras, pix_copia_cola, classification, file_url }"
+    },
+    "results": {
+      "type": "object",
+      "description": "Resultados das etapas: { stock, payment_id, cmv, confidence, processed }"
+    },
+    "pending": {
+      "type": "object",
+      "description": "Pendencia atual: { type, reason, product_names, requested_by, requested_at, resolved_by, resolved_at }"
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Auditoria por transicao: [{ state, previous_state, timestamp, actor, duration_ms, reason, errors, retry_count }]"
+    },
+    "next_step": {
+      "type": "string",
+      "description": "Descricao da proxima etapa"
+    },
+    "recovery_attempts": {
+      "type": "number",
+      "default": 0
+    },
+    "last_recovered_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ativo",
+        "pausado",
+        "concluido",
+        "erro"
+      ],
+      "default": "ativo"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "process_id",
+    "current_state"
+  ]
+}

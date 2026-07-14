@@ -22,6 +22,11 @@ import {
   PAYMENT_TYPES,
   CLASSIFICATION_THRESHOLD,
 } from "@/lib/documentClassifier";
+import {
+  createProcess,
+  transition,
+  finalizeAfterRoute,
+} from "@/lib/documentWorkflow";
 
 // Fluxo financeiro puro (somente criar Contas a Pagar, sem tocar estoque)
 const FINANCIAL_ONLY_TYPES = ["boleto", "comprovante_pix", "comprovante_bancario"];
@@ -456,6 +461,15 @@ export async function processDocument(file, user) {
     sent_at: new Date().toISOString(),
   });
 
+  // === WORKFLOW PERSISTENTE: cria Process ID imediatamente ===
+  const proc = await createProcess({
+    document_id: doc.id,
+    title: file.name,
+    route_type: "documento",
+    context: { file_url },
+    user,
+  });
+
   let extracted, mapped;
   try {
     extracted = await analyzeDocument(file_url);
@@ -468,7 +482,8 @@ export async function processDocument(file, user) {
       extracted_data: { confidence_score: 0, confidence_tier: "red", processing_time_ms: Date.now() - t0 },
     });
     await Core.audit({ audit_action: "update", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Falha na extração IA: ${iaError.message} | Confiança: 0%` });
-    return { doc: { ...doc, id: doc.id, status: "aguardando_confirmacao" }, extracted: null, route: { routed: "pendencia", auto: false, divergencias: [{ type: "ilegivel", severity: "critica", message: "Documento ilegível" }], alerts: [], confidence }, duplicate: null };
+    await transition(proc.id, "ERRO", { actor: user?.full_name || "BARON IA", reason: "Falha na extração IA", errors: [iaError.message] });
+    return { doc: { ...doc, id: doc.id, status: "aguardando_confirmacao" }, extracted: null, route: { routed: "pendencia", auto: false, divergencias: [{ type: "ilegivel", severity: "critica", message: "Documento ilegível" }], alerts: [], confidence }, duplicate: null, processId: proc.process_id };
   }
 
   const title = mapped.supplier ? `${mapped.supplier}${mapped.document_date ? ` - ${mapped.document_date}` : ""}` : file.name;
@@ -476,6 +491,9 @@ export async function processDocument(file, user) {
 
   // --- Classificador Inteligente (ETAPA 1) ---
   const classification = classifyDocument(extracted);
+
+  // WORKFLOW: OCR concluído
+  await transition(proc.id, "OCR_CONCLUIDO", { actor: "BARON IA", reason: "Extração OCR concluída" });
 
   await base44.entities.DBDocument.update(doc.id, {
     ...mapped,
@@ -497,6 +515,31 @@ export async function processDocument(file, user) {
     title,
   });
   const fullDoc = { ...doc, ...mapped, id: doc.id, title, classification: classification.routed_type };
+
+  // WORKFLOW: produtos extraídos + contexto persistido (sem perder OCR)
+  await transition(proc.id, "PRODUTOS_EXTRAIDOS", {
+    actor: "BARON IA",
+    reason: `Classificado: ${classificationMeta(classification.routed_type).label} (${classification.confidence}%)`,
+  });
+  await base44.entities.DocumentProcess.update(proc.id, {
+    route_type: classification.routed_type,
+    context: {
+      file_url,
+      supplier: mapped.supplier,
+      cnpj: mapped.cnpj,
+      value: mapped.value,
+      due_date: mapped.due_date,
+      document_date: mapped.document_date,
+      document_number: mapped.document_number,
+      bank: mapped.bank,
+      linha_digitavel: mapped.linha_digitavel,
+      codigo_barras: mapped.codigo_barras,
+      pix_copia_cola: mapped.pix_copia_cola,
+      products: mapped.products || [],
+      route_type: classification.routed_type,
+      classification: { routed_type: classification.routed_type, confidence: classification.confidence, reasons: classification.reasons },
+    },
+  });
 
   // --- Duplicata é bloqueio absoluto (ETAPA 4) ---
   const duplicate = await detectDuplicate(fullDoc);
@@ -549,6 +592,21 @@ export async function processDocument(file, user) {
     route = { routed: "documento", auto: true, divergencias: [], alerts: [], confidence: { score: classification.confidence, tier: "green", reasons: classification.reasons } };
   }
 
+  // === WORKFLOW: finaliza/pausa o processo persistente ===
+  const unmatchedNames = route.productMatches
+    ? route.productMatches.filter((m) => !m.match || m.match.confidence < 0.85).map((m) => m.noteProduct.name)
+    : [];
+  let finalizeReason = "Fluxo automático";
+  if (duplicate) finalizeReason = `Documento duplicado de ${duplicate.title}`;
+  else if (classification.needs_human_review) finalizeReason = `Classificação incerta (${classification.confidence}%)`;
+  await finalizeAfterRoute(proc.id, {
+    route,
+    route_type: classification.routed_type,
+    unmatchedProductNames: unmatchedNames,
+    user,
+    reason: finalizeReason,
+  });
+
   // Persistir confiança final no extracted_data
   if (route.confidence) {
     const current = await base44.entities.DBDocument.get(doc.id);
@@ -557,7 +615,7 @@ export async function processDocument(file, user) {
     });
   }
 
-  return { doc: { ...fullDoc, ...route }, extracted, route, duplicate };
+  return { doc: { ...fullDoc, ...route }, extracted, route, duplicate, processId: proc.process_id };
 }
 
 export async function generateBaronInsights(documents, payments) {
