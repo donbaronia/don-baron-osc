@@ -61,10 +61,25 @@ module.exports = {
   				ring: 'hsl(var(--sidebar-ring))'
   			},
   			baron: {
+  				orange: 'hsl(var(--baron-orange))',
+				'orange-hover': 'hsl(var(--baron-orange-hover))',
+  				blue: 'hsl(var(--baron-blue))',
+  				green: 'hsl(var(--baron-green))',
+  				red: 'hsl(var(--baron-red))',
+  				purple: 'hsl(var(--baron-purple))',
+  				pink: 'hsl(var(--baron-pink))',
+  				yellow: 'hsl(var(--baron-yellow))',
+  				white: 'hsl(var(--baron-white))',
   				success: 'hsl(var(--baron-success))',
   				alert: 'hsl(var(--baron-alert))',
   				error: 'hsl(var(--baron-error))',
   				menu: 'hsl(var(--baron-menu))'
+  			},
+  			table: {
+  				header: 'hsl(var(--table-header))',
+  				row: 'hsl(var(--table-row))',
+  				hover: 'hsl(var(--table-hover))',
+  				border: 'hsl(var(--table-border))'
   			},
   			bds: {
   				save: 'hsl(var(--bds-save))',

@@ -4,36 +4,57 @@ import { brl } from "@/lib/inventoryEngine";
 import Toolbar from "@/components/shared/Toolbar";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, MapPin } from "lucide-react";
+import { RefreshCw, MapPin, TrendingUp, Package } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 
 const STOCK_TYPES = [
-  { v: "materia_prima", l: "Matéria-Prima" },
-  { v: "producao", l: "Produção" },
-  { v: "produto_acabado", l: "Produto Acabado" },
-  { v: "em_transito", l: "Em Trânsito" },
-  { v: "perdas", l: "Perdas" },
-  { v: "consumo_interno", l: "Consumo Interno" },
-  { v: "marketing", l: "Marketing" },
-  { v: "manutencao", l: "Manutenção" },
-  { v: "limpeza", l: "Limpeza" },
-  { v: "escritorio", l: "Escritório" },
+  { v: "materia_prima", l: "Matéria-Prima", tag: "tag-materia" },
+  { v: "producao", l: "Produção", tag: "tag-producao" },
+  { v: "produto_acabado", l: "Produto Acabado", tag: "tag-acabado" },
+  { v: "em_transito", l: "Em Trânsito", tag: "tag-materia" },
+  { v: "perdas", l: "Perdas", tag: "tag-perdas" },
+  { v: "consumo_interno", l: "Consumo Interno", tag: "tag-escritorio" },
+  { v: "marketing", l: "Marketing", tag: "tag-marketing" },
+  { v: "manutencao", l: "Manutenção", tag: "tag-escritorio" },
+  { v: "limpeza", l: "Limpeza", tag: "tag-escritorio" },
+  { v: "escritorio", l: "Escritório", tag: "tag-escritorio" },
 ];
 
+const typeTagMap = {
+  materia_prima: "tag-materia",
+  producao: "tag-producao",
+  produto_acabado: "tag-acabado",
+  em_transito: "tag-materia",
+  perdas: "tag-perdas",
+  consumo_interno: "tag-escritorio",
+  marketing: "tag-marketing",
+  manutencao: "tag-escritorio",
+  limpeza: "tag-escritorio",
+  escritorio: "tag-escritorio",
+};
+
 const abcBadge = (cls) => {
-  const map = { A: "bg-rose-100 text-rose-700", B: "bg-amber-100 text-amber-700", C: "bg-blue-100 text-blue-700" };
-  return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${map[cls] || map.C}`}>{cls || "C"}</span>;
+  const map = {
+    A: "bg-baron-red/15 text-baron-red border-baron-red/30",
+    B: "bg-baron-yellow/15 text-baron-yellow border-baron-yellow/30",
+    C: "bg-baron-blue/15 text-baron-blue border-baron-blue/30",
+  };
+  return <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold ${map[cls] || map.C}`}>{cls || "C"}</span>;
 };
 
 const expiryBadge = (level) => {
-  if (!level || level === "normal") return <span className="text-xs text-neutral-400">—</span>;
+  if (!level || level === "normal") return <span className="text-xs text-small-info">—</span>;
   const map = {
-    vencido: "bg-rose-100 text-rose-700", alerta_1: "bg-rose-100 text-rose-700",
-    alerta_3: "bg-orange-100 text-orange-700", alerta_7: "bg-amber-100 text-amber-700",
-    alerta_15: "bg-yellow-100 text-yellow-700", alerta_30: "bg-blue-100 text-blue-700", alerta_60: "bg-blue-100 text-blue-700",
+    vencido: "bg-baron-red/15 text-baron-red border-baron-red/30",
+    alerta_1: "bg-baron-red/15 text-baron-red border-baron-red/30",
+    alerta_3: "bg-baron-orange/15 text-baron-orange border-baron-orange/30",
+    alerta_7: "bg-baron-yellow/15 text-baron-yellow border-baron-yellow/30",
+    alerta_15: "bg-baron-yellow/15 text-baron-yellow border-baron-yellow/30",
+    alerta_30: "bg-baron-blue/15 text-baron-blue border-baron-blue/30",
+    alerta_60: "bg-baron-blue/15 text-baron-blue border-baron-blue/30",
   };
   const label = level === "vencido" ? "Vencido" : level.replace("alerta_", "") + "d";
-  return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${map[level]}`}>{label}</span>;
+  return <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold ${map[level]}`}>{label}</span>;
 };
 
 export default function StockList() {
@@ -56,38 +77,81 @@ export default function StockList() {
   );
 
   const columns = [
-    { key: "product_name", label: "Produto", render: r => <span className="font-medium text-neutral-900">{r.product_name}</span> },
-    { key: "stock_type", label: "Tipo", render: r => <span className="text-xs text-neutral-500 capitalize">{(r.stock_type || "materia_prima").replace(/_/g, " ")}</span> },
-    { key: "quantity", label: "Quantidade", render: r => <span className={`font-medium ${(r.quantity || 0) <= (r.min_quantity || 0) && r.min_quantity > 0 ? "text-rose-600" : "text-neutral-900"}`}>{r.quantity || 0} {r.unit || ""}</span> },
-    { key: "min_quantity", label: "Mín/Ideal", render: r => <span className="text-xs text-neutral-500">{r.min_quantity || 0}/{r.ideal_quantity || 0}</span> },
+    { key: "product_name", label: "Produto", render: r => <span className="font-semibold text-title">{r.product_name}</span> },
+    { key: "stock_type", label: "Tipo", render: r => {
+      const tag = typeTagMap[r.stock_type || "materia_prima"] || "tag-escritorio";
+      return <span className={`tag-baron ${tag}`}>{(r.stock_type || "materia_prima").replace(/_/g, " ")}</span>;
+    }},
+    { key: "quantity", label: "Quantidade", render: r => {
+      const low = (r.quantity || 0) <= (r.min_quantity || 0) && r.min_quantity > 0;
+      return <span className={`font-semibold ${low ? "text-baron-red" : "text-baron-green"}`}>{r.quantity || 0} <span className="text-small-info font-normal">{r.unit || ""}</span></span>;
+    }},
+    { key: "min_quantity", label: "Mín/Ideal", render: r => <span className="text-small-info">{r.min_quantity || 0}/{r.ideal_quantity || 0}</span> },
     { key: "coverage_days", label: "Cobertura", render: r => {
       const days = r.coverage_days || 0;
-      const color = days === 0 ? "text-neutral-400" : days <= 2 ? "text-rose-600" : days <= 5 ? "text-amber-600" : "text-emerald-600";
-      return <span className={`text-sm font-medium ${color}`}>{days > 0 ? `${days}d` : "—"}</span>;
+      const color = days === 0 ? "text-small-info" : days <= 2 ? "text-baron-red" : days <= 5 ? "text-baron-yellow" : "text-baron-blue";
+      return <span className={`text-sm font-semibold ${color}`}>{days > 0 ? `${days}d` : "—"}</span>;
     }},
-    { key: "average_cost", label: "Custo Médio", render: r => brl(r.average_cost) },
-    { key: "total_value", label: "Valor Total", render: r => <span className="font-medium">{brl(r.total_value)}</span> },
+    { key: "average_cost", label: "Custo Médio", render: r => <span className="text-secondary-info">{brl(r.average_cost)}</span> },
+    { key: "total_value", label: "Valor Total", render: r => <span className="font-semibold text-baron-orange">{brl(r.total_value)}</span> },
     { key: "abc_class", label: "ABC", render: r => abcBadge(r.abc_class) },
     { key: "expiry_alert_level", label: "Validade", render: r => expiryBadge(r.expiry_alert_level) },
-    { key: "physical_location", label: "Localização", render: r => r.physical_location ? <span className="inline-flex items-center gap-1 text-xs text-neutral-500"><MapPin className="h-3 w-3" />{r.physical_location}</span> : "—" },
+    { key: "physical_location", label: "Localização", render: r => r.physical_location ? <span className="inline-flex items-center gap-1 text-xs text-small-info"><MapPin className="h-3 w-3" />{r.physical_location}</span> : <span className="text-small-info">—</span> },
   ];
 
   const totalValue = filtered.reduce((s, r) => s + (r.total_value || 0), 0);
+  const totalItems = filtered.length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <Toolbar search={search} onSearch={setSearch} onExport={() => exportToCsv("estoque_atual.csv", filtered)}>
         <Button variant="outline" size="sm" onClick={load} className="gap-2"><RefreshCw className="h-4 w-4" /> Atualizar</Button>
       </Toolbar>
-      <div className="flex items-center justify-between">
-        <div className="flex gap-2 flex-wrap">
-          <button onClick={() => setTypeFilter("todos")} className={`rounded-full px-3 py-1 text-xs font-medium ${typeFilter === "todos" ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-600"}`}>Todos</button>
-          {STOCK_TYPES.map(t => (
-            <button key={t.v} onClick={() => setTypeFilter(t.v)} className={`rounded-full px-3 py-1 text-xs font-medium ${typeFilter === t.v ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-600"}`}>{t.l}</button>
-          ))}
+
+      {/* Card de total — destaque */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="rounded-lg border border-border bg-card p-5">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-small-info">
+            <TrendingUp className="h-4 w-4 text-baron-orange" />
+            Valor Total
+          </div>
+          <div className="mt-2 text-3xl font-bold text-baron-orange">{brl(totalValue)}</div>
         </div>
-        <span className="text-sm font-medium text-neutral-900">Total: {brl(totalValue)}</span>
+        <div className="rounded-lg border border-border bg-card p-5">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-small-info">
+            <Package className="h-4 w-4 text-baron-blue" />
+            Itens
+          </div>
+          <div className="mt-2 text-3xl font-bold text-title">{totalItems}</div>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-5">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-small-info">
+            <Package className="h-4 w-4 text-baron-green" />
+            Tipos Ativos
+          </div>
+          <div className="mt-2 text-3xl font-bold text-baron-green">{typeFilter === "todos" ? STOCK_TYPES.length : 1}</div>
+        </div>
       </div>
+
+      {/* Filtros por tipo */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => setTypeFilter("todos")}
+          className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 ${typeFilter === "todos" ? "bg-baron-orange text-white shadow-lg shadow-baron-orange/20" : "bg-secondary/50 text-secondary-info border border-border hover:bg-table-hover hover:text-primary-info"}`}
+        >
+          Todos
+        </button>
+        {STOCK_TYPES.map(t => (
+          <button
+            key={t.v}
+            onClick={() => setTypeFilter(t.v)}
+            className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 ${typeFilter === t.v ? "bg-baron-orange text-white shadow-lg shadow-baron-orange/20" : "bg-secondary/50 text-secondary-info border border-border hover:bg-table-hover hover:text-primary-info"}`}
+          >
+            {t.l}
+          </button>
+        ))}
+      </div>
+
       <DataTable columns={columns} rows={filtered} loading={loading} emptyTitle="Nenhum estoque" emptyDescription="Registre movimentações para criar estoques automaticamente." />
     </div>
   );
