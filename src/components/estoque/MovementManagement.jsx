@@ -51,7 +51,7 @@ export default function MovementManagement() {
     try {
       const [prods, movs] = await Promise.all([
         base44.entities.Product.filter({ active: true }, "name", 500).catch(() => []),
-        base44.entities.Movement.filter({ deleted_at: { $exists: false } }, "-movement_date", 300).catch(() => []),
+        base44.entities.Movement.filter({ deleted_at: null }, "-movement_date", 300).catch(() => []),
       ]);
       setProducts(prods); setRows(movs);
     } catch { toast({ title: "Erro", description: "Falha ao carregar", variant: "destructive" }); }

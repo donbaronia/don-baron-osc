@@ -44,7 +44,7 @@ export default function StockList() {
 
   const load = async () => {
     setLoading(true);
-    try { setRows(await base44.entities.Stock.filter({ deleted_at: { $exists: false } }, "product_name", 500)); }
+    try { setRows(await base44.entities.Stock.filter({ deleted_at: null }, "product_name", 500)); }
     catch { }
     setLoading(false);
   };

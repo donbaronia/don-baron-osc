@@ -79,7 +79,7 @@ export const IE = {
   // ===== INTERNAL: Update Stock =====
   async _updateStock(productId, productName, movementType, quantity, unitCost, stockType, batchNumber, expiryDate, supplierId, supplierName, movementDate) {
     // Buscar ou criar Stock
-    let stocks = await base44.entities.Stock.filter({ product_id: productId, deleted_at: { $exists: false } }, "-created_date", 10).catch(() => []);
+    let stocks = await base44.entities.Stock.filter({ product_id: productId, deleted_at: null }, "-created_date", 10).catch(() => []);
     const effectiveStockType = stockType || (stocks[0]?.stock_type || "materia_prima");
     let stock = stocks.find(s => s.stock_type === effectiveStockType);
 
@@ -240,7 +240,7 @@ export const IE = {
       product_id: productId,
       movement_type: { $in: ["saida", "perda", "quebra", "vencimento", "consumo", "venda"] },
       movement_date: { $gte: thirtyDaysAgo.toISOString() },
-      deleted_at: { $exists: false },
+      deleted_at: null,
     }, "-movement_date", 500).catch(() => []);
 
     const totalConsumption = movements.reduce((s, m) => s + (m.quantity || 0), 0);
@@ -277,8 +277,8 @@ export const IE = {
   // ===== OPERATIONAL DASHBOARD =====
   async getOperationalDashboard() {
     const [stocks, movements, products] = await Promise.all([
-      base44.entities.Stock.filter({ deleted_at: { $exists: false } }, "-created_date", 500).catch(() => []),
-      base44.entities.Movement.filter({ deleted_at: { $exists: false } }, "-movement_date", 500).catch(() => []),
+      base44.entities.Stock.filter({ deleted_at: null }, "-created_date", 500).catch(() => []),
+      base44.entities.Movement.filter({ deleted_at: null }, "-movement_date", 500).catch(() => []),
       base44.entities.Product.filter({ active: true }, "name", 500).catch(() => []),
     ]);
 
@@ -436,8 +436,8 @@ export const IE = {
 
   // ===== ABC CURVE =====
   async getABCCurve(criteria = "valor") {
-    const stocks = await base44.entities.Stock.filter({ deleted_at: { $exists: false } }, "name", 500).catch(() => []);
-    const movements = await base44.entities.Movement.filter({ deleted_at: { $exists: false } }, "-movement_date", 1000).catch(() => []);
+    const stocks = await base44.entities.Stock.filter({ deleted_at: null }, "name", 500).catch(() => []);
+    const movements = await base44.entities.Movement.filter({ deleted_at: null }, "-movement_date", 1000).catch(() => []);
 
     const items = stocks.map(stock => {
       let metric = 0;
@@ -498,7 +498,7 @@ export const IE = {
 
   // ===== EXPIRY ALERTS =====
   async getExpiryAlerts() {
-    const stocks = await base44.entities.Stock.filter({ deleted_at: { $exists: false }, expiry_alert_level: { $ne: "normal" } }, "product_name", 500).catch(() => []);
+    const stocks = await base44.entities.Stock.filter({ deleted_at: null, expiry_alert_level: { $ne: "normal" } }, "product_name", 500).catch(() => []);
 
     const categories = {
       alerta_60: [],
@@ -549,7 +549,7 @@ export const IE = {
     const movements = await base44.entities.Movement.filter({
       product_id: productId,
       movement_type: { $in: ["saida", "consumo", "producao", "venda"] },
-      deleted_at: { $exists: false },
+      deleted_at: null,
     }, "-movement_date", 500).catch(() => []);
 
     if (movements.length === 0) return null;
@@ -611,7 +611,7 @@ export const IE = {
   async getLosses(startDate, endDate) {
     const filter = {
       movement_type: { $in: ["perda", "quebra", "vencimento"] },
-      deleted_at: { $exists: false },
+      deleted_at: null,
     };
     if (startDate) filter.movement_date = { $gte: new Date(startDate).toISOString() };
     if (endDate) { filter.movement_date = filter.movement_date || {}; filter.movement_date.$lte = new Date(endDate).toISOString(); }

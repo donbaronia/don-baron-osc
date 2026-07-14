@@ -45,9 +45,9 @@ export default function InventoryCount() {
     setLoading(true);
     try {
       const [invs, prods, stks] = await Promise.all([
-        base44.entities.Inventory.filter({ deleted_at: { $exists: false } }, "-inventory_date", 100).catch(() => []),
+        base44.entities.Inventory.filter({ deleted_at: null }, "-inventory_date", 100).catch(() => []),
         base44.entities.Product.filter({ active: true }, "name", 500).catch(() => []),
-        base44.entities.Stock.filter({ deleted_at: { $exists: false } }, "product_name", 500).catch(() => []),
+        base44.entities.Stock.filter({ deleted_at: null }, "product_name", 500).catch(() => []),
       ]);
       setRows(invs); setProducts(prods); setStocks(stks);
     } catch { toast({ title: "Erro", description: "Falha ao carregar", variant: "destructive" }); }
