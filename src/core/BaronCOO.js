@@ -13,9 +13,13 @@
 import { IntentEngine } from "./IntentEngine";
 import { ExecutionEngine } from "./ExecutionEngine";
 import { OperationalMemory } from "./OperationalMemory";
+import { PersistenceEngine } from "./PersistenceEngine";
+import { Core } from "@/lib/coreEngine";
+import { todayStr, brl } from "@/lib/financialCenter";
 import { base44 } from "@/api/base44Client";
 
 const CTX_KEY = "baron_coo_context";
+const PENDING_REG_KEY = "baron_pending_registration";
 
 function saveContext(ctx) {
   try { localStorage.setItem(CTX_KEY, JSON.stringify(ctx)); } catch {}
@@ -94,7 +98,54 @@ export const BaronCOO = {
       saveContext({ needsField: result.needsField, parsed });
     }
 
+    // 5. Se precisa cadastrar produto, salvar comando pendente
+    if (result.status === "needs_product_registration" && result.pendingCommand) {
+      try { localStorage.setItem(PENDING_REG_KEY, JSON.stringify(result.pendingCommand)); } catch {}
+      mem.invalidate("Product"); // invalida cache para que a busca encontre o novo produto
+    }
+
     return result;
+  },
+
+  /**
+   * Continua o fluxo após o operador salvar um produto novo.
+   * Cria a transação financeira (se houver preço) + auditoria.
+   * O produto já foi salvo com stock_quantity = quantidade inicial.
+   */
+  async continueAfterProductRegistration(savedProduct, user) {
+    const mem = OperationalMemory;
+    mem.invalidate("Product");
+
+    let pending = null;
+    try { pending = JSON.parse(localStorage.getItem(PENDING_REG_KEY) || "null"); } catch {}
+    try { localStorage.removeItem(PENDING_REG_KEY); } catch {}
+
+    const e = pending?.entities || {};
+    const qty = e.quantity || savedProduct.stock_quantity || 0;
+    const unit = (savedProduct.control_unit || savedProduct.unit || "UN").toUpperCase();
+    const price = e.price || 0;
+    const total = e.price_type === "total" ? price : (price * qty);
+    const supplier = e.supplier || savedProduct.primary_supplier_name || "";
+
+    // Se houver preço, criar a transação financeira da compra
+    if (price > 0) {
+      try {
+        await PersistenceEngine.create("FinancialTransaction", {
+          description: `Compra: ${qty} ${unit} ${savedProduct.name}${supplier ? ` - ${supplier}` : ""}`,
+          type: "a_pagar", amount: total,
+          due_date: todayStr(), payment_date: todayStr(), status: "pago",
+          supplier, origin: "compra", payment_method: e.payment_method || "pix",
+          notes: `Registro via BARON por ${user?.full_name || "Sistema"}`,
+        }, { module: "estoque", origin: "baron", userId: user?.id });
+      } catch {}
+    }
+
+    await Core.audit({ audit_action: "create", module: "estoque", entity_type: "Product", entity_id: savedProduct.id, details: `Cadastro + entrada via BARON: ${qty} ${unit} ${savedProduct.name}${price > 0 ? ` | ${brl(total)}` : ""}${supplier ? ` | ${supplier}` : ""} | Usuário: ${user?.full_name}` });
+
+    return {
+      status: "executed",
+      message: `Entrada concluída.\n${qty} ${unit} ${savedProduct.name} adicionados.\nEstoque atual: ${savedProduct.stock_quantity || qty} ${unit}.`,
+    };
   },
 
   /**

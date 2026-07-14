@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { BaronCOO } from "@/core/BaronCOO";
 import { processDocument } from "@/lib/processamentoIA";
 import { useAuth } from "@/lib/AuthContext";
+import ProductRegistrationModal from "@/components/cadastro/ProductRegistrationModal";
 import { Mic, Paperclip, Camera, Send, Loader2 } from "lucide-react";
 
 const CONV_KEY = "baron_conversation";
@@ -32,6 +33,7 @@ export default function BaronConsole() {
   const [pendingContext, setPendingContext] = useState(null);
   const [ephemeral, setEphemeral] = useState(null);
   const [askLabel, setAskLabel] = useState(null);
+  const [regModal, setRegModal] = useState(null); // { prefill } ou null
   const fileRef = useRef(null);
   const cameraRef = useRef(null);
   const navigate = useNavigate();
@@ -103,6 +105,10 @@ export default function BaronConsole() {
       saveHistory("baron", result.message, result.route);
       setContext({ type: "coo_pending" });
       setAskLabel(FIELD_LABELS[result.needsField] || "Continue...");
+    } else if (result.status === "needs_product_registration") {
+      saveHistory("baron", result.message);
+      setEphemeral({ text: "Abrindo cadastro pré-preenchido...", kind: "info" });
+      setRegModal({ prefill: result.prefill });
     } else if (type === "needs_info") {
       saveHistory("baron", result.message, result.route);
       setEphemeral({ text: result.message, kind: "info" });
@@ -235,6 +241,27 @@ export default function BaronConsole() {
           ))}
         </div>
       )}
+
+      {/* Modal de cadastro pré-preenchido — aberto quando BARON não encontra o produto */}
+      <ProductRegistrationModal
+        open={!!regModal}
+        onClose={() => setRegModal(null)}
+        prefill={regModal?.prefill}
+        onSaved={async (savedProduct) => {
+          setRegModal(null);
+          setLoading(true);
+          try {
+            const res = await BaronCOO.continueAfterProductRegistration(savedProduct, user);
+            saveHistory("baron", res.message);
+            setEphemeral({ text: shortConfirm(res.message), kind: "done" });
+            setContext(null);
+          } catch {
+            setEphemeral({ text: "Produto salvo, mas houve falha ao registrar a entrada. Verifique o estoque.", kind: "error" });
+          } finally {
+            setLoading(false);
+          }
+        }}
+      />
     </div>
   );
 }

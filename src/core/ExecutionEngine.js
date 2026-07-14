@@ -57,11 +57,62 @@ const VALIDATORS = {
 // Executors por intent — usam PersistenceEngine (com read-back)
 // ============================================================
 
+// Normaliza unidade para uppercase (padrão do cadastro)
+const normUnit = (u) => String(u || "UN").toUpperCase();
+
+// Sugere categoria pelo nome do produto
+function guessCategory(name) {
+  const n = String(name || "").toLowerCase();
+  if (/molho|maionese|ketchup|mostarda/.test(n)) return "Molhos";
+  if (/carne|bacon|linguica|presunto|salame|frango|peixe|bovino|suino/.test(n)) return "Carnes";
+  if (/queijo|mussarela|prato|parmesao/.test(n)) return "Laticínios";
+  if (/pao|massa|farinha|trigo/.test(n)) return "Padaria";
+  if (/bebida|refrigerante|coca|suco|agua|cerveja/.test(n)) return "Bebidas";
+  if (/verdura|legume|tomate|cebola|alface|batata|cenoura/.test(n)) return "Hortifruti";
+  if (/embalagem|saco|sacola|copo|bandeja/.test(n)) return "Embalagens";
+  if (/limpeza|detergente|sabao|agua sanitaria/.test(n)) return "Limpeza";
+  return "";
+}
+
+// Constrói o pré-preenchimento do cadastro a partir das entidades extraídas
+function buildProductPrefill(entities) {
+  const unit = normUnit(entities.unit);
+  const price = entities.price || 0;
+  const qty = entities.quantity || 0;
+  const unitPrice = entities.price_type === "total" && qty > 0 ? price / qty : price;
+
+  return {
+    name: (entities.product_name || "").replace(/\b\w/g, (c) => c.toUpperCase()),
+    control_unit: unit,
+    purchase_unit: unit,
+    consumption_unit: unit,
+    unit: unit,
+    stock_quantity: qty,
+    min_quantity: qty > 0 ? Math.ceil(qty * 0.1) : 10,
+    cost_price: unitPrice,
+    last_price: unitPrice,
+    avg_price: unitPrice,
+    primary_supplier_name: entities.supplier || "",
+    preferred_supplier_name: entities.supplier || "",
+    is_raw_material: true,
+    controls_stock: true,
+    active: true,
+    category: guessCategory(entities.product_name),
+    cost_center: "Produção",
+  };
+}
+
 async function execStockEntry(parsed, user, mem) {
   const e = parsed.entities;
   const match = await mem.findProduct(e.product_name);
   if (!match) {
-    return { status: "needs_info", message: `Produto "${e.product_name}" não cadastrado. Abra o cadastro.`, route: "/cadastro" };
+    // NÃO perde o comando — retorna pré-preenchimento para cadastro
+    return {
+      status: "needs_product_registration",
+      prefill: buildProductPrefill(e),
+      pendingCommand: parsed,
+      message: `Produto "${e.product_name}" não cadastrado. Abrindo cadastro pré-preenchido — revise e confirme.`,
+    };
   }
   const product = match.product;
   const purchaseUnit = (e.unit || product.purchase_unit || product.control_unit || "UN").toUpperCase();
