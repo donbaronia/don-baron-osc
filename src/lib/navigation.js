@@ -12,6 +12,7 @@ import {
   FileText,
   Zap,
   History,
+  HeartPulse,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -91,6 +92,12 @@ export const NAV_ITEMS = [
     label: "Configurações",
     icon: Settings,
     path: "/administracao",
+    roles: ["administrador"],
+  },
+  {
+    label: "Saúde do Sistema",
+    icon: HeartPulse,
+    path: "/saude",
     roles: ["administrador"],
   },
   {
