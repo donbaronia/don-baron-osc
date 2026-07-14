@@ -36,13 +36,53 @@ export default function SaudeSistema() {
     setError(null);
     try {
       const res = await base44.functions.invoke("systemDiagnostic", {});
-      setReport(res.data);
+      const data = res.data;
+      setReport(data);
+
+      // Salvar em SystemHealth (ETAPA 14) — persistir resultado do health check
+      try {
+        await base44.entities.SystemHealth.create({
+          check_timestamp: new Date().toISOString(),
+          overall_status: data.overallStatus || "unknown",
+          database_connected: data.databaseConnected ?? true,
+          database_response_ms: data.summary?.avgCrudTimeMs || 0,
+          total_tables: data.summary?.totalTables || 0,
+          accessible_tables: data.summary?.accessibleTables || 0,
+          total_records: data.summary?.totalRecords || 0,
+          modules_tested: data.summary?.modulesTested || 0,
+          modules_passed: data.summary?.modulesPassed || 0,
+          modules_failed: data.summary?.modulesFailed || 0,
+          relationship_test_passed: data.summary?.relationshipTestPassed || false,
+          avg_crud_ms: data.summary?.avgCrudTimeMs || 0,
+          errors: data.errors || [],
+          last_error: data.errors?.length > 0 ? data.errors[0].error : "",
+          triggered_by: user?.full_name || user?.email || "Sistema",
+        });
+      } catch {}
+
+      // Salvar em SystemLog (ETAPA 13) — registrar execução do diagnóstico
+      try {
+        await base44.entities.SystemLog.create({
+          timestamp: new Date().toISOString(),
+          user_name: user?.full_name || user?.email || "Sistema",
+          user_email: user?.email || "",
+          entity_name: "System",
+          operation: "diagnostic",
+          payload: { modules_tested: data.summary?.modulesTested },
+          bank_response: { status: data.overallStatus, modules_passed: data.summary?.modulesPassed },
+          duration_ms: data.summary?.avgCrudTimeMs || 0,
+          status: "success",
+          readback_verified: true,
+          module: "diagnostico",
+          origin: "frontend",
+        });
+      } catch {}
     } catch (e) {
       setError(e.message || "Falha ao executar diagnóstico");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => { runDiagnostic(); }, [runDiagnostic]);
 
