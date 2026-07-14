@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { Core } from "@/lib/coreEngine";
@@ -93,8 +94,13 @@ export default function ProcessamentoDocumentos() {
     const c = getConfidence(d);
     return c.tier === "green" && d.status === "processado";
   });
-  const needReview = documents.filter((d) => d.status === "aguardando_confirmacao");
+  const needReview = documents.filter(
+    (d) => d.status === "aguardando_confirmacao" && d.extracted_data?.pending_action !== "classificacao"
+  );
   const exceptions = needReview;
+  const classificacaoPendentes = documents.filter(
+    (d) => d.status === "aguardando_confirmacao" && d.extracted_data?.pending_action === "classificacao"
+  ).length;
   const processingTimes = documents.map((d) => d.extracted_data?.processing_time_ms).filter(Boolean);
   const avgTimeMs = processingTimes.length > 0 ? processingTimes.reduce((a, b) => a + b, 0) / processingTimes.length : 0;
   const precision = autoApproved.length + needReview.length > 0
@@ -148,7 +154,18 @@ export default function ProcessamentoDocumentos() {
               <h3 className="text-sm font-semibold text-foreground">Fila de Exceções</h3>
               <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-500">{exceptions.length}</span>
             </div>
-            <p className="text-xs text-muted-foreground">O BARON já processou o restante automaticamente.</p>
+            <div className="flex items-center gap-3">
+              <p className="text-xs text-muted-foreground">O BARON já processou o restante automaticamente.</p>
+              {classificacaoPendentes > 0 && (
+                <Link
+                  to="/pendencias-ia"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-baron-yellow/30 bg-baron-yellow/10 px-2.5 py-1 text-xs font-medium text-baron-yellow hover:bg-baron-yellow/15 transition-colors"
+                >
+                  <Brain className="h-3 w-3" />
+                  {classificacaoPendentes} pendência(s) de classificação
+                </Link>
+              )}
+            </div>
           </div>
           {loading ? (
             <div className="space-y-2">

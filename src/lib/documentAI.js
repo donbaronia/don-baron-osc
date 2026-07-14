@@ -5,7 +5,23 @@ const EXTRACTION_SCHEMA = {
   properties: {
     document_type: {
       type: "string",
-      "enum": ["nota_fiscal", "boleto", "comprovante_pix", "comprovante_bancario", "contrato", "relatorio_ifood", "relatorio_financeiro", "relatorio_bancario", "pedido_compra", "orcamento", "recibo", "xml", "planilha", "imagem", "documento_interno", "outros"],
+      "enum": ["nota_fiscal", "boleto", "nota_boleto", "cupom_fiscal", "comprovante_pix", "comprovante_bancario", "contrato", "relatorio_ifood", "relatorio_financeiro", "relatorio_bancario", "pedido_compra", "orcamento", "recibo", "xml", "planilha", "imagem", "documento_interno", "outros"],
+    },
+    classification_confidence: {
+      type: "number",
+      "description": "Grau de certeza (0-100) sobre o TIPO do documento identificado. Considere 95+ quando o layout e os campos são inequívocos; 70-94 quando há ambiguidade; <70 quando incerto."
+    },
+    classification_reasoning: {
+      type: "string",
+      "description": "Motivo conciso da classificação em português (ex: 'Boleto com linha digitável de 47 dígitos e logotipo do banco')."
+    },
+    has_products: {
+      type: "boolean",
+      "description": "true se o documento contém linhas de itens/produtos (notas, cupons, pedidos)."
+    },
+    has_payment_info: {
+      type: "boolean",
+      "description": "true se o documento contém dados de pagamento (linha digitável, código de barras, PIX copia e cola, comprovante)."
     },
     supplier: { type: "string", description: "Nome do fornecedor ou emitente" },
     cnpj: { type: "string" },
@@ -68,9 +84,12 @@ const PROMPT = `Voce e um especialista em analise de documentos fiscais e financ
 
 Analise o documento enviado e extraia TODAS as informacoes relevantes.
 
-Primeiro, identifique o tipo do documento:
-- nota_fiscal: Nota Fiscal (NFe, NFCe, NFS-e, cupom fiscal, DANFE)
-- boleto: Boleto Bancario
+ETAPA 1 - CLASSIFICACAO (antes de extrair campos):
+Identifique o TIPO do documento com o maximo de certeza possivel:
+- nota_fiscal: Nota Fiscal (NFe, NFCe, NFS-e, DANFE) — apenas a nota, SEM boleto anexo
+- boleto: Boleto Bancario — apenas o boleto, SEM nota
+- nota_boleto: Documento HIBRIDO que contem a Nota Fiscal E o boleto/linha digitavel juntos (DANFE com boleto na mesma pagina)
+- cupom_fiscal: Cupom Fiscal (ECF / NFCe simplificado)
 - comprovante_pix: Comprovante de transferencia PIX
 - comprovante_bancario: Comprovante bancario (transferencia, deposito)
 - contrato: Contrato
@@ -85,6 +104,14 @@ Primeiro, identifique o tipo do documento:
 - imagem: Imagem ou captura de tela
 - documento_interno: Documento interno da empresa
 - outros: Qualquer outro tipo
+
+Preencha OBRIGATORIAMENTE:
+- classification_confidence: grau de certeza (0-100) SOBRE O TIPO. Use 95+ quando o layout for inequivoco; 70-94 quando houver ambiguidade; <70 quando incerto. Se houver produtos E dados de pagamento no mesmo documento, considere nota_boleto.
+- classification_reasoning: motivo curto da classificacao em portugues.
+- has_products: true se existem linhas de itens/produtos.
+- has_payment_info: true se existem dados de pagamento (linha digitavel, codigo de barras, PIX copia e cola, comprovante).
+
+CRITICO: um boleto NUNCA deve ser tratado como nota fiscal. Se o documento e so boleto (sem lista de produtos), use document_type=boleto. Se e so nota (sem linha digitavel/boleto), use nota_fiscal. Se tem os dois, use nota_boleto.
 
 CAMPOS GERAIS — extraia sempre que disponivel:
 - Fornecedor/emitente (nome completo da empresa)

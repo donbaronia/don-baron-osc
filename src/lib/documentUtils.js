@@ -1,6 +1,8 @@
 export const DOCUMENT_CATEGORIES = [
   { value: "nota_fiscal", label: "Nota Fiscal", emoji: "🧾" },
   { value: "boleto", label: "Boleto", emoji: "📄" },
+  { value: "nota_boleto", label: "Nota + Boleto", emoji: "🔀" },
+  { value: "cupom_fiscal", label: "Cupom Fiscal", emoji: "🧾" },
   { value: "comprovante_pix", label: "Comprovante PIX", emoji: "💸" },
   { value: "comprovante_bancario", label: "Comprovante Bancário", emoji: "🏦" },
   { value: "contrato", label: "Contrato", emoji: "📋" },

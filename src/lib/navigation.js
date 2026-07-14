@@ -13,6 +13,7 @@ import {
   Zap,
   History,
   HeartPulse,
+  Brain,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -39,6 +40,12 @@ export const NAV_ITEMS = [
     icon: FileText,
     path: "/documentos-financeiros",
     roles: ["administrador", "financeiro", "gerencia", "compras"],
+  },
+  {
+    label: "Pendências da IA",
+    icon: Brain,
+    path: "/pendencias-ia",
+    roles: ["administrador", "financeiro", "gerencia", "compras", "estoque"],
   },
   {
     label: "Estoque",

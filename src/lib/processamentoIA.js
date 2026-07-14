@@ -14,9 +14,19 @@ import { detectDuplicate, detectPriceChanges, generateAlerts } from "@/lib/docum
 import { Core } from "@/lib/coreEngine";
 import { todayStr } from "@/lib/financialCenter";
 import { loadAutomationConfig } from "@/lib/automationConfig";
+import {
+  classifyDocument,
+  classificationMeta,
+  FINANCIAL_TYPES,
+  STOCK_TYPES,
+  PAYMENT_TYPES,
+  CLASSIFICATION_THRESHOLD,
+} from "@/lib/documentClassifier";
 
-const BOLETO_TYPES = ["boleto", "comprovante_pix", "comprovante_bancario"];
-const NF_TYPES = ["nota_fiscal", "xml"];
+// Fluxo financeiro puro (somente criar Contas a Pagar, sem tocar estoque)
+const FINANCIAL_ONLY_TYPES = ["boleto", "comprovante_pix", "comprovante_bancario"];
+// Fluxo de estoque puro (atualizar estoque + custo + CMV, sem criar conta a pagar)
+const STOCK_ONLY_TYPES = ["nota_fiscal", "cupom_fiscal", "xml"];
 
 function nameSimilarity(a, b) {
   if (!a || !b) return 0;
@@ -80,13 +90,13 @@ export function calculateConfidence(extracted, divergencias, docType) {
   if (!extracted.supplier) { score -= 10; reasons.push("Fornecedor não identificado"); }
   if (!extracted.value || extracted.value <= 0) { score -= 15; reasons.push("Valor não extraído"); }
 
-  if (BOLETO_TYPES.includes(docType)) {
+  if (FINANCIAL_ONLY_TYPES.includes(docType)) {
     if (!extracted.linha_digitavel && !extracted.codigo_barras && !extracted.pix_copia_cola) {
       score -= 15; reasons.push("Linha digitável / código de barras / PIX ausente");
     }
   }
 
-  if (NF_TYPES.includes(docType)) {
+  if (STOCK_ONLY_TYPES.includes(docType)) {
     if (!extracted.products || extracted.products.length === 0) {
       score -= 20; reasons.push("Produtos não extraídos da nota");
     }
@@ -260,6 +270,176 @@ async function processarNotaFiscal(doc, extracted, user, config) {
   return { routed: "estoque", auto: false, divergencias, alerts: allAlerts, confidence, productMatches: matches, partialProcessed };
 }
 
+/**
+ * Fluxo HÍBRIDO — Nota + Boleto no mesmo documento.
+ * Executa simultaneamente:
+ *  - Fluxo Financeiro: criar Contas a Pagar + anexar boleto
+ *  - Fluxo Estoque: atualizar estoque + custo médio + CMV
+ * E cria o VÍNCULO entre a nota e o boleto para futura consulta.
+ */
+async function processarNotaBoleto(doc, extracted, user, config) {
+  // --- Fluxo Financeiro ---
+  const { divergencias: finDivs } = await validarBoleto(doc, extracted);
+  const paymentReady =
+    config.auto_create_accounts && extracted.value > 0 && finDivs.filter((d) => d.severity === "critica").length === 0;
+
+  let payment = null;
+  if (paymentReady) {
+    payment = await base44.entities.Payment.create({
+      description: `${extracted.supplier || "Documento"}${extracted.document_number ? ` - ${extracted.document_number}` : ""}`.trim(),
+      supplier_name: extracted.supplier || "",
+      amount: extracted.value,
+      issue_date: extracted.document_date || todayStr(),
+      due_date: extracted.due_date || "",
+      bank: extracted.bank || "",
+      pix_key: extracted.pix_copia_cola || "",
+      barcode: extracted.codigo_barras || extracted.linha_digitavel || "",
+      document_number: extracted.document_number || "",
+      document_id: doc.id,
+      payment_method: "boleto",
+      status: "pendente",
+    });
+    await Core.audit({
+      audit_action: "create", module: "financeiro", entity_type: "Payment",
+      entity_id: payment.id, details: `Conta a pagar criada via híbrido: ${payment.description} - ${payment.amount}`,
+    });
+  }
+
+  // --- Fluxo Estoque ---
+  const products = extracted.products || [];
+  const allProducts = await base44.entities.Product.filter({ active: true }, "-created_date", 500).catch(() => []);
+  const matches = products.map((p) => ({ noteProduct: p, match: matchProduct(p.name, allProducts) }));
+  const unmatched = matches.filter((m) => !m.match || m.match.confidence < 0.85);
+  const matched = matches.filter((m) => m.match && m.match.confidence >= 0.85);
+  const priceChanges = await detectPriceChanges({ ...doc, products });
+
+  const stockDivs = [];
+  if (unmatched.length > 0)
+    stockDivs.push({ type: "produtos_novos", severity: "alta", message: `${unmatched.length} produto(s) sem correspondência: ${unmatched.slice(0, 3).map((m) => m.noteProduct.name).join(", ")}` });
+  for (const pc of priceChanges) {
+    if (Math.abs(pc.change_pct) > 20)
+      stockDivs.push({ type: "preco_alterado", severity: "media", message: `${pc.product_name}: preço ${pc.change_pct > 0 ? "+" : ""}${pc.change_pct.toFixed(0)}% vs histórico` });
+  }
+
+  const processedProducts = [];
+  if (config.auto_update_stock && matched.length > 0) {
+    for (const m of matched) {
+      const prod = m.match.product;
+      const newQty = (prod.stock_quantity || 0) + (m.noteProduct.quantity || 0);
+      const newCost = m.noteProduct.unit_price || prod.cost_price;
+      await base44.entities.Product.update(prod.id, {
+        stock_quantity: newQty,
+        cost_price: newCost,
+        primary_supplier_name: extracted.supplier || prod.primary_supplier_name,
+      });
+      if (config.learn_aliases && m.noteProduct.name && m.noteProduct.name.toLowerCase() !== prod.name.toLowerCase()) {
+        await learnAlias(prod.id, m.noteProduct.name, extracted.supplier);
+      }
+      processedProducts.push({ name: prod.name, quantity: m.noteProduct.quantity });
+    }
+  }
+
+  // --- Vínculo + consolidação ---
+  const allDivs = [...finDivs, ...stockDivs];
+  const related = payment
+    ? [{ entity_type: "Payment", entity_id: payment.id, entity_name: payment.description, relationship: "conta_a_pagar_boleto" }]
+    : [];
+  const allResolved = unmatched.length === 0 && paymentReady;
+  const confidence = calculateConfidence(extracted, allDivs, "nota_boleto");
+
+  const alerts = generateAlerts(doc, { duplicate: null, priceChanges, newProducts: unmatched.map((m) => m.noteProduct.name) });
+  const allAlerts = [...alerts, ...allDivs.map((d) => ({ type: d.type, severity: d.severity === "critica" ? "urgent" : "warning", message: d.message }))];
+
+  if (allResolved) {
+    await base44.entities.DBDocument.update(doc.id, {
+      status: "processado",
+      confirmed_by: "BARON IA",
+      confirmed_at: new Date().toISOString(),
+      alerts: allAlerts,
+      related_entities: related,
+      ia_analysis: { price_changes: priceChanges, new_products: [], inconsistencies: [], processed_products: processedProducts, payment_id: payment?.id },
+    });
+    await Core.audit({ audit_action: "confirm", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Híbrido processado | Conta a pagar: ${payment?.id} | Estoque: ${processedProducts.length} itens` });
+    return { routed: "híbrido", auto: true, paymentId: payment?.id, divergencias: [], alerts: allAlerts, confidence, productMatches: matches };
+  }
+
+  // Parcial: criou conta a pagar e/ou deu entrada parcial, mas restam pendências
+  const pendingParts = [];
+  if (!paymentReady) pendingParts.push("conta a pagar não criada (validação financeira)");
+  if (unmatched.length > 0) pendingParts.push(`${unmatched.length} produto(s) sem cadastro`);
+
+  await base44.entities.DBDocument.update(doc.id, {
+    status: "aguardando_confirmacao",
+    alerts: allAlerts,
+    related_entities: related,
+    pending_reason: `Híbrido — ${pendingParts.join("; ")}`,
+    ia_analysis: { price_changes: priceChanges, new_products: unmatched.map((m) => m.noteProduct.name), inconsistencies: allDivs, processed_products: processedProducts, payment_id: payment?.id },
+  });
+  await Core.audit({ audit_action: "update", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Híbrido em revisão | Conta a pagar: ${payment ? "criada" : "pendente"} | Estoque: ${processedProducts.length} itens, ${unmatched.length} pendentes` });
+
+  return { routed: "híbrido", auto: false, paymentId: payment?.id, divergencias: allDivs, alerts: allAlerts, confidence, productMatches: matches, partialProcessed: processedProducts.length > 0 };
+}
+
+/**
+ * Re-roteia um documento já extraído após decisão humana (Pendências da IA).
+ * Não reenvia nem reprocessa o arquivo — reusa os dados já extraídos.
+ * chosenType: "boleto" | "nota_fiscal" | "nota_boleto" | "outros"
+ */
+export async function rerouteDocument(docId, chosenType, user) {
+  const doc = await base44.entities.DBDocument.get(docId);
+  const extracted = {
+    ...(doc.extracted_data || {}),
+    supplier: doc.supplier,
+    cnpj: doc.cnpj,
+    cpf: doc.cpf,
+    document_number: doc.document_number,
+    chave_nota: doc.chave_nota,
+    value: doc.value,
+    document_date: doc.document_date,
+    due_date: doc.due_date,
+    bank: doc.bank,
+    linha_digitavel: doc.linha_digitavel,
+    codigo_barras: doc.codigo_barras,
+    pix_copia_cola: doc.pix_copia_cola,
+    beneficiario: doc.beneficiario,
+    products: doc.products,
+    taxes: doc.taxes,
+    freight: doc.freight,
+    category: chosenType,
+    document_type: chosenType,
+  };
+  const config = await loadAutomationConfig();
+  const meta = classificationMeta(chosenType);
+
+  await base44.entities.DBDocument.update(doc.id, {
+    classification: chosenType,
+    classification_confidence: 100,
+    pending_reason: "",
+    status: "em_analise",
+  });
+
+  let route;
+  if (FINANCIAL_ONLY_TYPES.includes(chosenType)) {
+    route = await processarBoleto(doc, extracted, user, config);
+  } else if (STOCK_ONLY_TYPES.includes(chosenType)) {
+    route = await processarNotaFiscal(doc, extracted, user, config);
+  } else if (chosenType === "nota_boleto") {
+    route = await processarNotaBoleto(doc, extracted, user, config);
+  } else {
+    // "outros" — arquiva como processado (decisão humana explícita)
+    await base44.entities.DBDocument.update(doc.id, {
+      status: "processado",
+      confirmed_by: user?.full_name || "Operador",
+      confirmed_at: new Date().toISOString(),
+      pending_reason: "",
+    });
+    route = { routed: "documento", auto: true, divergencias: [], alerts: [], confidence: { score: 100, tier: "green", reasons: [] } };
+  }
+
+  await Core.audit({ audit_action: "update", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Re-roteado por operador (${user?.full_name || "Sistema"}) para: ${meta.label}` });
+  return route;
+}
+
 export async function processDocument(file, user) {
   const t0 = Date.now();
   const config = await loadAutomationConfig();
@@ -294,36 +474,79 @@ export async function processDocument(file, user) {
   const title = mapped.supplier ? `${mapped.supplier}${mapped.document_date ? ` - ${mapped.document_date}` : ""}` : file.name;
   const processingTimeMs = Date.now() - t0;
 
+  // --- Classificador Inteligente (ETAPA 1) ---
+  const classification = classifyDocument(extracted);
+
   await base44.entities.DBDocument.update(doc.id, {
     ...mapped,
-    extracted_data: { ...extracted, confidence_score: 0, confidence_tier: "yellow", processing_time_ms: processingTimeMs },
+    classification: classification.routed_type,
+    classification_confidence: classification.confidence,
+    extracted_data: {
+      ...extracted,
+      confidence_score: 0,
+      confidence_tier: "yellow",
+      processing_time_ms: processingTimeMs,
+      classification_signals: {
+        routed_type: classification.routed_type,
+        confidence: classification.confidence,
+        has_products: classification.has_products,
+        has_payment: classification.has_payment,
+        reasons: classification.reasons,
+      },
+    },
     title,
   });
-  const fullDoc = { ...doc, ...mapped, id: doc.id, title };
+  const fullDoc = { ...doc, ...mapped, id: doc.id, title, classification: classification.routed_type };
 
+  // --- Duplicata é bloqueio absoluto (ETAPA 4) ---
   const duplicate = await detectDuplicate(fullDoc);
-  const docType = (mapped.category || extracted.document_type || "").toLowerCase();
   let route;
 
   if (duplicate) {
+    const reason = `Documento duplicado de ${duplicate.title}`;
     await base44.entities.DBDocument.update(doc.id, {
       status: "aguardando_confirmacao",
       duplicate_of: duplicate.id,
+      pending_reason: reason,
       alerts: [{ type: "duplicate", severity: "urgent", message: `Documento duplicado: ${duplicate.title}` }],
       extracted_data: { ...extracted, confidence_score: 35, confidence_tier: "red", processing_time_ms: Date.now() - t0, confidence_reasons: ["Duplicidade detectada"] },
     });
     route = { routed: "pendencia", auto: false, divergencias: [{ type: "duplicata", severity: "critica", message: "Documento duplicado" }], alerts: [{ type: "duplicate", severity: "urgent", message: `Documento duplicado: ${duplicate.title}` }], confidence: { score: 35, tier: "red", reasons: ["Duplicidade"] } };
-  } else if (BOLETO_TYPES.includes(docType)) {
-    route = await processarBoleto(fullDoc, mapped, user, config);
-  } else if (NF_TYPES.includes(docType)) {
-    route = await processarNotaFiscal(fullDoc, mapped, user, config);
-  } else {
+  } else if (classification.needs_human_review) {
+    // --- ETAPA 3: confiança abaixo do limiar → Pendências da IA ---
+    const reason = classification.reasons.length > 0
+      ? `Classificação incerta (${classification.confidence}%): ${classification.reasons.join("; ")}`
+      : `Classificação incerta (${classification.confidence}%) — confirme o tipo do documento`;
     await base44.entities.DBDocument.update(doc.id, {
       status: "aguardando_confirmacao",
-      alerts: [{ type: "manual_review", severity: "warning", message: "Documento sem roteamento automático — revise e aprove manualmente" }],
-      extracted_data: { ...extracted, confidence_score: 50, confidence_tier: "yellow", processing_time_ms: Date.now() - t0 },
+      pending_reason: reason,
+      alerts: [{ type: "classificacao_incerta", severity: "warning", message: reason }],
+      extracted_data: {
+        ...extracted,
+        confidence_score: classification.confidence,
+        confidence_tier: classification.confidence >= 70 ? "yellow" : "red",
+        processing_time_ms: Date.now() - t0,
+        pending_action: "classificacao",
+      },
     });
-    route = { routed: "documento", auto: false, divergencias: [{ type: "manual_review", severity: "media", message: "Tipo não roteado automaticamente" }], alerts: [{ type: "manual_review", severity: "warning", message: "Documento sem roteamento automático" }], confidence: { score: 50, tier: "yellow", reasons: ["Tipo não roteado"] } };
+    await Core.audit({ audit_action: "update", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Enviado para Pendências da IA | Tipo: ${classificationMeta(classification.routed_type).label} | Confiança: ${classification.confidence}%` });
+    route = { routed: "pendencia_classificacao", auto: false, divergencias: [{ type: "classificacao_incerta", severity: "media", message: reason }], alerts: [{ type: "classificacao_incerta", severity: "warning", message: reason }], confidence: { score: classification.confidence, tier: classification.confidence >= 70 ? "yellow" : "red", reasons: classification.reasons }, classification };
+  } else if (FINANCIAL_ONLY_TYPES.includes(classification.routed_type)) {
+    route = await processarBoleto(fullDoc, mapped, user, config);
+  } else if (STOCK_ONLY_TYPES.includes(classification.routed_type)) {
+    route = await processarNotaFiscal(fullDoc, mapped, user, config);
+  } else if (classification.routed_type === "nota_boleto") {
+    route = await processarNotaBoleto(fullDoc, mapped, user, config);
+  } else {
+    // Outros tipos roteáveis (orçamento, pedido, etc.) — confiança alta → arquiva como processado
+    await base44.entities.DBDocument.update(doc.id, {
+      status: "processado",
+      confirmed_by: "BARON IA",
+      confirmed_at: new Date().toISOString(),
+      alerts: [{ type: "manual_review", severity: "info", message: `Arquivado como ${classificationMeta(classification.routed_type).label} (sem roteamento financeiro/estoque)` }],
+      extracted_data: { ...extracted, confidence_score: classification.confidence, confidence_tier: "green", processing_time_ms: Date.now() - t0 },
+    });
+    route = { routed: "documento", auto: true, divergencias: [], alerts: [], confidence: { score: classification.confidence, tier: "green", reasons: classification.reasons } };
   }
 
   // Persistir confiança final no extracted_data
