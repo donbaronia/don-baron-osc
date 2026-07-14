@@ -4,45 +4,88 @@
 
 @layer base {
   :root {
-    /* Fundo — nunca preto puro */
+    /* === PALETA OFICIAL DON BARON ENTERPRISE 2.0 === */
+
+    /* Fundo principal — #0F1115 */
     --background: 220 17% 7%;
     --foreground: 210 40% 98%;
 
-    /* Cards — #181C22 com borda #262C36 */
+    /* Cards — #181C22 / Hover — #1F2630 */
     --card: 216 17% 11%;
+    --card-hover: 215 21% 15%;
     --card-foreground: 210 40% 98%;
     --popover: 216 17% 11%;
     --popover-foreground: 210 40% 98%;
 
-    /* Baron Orange — primário */
+    /* Laranja Baron — #FF7A00 / Hover — #FF9B3F */
     --primary: 29 100% 50%;
     --primary-foreground: 0 0% 100%;
+    --baron-orange: 29 100% 50%;
+    --baron-orange-hover: 29 100% 62%;
 
-    /* Secundário — cinza escuro elegante */
+    /* Azul Intelligence — #3B82F6 */
+    --baron-blue: 217 91% 60%;
+
+    /* Verde — #22C55E */
+    --baron-green: 142 71% 45%;
+
+    /* Vermelho — #EF4444 */
+    --baron-red: 0 84% 60%;
+
+    /* Roxo / Rosa / Amarelo (acesso semântico) */
+    --baron-purple: 280 65% 60%;
+    --baron-pink: 330 80% 65%;
+    --baron-yellow: 44 96% 56%;
+
+    /* Branco — #F8FAFC */
+    --baron-white: 210 40% 98%;
+
+    /* Texto Secundário — #AAB2BF */
+    --text-title: 0 0% 100%;
+    --text-primary: 210 40% 98%;
+    --text-secondary: 218 19% 81%;
+    --text-small: 217 14% 60%;
+    --text-gray: 217 14% 71%;
+
+    /* Sidebar — #13171D */
+    --sidebar-background: 216 21% 9%;
+    --sidebar-foreground: 217 14% 71%;
+    --sidebar-primary: 29 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 218 23% 16%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 21% 21%;
+    --sidebar-ring: 29 100% 50%;
+
+    /* Header — #171B22 */
+    --table-header: 218 19% 11%;
+    --table-row: 216 21% 9%;
+    --table-hover: 218 23% 16%;
+    --table-border: 218 17% 14%;
+
+    /* Linhas — #2B3442 */
+    --border: 217 21% 21%;
+    --input: 217 21% 21%;
+    --ring: 29 100% 50%;
+
+    /* Secundário */
     --secondary: 218 23% 16%;
     --secondary-foreground: 210 40% 98%;
-
     --muted: 218 23% 16%;
     --muted-foreground: 217 14% 60%;
-
     --accent: 29 100% 50%;
     --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 100% 68%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 218 17% 18%;
-    --input: 218 17% 18%;
-    --ring: 29 100% 50%;
 
     /* Gráficos */
     --chart-1: 29 100% 50%;
-    --chart-2: 157 80% 43%;
-    --chart-3: 218 100% 65%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 217 91% 60%;
     --chart-4: 280 65% 60%;
-    --chart-5: 0 100% 68%;
+    --chart-5: 0 84% 60%;
 
-    --radius: 0.625rem;
+    --radius: 0.5rem;
 
     /* Tipografia */
     --font-heading: ui-sans-serif, system-ui, sans-serif;
@@ -50,66 +93,32 @@
     --font-display: ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-    /* Sidebar */
-    --sidebar-background: 216 17% 9%;
-    --sidebar-foreground: 217 14% 71%;
-    --sidebar-primary: 29 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 218 23% 16%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 218 17% 18%;
-    --sidebar-ring: 29 100% 50%;
-
-    /* Hierarquia de texto Baron */
-    --text-title: 0 0% 100%;
-    --text-primary: 210 40% 98%;
-    --text-secondary: 218 19% 81%;
-    --text-small: 217 14% 60%;
-    --text-gray: 217 14% 71%;
-
-    /* Tabela estilo Bloomberg */
-    --table-header: 218 19% 11%;
-    --table-row: 216 21% 9%;
-    --table-hover: 218 23% 16%;
-    --table-border: 218 17% 14%;
-
-    /* Identidade Baron */
-    --baron-orange: 29 100% 50%;
-    --baron-orange-hover: 29 100% 58%;
-    --baron-blue: 218 100% 65%;
-    --baron-green: 157 80% 43%;
-    --baron-red: 0 100% 68%;
-    --baron-purple: 280 65% 60%;
-    --baron-pink: 330 80% 65%;
-    --baron-yellow: 44 96% 56%;
-    --baron-white: 210 40% 98%;
-
     /* Tags semânticas */
-    --tag-materia-bg: 218 100% 65%;
+    --tag-materia-bg: 217 91% 60%;
     --tag-materia-fg: 0 0% 100%;
     --tag-producao-bg: 280 65% 60%;
     --tag-producao-fg: 0 0% 100%;
-    --tag-acabado-bg: 157 80% 43%;
+    --tag-acabado-bg: 142 71% 45%;
     --tag-acabado-fg: 0 0% 100%;
-    --tag-perdas-bg: 0 100% 68%;
+    --tag-perdas-bg: 0 84% 60%;
     --tag-perdas-fg: 0 0% 100%;
     --tag-marketing-bg: 330 80% 65%;
     --tag-marketing-fg: 0 0% 100%;
     --tag-escritorio-bg: 217 14% 71%;
     --tag-escritorio-fg: 216 17% 11%;
 
-    /* Legado Baron (compat) */
-    --baron-success: 157 80% 43%;
+    /* Compat legado */
+    --baron-success: 142 71% 45%;
     --baron-alert: 44 96% 56%;
-    --baron-error: 0 100% 68%;
-    --baron-menu: 216 17% 9%;
+    --baron-error: 0 84% 60%;
+    --baron-menu: 216 21% 9%;
 
     /* BDS */
-    --bds-save: 157 80% 43%;
+    --bds-save: 142 71% 45%;
     --bds-save-fg: 0 0% 100%;
     --bds-cancel: 218 23% 16%;
     --bds-cancel-fg: 218 19% 81%;
-    --bds-delete: 0 100% 68%;
+    --bds-delete: 0 84% 60%;
     --bds-delete-fg: 0 0% 100%;
     --bds-edit: 29 100% 50%;
     --bds-edit-fg: 0 0% 100%;
@@ -125,74 +134,75 @@
     --background: 220 17% 7%;
     --foreground: 210 40% 98%;
     --card: 216 17% 11%;
+    --card-hover: 215 21% 15%;
     --card-foreground: 210 40% 98%;
     --popover: 216 17% 11%;
     --popover-foreground: 210 40% 98%;
     --primary: 29 100% 50%;
     --primary-foreground: 0 0% 100%;
+    --baron-orange: 29 100% 50%;
+    --baron-orange-hover: 29 100% 62%;
+    --baron-blue: 217 91% 60%;
+    --baron-green: 142 71% 45%;
+    --baron-red: 0 84% 60%;
+    --baron-purple: 280 65% 60%;
+    --baron-pink: 330 80% 65%;
+    --baron-yellow: 44 96% 56%;
+    --baron-white: 210 40% 98%;
+    --text-title: 0 0% 100%;
+    --text-primary: 210 40% 98%;
+    --text-secondary: 218 19% 81%;
+    --text-small: 217 14% 60%;
+    --text-gray: 217 14% 71%;
+    --sidebar-background: 216 21% 9%;
+    --sidebar-foreground: 217 14% 71%;
+    --sidebar-primary: 29 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 218 23% 16%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 21% 21%;
+    --sidebar-ring: 29 100% 50%;
+    --table-header: 218 19% 11%;
+    --table-row: 216 21% 9%;
+    --table-hover: 218 23% 16%;
+    --table-border: 218 17% 14%;
+    --border: 217 21% 21%;
+    --input: 217 21% 21%;
+    --ring: 29 100% 50%;
     --secondary: 218 23% 16%;
     --secondary-foreground: 210 40% 98%;
     --muted: 218 23% 16%;
     --muted-foreground: 217 14% 60%;
     --accent: 29 100% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 100% 68%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 218 17% 18%;
-    --input: 218 17% 18%;
-    --ring: 29 100% 50%;
     --chart-1: 29 100% 50%;
-    --chart-2: 157 80% 43%;
-    --chart-3: 218 100% 65%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 217 91% 60%;
     --chart-4: 280 65% 60%;
-    --chart-5: 0 100% 68%;
-    --sidebar-background: 216 17% 9%;
-    --sidebar-foreground: 217 14% 71%;
-    --sidebar-primary: 29 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 218 23% 16%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 218 17% 18%;
-    --sidebar-ring: 29 100% 50%;
-    --text-title: 0 0% 100%;
-    --text-primary: 210 40% 98%;
-    --text-secondary: 218 19% 81%;
-    --text-small: 217 14% 60%;
-    --text-gray: 217 14% 71%;
-    --table-header: 218 19% 11%;
-    --table-row: 216 21% 9%;
-    --table-hover: 218 23% 16%;
-    --table-border: 218 17% 14%;
-    --baron-orange: 29 100% 50%;
-    --baron-orange-hover: 29 100% 58%;
-    --baron-blue: 218 100% 65%;
-    --baron-green: 157 80% 43%;
-    --baron-red: 0 100% 68%;
-    --baron-purple: 280 65% 60%;
-    --baron-pink: 330 80% 65%;
-    --baron-yellow: 44 96% 56%;
-    --baron-white: 210 40% 98%;
-    --tag-materia-bg: 218 100% 65%;
+    --chart-5: 0 84% 60%;
+    --tag-materia-bg: 217 91% 60%;
     --tag-materia-fg: 0 0% 100%;
     --tag-producao-bg: 280 65% 60%;
     --tag-producao-fg: 0 0% 100%;
-    --tag-acabado-bg: 157 80% 43%;
+    --tag-acabado-bg: 142 71% 45%;
     --tag-acabado-fg: 0 0% 100%;
-    --tag-perdas-bg: 0 100% 68%;
+    --tag-perdas-bg: 0 84% 60%;
     --tag-perdas-fg: 0 0% 100%;
     --tag-marketing-bg: 330 80% 65%;
     --tag-marketing-fg: 0 0% 100%;
     --tag-escritorio-bg: 217 14% 71%;
     --tag-escritorio-fg: 216 17% 11%;
-    --baron-success: 157 80% 43%;
+    --baron-success: 142 71% 45%;
     --baron-alert: 44 96% 56%;
-    --baron-error: 0 100% 68%;
-    --baron-menu: 216 17% 9%;
-    --bds-save: 157 80% 43%;
+    --baron-error: 0 84% 60%;
+    --baron-menu: 216 21% 9%;
+    --bds-save: 142 71% 45%;
     --bds-save-fg: 0 0% 100%;
     --bds-cancel: 218 23% 16%;
     --bds-cancel-fg: 218 19% 81%;
-    --bds-delete: 0 100% 68%;
+    --bds-delete: 0 84% 60%;
     --bds-delete-fg: 0 0% 100%;
     --bds-edit: 29 100% 50%;
     --bds-edit-fg: 0 0% 100%;
@@ -216,7 +226,7 @@
 }
 
 @layer components {
-  /* Texto hierárquico Baron */
+  /* Hierarquia de texto Baron */
   .text-title { color: hsl(var(--text-title)); }
   .text-primary-info { color: hsl(var(--text-primary)); }
   .text-secondary-info { color: hsl(var(--text-secondary)); }
