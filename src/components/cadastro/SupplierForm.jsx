@@ -126,17 +126,17 @@ export default function SupplierForm({ open, onClose, supplier, onSaved }) {
             <Label>Observações</Label>
             <Textarea value={form.notes} onChange={(e) => set("notes", e.target.value)} className="mt-1.5" rows={2} />
           </div>
-          <div className="flex items-center justify-between rounded-lg border border-neutral-200 p-3">
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div>
-              <p className="text-sm font-medium text-neutral-900">Fornecedor Ativo</p>
-              <p className="text-xs text-neutral-500">Disponível para novos pedidos</p>
+              <p className="text-sm font-medium text-primary-info">Fornecedor Ativo</p>
+              <p className="text-xs text-small-info">Disponível para novos pedidos</p>
             </div>
             <Switch checked={form.active} onCheckedChange={() => setForm((f) => ({ ...f, active: !f.active }))} />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button onClick={save} disabled={saving || !form.name} className="bg-neutral-900 hover:bg-neutral-800">
+          <Button onClick={save} disabled={saving || !form.name}>
             {saving ? "Salvando..." : "Salvar Fornecedor"}
           </Button>
         </DialogFooter>

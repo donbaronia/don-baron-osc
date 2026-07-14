@@ -42,10 +42,10 @@ const EMPTY = {
 
 function SwitchCard({ label, desc, checked, onChange }) {
   return (
-    <div className="flex items-center justify-between rounded-lg border border-neutral-200 p-3">
+    <div className="flex items-center justify-between rounded-lg border border-border p-3">
       <div className="pr-3">
-        <p className="text-sm font-medium text-neutral-900">{label}</p>
-        <p className="text-xs text-neutral-500">{desc}</p>
+        <p className="text-sm font-medium text-primary-info">{label}</p>
+        <p className="text-xs text-small-info">{desc}</p>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
     </div>
@@ -148,7 +148,7 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
         <div className="space-y-6 py-2">
           {/* Identificação */}
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-900">Informações Básicas</h3>
+            <h3 className="text-sm font-semibold text-primary-info">Informações Básicas</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Nome *</Label>
@@ -212,7 +212,7 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
 
           {/* Unidades Múltiplas */}
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-900">Unidades de Medida</h3>
+            <h3 className="text-sm font-semibold text-primary-info">Unidades de Medida</h3>
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label>Unidade de Compra</Label>
@@ -246,8 +246,8 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
 
           {/* Conversões Automáticas */}
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-900">Conversões Automáticas</h3>
-            <p className="text-xs text-neutral-500">Cadastre equivalências: 1 caixa = 12 unidades, 1 peça = 4,200 kg, etc. O sistema converte sozinho ao comprar.</p>
+            <h3 className="text-sm font-semibold text-primary-info">Conversões Automáticas</h3>
+            <p className="text-xs text-small-info">Cadastre equivalências: 1 caixa = 12 unidades, 1 peça = 4,200 kg, etc. O sistema converte sozinho ao comprar.</p>
             <UnitConversionEditor
               conversions={form.unit_conversions || []}
               units={unitOptions}
@@ -257,7 +257,7 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
 
           {/* Controles */}
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-900">Controles</h3>
+            <h3 className="text-sm font-semibold text-primary-info">Controles</h3>
             <div className="grid grid-cols-2 gap-3">
               <SwitchCard label="Produto Ativo" desc="Disponível para uso no sistema" checked={form.active} onChange={() => toggle("active")} />
               <SwitchCard label="Controla Estoque" desc="Monitora quantidade em estoque" checked={form.controls_stock} onChange={() => toggle("controls_stock")} />
@@ -273,7 +273,7 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
 
           {/* Estoque */}
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-900">Estoque</h3>
+            <h3 className="text-sm font-semibold text-primary-info">Estoque</h3>
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label>Estoque Atual</Label>
@@ -296,7 +296,7 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
 
           {/* Compras */}
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-900">Compras</h3>
+            <h3 className="text-sm font-semibold text-primary-info">Compras</h3>
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label>Último Preço</Label>
@@ -323,7 +323,7 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
 
           {/* Financeiro */}
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-900">Financeiro</h3>
+            <h3 className="text-sm font-semibold text-primary-info">Financeiro</h3>
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label>Conta Contábil</Label>
@@ -342,7 +342,7 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
 
           {/* Inteligência */}
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-900">Inteligência</h3>
+            <h3 className="text-sm font-semibold text-primary-info">Inteligência</h3>
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label>Consumo Médio/dia</Label>
@@ -361,20 +361,20 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
 
           {/* Tags */}
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-900">Tags</h3>
+            <h3 className="text-sm font-semibold text-primary-info">Tags</h3>
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => {
                 const active = form.tags.includes(tag.name);
                 return (
                   <button key={tag.id} type="button" onClick={() => toggleTag(tag.name)}
                     className={cn("rounded-full px-3 py-1 text-xs font-medium transition-colors",
-                      active ? "bg-amber-500 text-white" : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200")}>
+                      active ? "bg-primary text-white" : "bg-secondary text-secondary-info hover:bg-table-hover")}>
                     {tag.name}
                   </button>
                 );
               })}
               {form.tags.filter((t) => !tags.some((tag) => tag.name === t)).map((t) => (
-                <span key={t} className="inline-flex items-center gap-1 rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-white">
+                <span key={t} className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-medium text-white">
                   {t}
                   <button type="button" onClick={() => toggleTag(t)}><X className="h-3 w-3" /></button>
                 </span>
@@ -388,7 +388,7 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
 
           {/* Adicionais */}
           <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-neutral-900">Observações e Imagem</h3>
+            <h3 className="text-sm font-semibold text-primary-info">Observações e Imagem</h3>
             <div>
               <Label>Descrição</Label>
               <Textarea value={form.description} onChange={(e) => set("description", e.target.value)} className="mt-1.5" rows={2} />
@@ -397,7 +397,7 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
               <Label>Imagem do Produto</Label>
               <div className="mt-1.5 flex items-center gap-3">
                 {form.image_url && <img src={form.image_url} alt="" className="h-16 w-16 rounded-lg object-cover" />}
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-neutral-300 px-4 py-2 text-sm text-neutral-600 hover:border-neutral-400">
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-border px-4 py-2 text-sm text-secondary-info hover:border-neutral-400">
                   <Upload className="h-4 w-4" />
                   {uploading ? "Enviando..." : form.image_url ? "Trocar imagem" : "Enviar imagem"}
                   <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
@@ -413,7 +413,7 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button onClick={save} disabled={saving || !form.name} className="bg-neutral-900 hover:bg-neutral-800">
+          <Button onClick={save} disabled={saving || !form.name} className="">
             {saving ? "Salvando..." : "Salvar Produto"}
           </Button>
         </DialogFooter>

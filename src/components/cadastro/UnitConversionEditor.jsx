@@ -27,12 +27,12 @@ export default function UnitConversionEditor({ conversions = [], units = [], onC
   return (
     <div className="space-y-2">
       {conversions.length === 0 && (
-        <p className="text-xs text-neutral-500">Nenhuma conversão cadastrada. Ex: 1 Caixa = 12 Unidades.</p>
+        <p className="text-xs text-small-info">Nenhuma conversão cadastrada. Ex: 1 Caixa = 12 Unidades.</p>
       )}
       {conversions.map((conv, idx) => (
-        <div key={idx} className="flex items-center gap-2 rounded-lg border border-neutral-200 p-2">
+        <div key={idx} className="flex items-center gap-2 rounded-lg border border-border p-2">
           <div className="flex flex-col items-center">
-            <span className="text-[10px] text-neutral-400">1</span>
+            <span className="text-[10px] text-muted-foreground">1</span>
           </div>
           <Select value={conv.from_unit} onValueChange={(v) => updateConversion(idx, "from_unit", v)}>
             <SelectTrigger className="w-28"><SelectValue placeholder="De" /></SelectTrigger>
@@ -40,7 +40,7 @@ export default function UnitConversionEditor({ conversions = [], units = [], onC
               {units.map((u) => <SelectItem key={u.id} value={u.abbreviation}>{u.abbreviation}</SelectItem>)}
             </SelectContent>
           </Select>
-          <span className="text-sm font-medium text-neutral-700">=</span>
+          <span className="text-sm font-medium text-primary-info">=</span>
           <Input
             type="number"
             step="0.001"
@@ -63,7 +63,7 @@ export default function UnitConversionEditor({ conversions = [], units = [], onC
           <button
             type="button"
             onClick={() => removeConversion(idx)}
-            className="rounded-md p-1.5 text-neutral-400 hover:bg-rose-50 hover:text-rose-600"
+            className="rounded-md p-1.5 text-muted-foreground hover:bg-baron-red/10 hover:text-baron-red"
           >
             <Trash2 className="h-4 w-4" />
           </button>

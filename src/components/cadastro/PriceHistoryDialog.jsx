@@ -65,35 +65,35 @@ export default function PriceHistoryDialog({ open, onClose, product, suppliers }
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <History className="h-5 w-5 text-amber-500" />
+            <History className="h-5 w-5 text-primary" />
             Histórico de Preços — {product.name}
           </DialogTitle>
         </DialogHeader>
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-neutral-200 bg-white p-3">
-            <p className="text-xs text-neutral-500">Último Preço</p>
-            <p className="mt-1 text-sm font-semibold text-neutral-900">{latest ? formatBRL(latest.price) : "—"}</p>
-            <p className="text-xs text-neutral-400">{latest?.date ? new Date(latest.date).toLocaleDateString("pt-BR") : ""}</p>
+          <div className="rounded-xl border border-border bg-card p-3">
+            <p className="text-xs text-small-info">Último Preço</p>
+            <p className="mt-1 text-sm font-semibold text-primary-info">{latest ? formatBRL(latest.price) : "—"}</p>
+            <p className="text-xs text-muted-foreground">{latest?.date ? new Date(latest.date).toLocaleDateString("pt-BR") : ""}</p>
           </div>
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-            <div className="flex items-center gap-1"><TrendingDown className="h-3.5 w-3.5 text-emerald-600" /><p className="text-xs text-emerald-700">Menor Preço</p></div>
-            <p className="mt-1 text-sm font-semibold text-emerald-700">{lowest ? formatBRL(lowest) : "—"}</p>
+          <div className="rounded-xl border border-baron-green/30 bg-baron-green/10 p-3">
+            <div className="flex items-center gap-1"><TrendingDown className="h-3.5 w-3.5 text-baron-green" /><p className="text-xs text-baron-green">Menor Preço</p></div>
+            <p className="mt-1 text-sm font-semibold text-baron-green">{lowest ? formatBRL(lowest) : "—"}</p>
           </div>
-          <div className="rounded-xl border border-rose-200 bg-rose-50 p-3">
-            <div className="flex items-center gap-1"><TrendingUp className="h-3.5 w-3.5 text-rose-600" /><p className="text-xs text-rose-700">Maior Preço</p></div>
-            <p className="mt-1 text-sm font-semibold text-rose-700">{highest ? formatBRL(highest) : "—"}</p>
+          <div className="rounded-xl border border-baron-red/30 bg-baron-red/10 p-3">
+            <div className="flex items-center gap-1"><TrendingUp className="h-3.5 w-3.5 text-baron-red" /><p className="text-xs text-baron-red">Maior Preço</p></div>
+            <p className="mt-1 text-sm font-semibold text-baron-red">{highest ? formatBRL(highest) : "—"}</p>
           </div>
-          <div className="rounded-xl border border-neutral-200 bg-white p-3">
-            <p className="text-xs text-neutral-500">Fornecedores</p>
-            <p className="mt-1 text-sm font-semibold text-neutral-900">{uniqueSuppliers}</p>
+          <div className="rounded-xl border border-border bg-card p-3">
+            <p className="text-xs text-small-info">Fornecedores</p>
+            <p className="mt-1 text-sm font-semibold text-primary-info">{uniqueSuppliers}</p>
           </div>
         </div>
 
         {/* Manual entry */}
-        <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
-          <p className="mb-3 text-sm font-medium text-neutral-900">Registrar Preço</p>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <p className="mb-3 text-sm font-medium text-primary-info">Registrar Preço</p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
             <div className="col-span-2 sm:col-span-1">
               <Label>Fornecedor</Label>
@@ -117,36 +117,36 @@ export default function PriceHistoryDialog({ open, onClose, product, suppliers }
               <Input type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} className="mt-1.5" />
             </div>
             <div className="flex items-end">
-              <Button onClick={addEntry} disabled={adding || !form.supplier_id || !form.price} className="w-full gap-2 bg-neutral-900 hover:bg-neutral-800"><Plus className="h-4 w-4" />Adicionar</Button>
+              <Button onClick={addEntry} disabled={adding || !form.supplier_id || !form.price} className="w-full gap-2"><Plus className="h-4 w-4" />Adicionar</Button>
             </div>
           </div>
         </div>
 
         {/* History table */}
         {loading ? (
-          <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-10 animate-pulse rounded-lg bg-neutral-200/60" />)}</div>
+          <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-10 animate-pulse rounded-lg bg-table-row" />)}</div>
         ) : history.length === 0 ? (
-          <p className="py-8 text-center text-sm text-neutral-500">Nenhum registro de preço ainda.</p>
+          <p className="py-8 text-center text-sm text-small-info">Nenhum registro de preço ainda.</p>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-neutral-200">
+          <div className="overflow-hidden rounded-xl border border-border">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-neutral-200 bg-neutral-50">
-                  <th className="px-4 py-2 text-left text-xs font-semibold uppercase text-neutral-500">Data</th>
-                  <th className="px-4 py-2 text-left text-xs font-semibold uppercase text-neutral-500">Fornecedor</th>
-                  <th className="px-4 py-2 text-right text-xs font-semibold uppercase text-neutral-500">Preço</th>
-                  <th className="px-4 py-2 text-right text-xs font-semibold uppercase text-neutral-500">Qtd</th>
-                  <th className="px-4 py-2 text-left text-xs font-semibold uppercase text-neutral-500">Usuário</th>
+                <tr className="border-b border-border bg-card">
+                  <th className="px-4 py-2 text-left text-xs font-semibold uppercase text-small-info">Data</th>
+                  <th className="px-4 py-2 text-left text-xs font-semibold uppercase text-small-info">Fornecedor</th>
+                  <th className="px-4 py-2 text-right text-xs font-semibold uppercase text-small-info">Preço</th>
+                  <th className="px-4 py-2 text-right text-xs font-semibold uppercase text-small-info">Qtd</th>
+                  <th className="px-4 py-2 text-left text-xs font-semibold uppercase text-small-info">Usuário</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-100">
+              <tbody className="divide-y divide-table-border">
                 {history.map((h) => (
-                  <tr key={h.id} className={h.price === lowest ? "bg-emerald-50/50" : ""}>
-                    <td className="px-4 py-2 text-neutral-700">{h.date ? new Date(h.date).toLocaleDateString("pt-BR") : "—"}</td>
-                    <td className="px-4 py-2 text-neutral-700">{h.supplier_name}</td>
-                    <td className="px-4 py-2 text-right font-medium text-neutral-900">{formatBRL(h.price)}</td>
-                    <td className="px-4 py-2 text-right text-neutral-500">{h.quantity} {h.unit}</td>
-                    <td className="px-4 py-2 text-neutral-500">{h.user_name || "—"}</td>
+                  <tr key={h.id} className={h.price === lowest ? "bg-baron-green/10" : ""}>
+                    <td className="px-4 py-2 text-primary-info">{h.date ? new Date(h.date).toLocaleDateString("pt-BR") : "—"}</td>
+                    <td className="px-4 py-2 text-primary-info">{h.supplier_name}</td>
+                    <td className="px-4 py-2 text-right font-medium text-primary-info">{formatBRL(h.price)}</td>
+                    <td className="px-4 py-2 text-right text-small-info">{h.quantity} {h.unit}</td>
+                    <td className="px-4 py-2 text-small-info">{h.user_name || "—"}</td>
                   </tr>
                 ))}
               </tbody>
