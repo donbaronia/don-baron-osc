@@ -1,0 +1,98 @@
+{
+  "name": "SystemHealth",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "check_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Momento exato do teste"
+    },
+    "overall_status": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "warning",
+        "critical",
+        "offline"
+      ],
+      "default": "ok"
+    },
+    "database_connected": {
+      "type": "boolean",
+      "default": true
+    },
+    "database_response_ms": {
+      "type": "number",
+      "default": 0,
+      "description": "Tempo de resposta do banco"
+    },
+    "total_tables": {
+      "type": "number",
+      "default": 0
+    },
+    "accessible_tables": {
+      "type": "number",
+      "default": 0
+    },
+    "total_records": {
+      "type": "number",
+      "default": 0
+    },
+    "modules_tested": {
+      "type": "number",
+      "default": 0
+    },
+    "modules_passed": {
+      "type": "number",
+      "default": 0
+    },
+    "modules_failed": {
+      "type": "number",
+      "default": 0
+    },
+    "relationship_test_passed": {
+      "type": "boolean",
+      "default": false
+    },
+    "avg_crud_ms": {
+      "type": "number",
+      "default": 0
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Lista de erros encontrados: [{module, error}]"
+    },
+    "last_write_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Ultima gravacao confirmada"
+    },
+    "last_read_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Ultima leitura confirmada"
+    },
+    "last_error": {
+      "type": "string",
+      "description": "Ultimo erro registrado"
+    },
+    "triggered_by": {
+      "type": "string",
+      "description": "Usuario ou sistema que executou o teste"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "overall_status"
+  ]
+}

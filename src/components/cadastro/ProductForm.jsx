@@ -3,6 +3,8 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
 import { generateInternalCode } from "@/lib/masterData";
 import { logAudit } from "@/lib/audit";
+import { Core } from "@/lib/donBaronCore";
+import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -52,6 +54,7 @@ function SwitchCard({ label, desc, checked, onChange }) {
 
 export default function ProductForm({ open, onClose, product, onSaved, suppliers, categories, units, tags }) {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -100,21 +103,22 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
   };
 
   const save = async () => {
-    if (!form.name) return;
-    if (!form.control_unit) { alert("Unidade de medida é obrigatória. Nunca deverão existir produtos sem unidade."); return; }
+    if (!form.name) { toast({ title: "Erro", description: "Nome é obrigatório.", variant: "destructive" }); return; }
+    if (!form.control_unit) { toast({ title: "Erro", description: "Unidade de medida é obrigatória.", variant: "destructive" }); return; }
     setSaving(true);
     try {
-      // Sincroniza unit legado com control_unit
       const data = { ...form, unit: form.control_unit };
       if (product?.id) {
-        await base44.entities.Product.update(product.id, data);
-        await logAudit({ user, module: "Cadastro Mestre", action: "Editou produto", details: form.name });
+        await Core.update("Product", product.id, data, { user, module: "cadastro" });
+        toast({ title: "Produto atualizado", description: `${form.name} — persistência confirmada pelo banco.` });
       } else {
-        await base44.entities.Product.create(data);
-        await logAudit({ user, module: "Cadastro Mestre", action: "Criou produto", details: form.name });
+        await Core.save("Product", data, { user, module: "cadastro" });
+        toast({ title: "Produto criado", description: `${form.name} — gravado e verificado no banco (read-back OK).` });
       }
       onSaved?.();
       onClose();
+    } catch (e) {
+      toast({ title: "Falha ao salvar produto", description: e.message, variant: "destructive" });
     } finally {
       setSaving(false);
     }

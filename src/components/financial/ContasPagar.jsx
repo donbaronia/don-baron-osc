@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
+import { Core as DBCore } from "@/lib/donBaronCore";
 import { brl, todayStr } from "@/lib/financialCenter";
 import Toolbar from "@/components/shared/Toolbar";
 import DataTable from "@/components/shared/DataTable";
@@ -65,15 +66,15 @@ export default function ContasPagar() {
     setSaving(true);
     try {
       if (editing) {
-        await base44.entities.Payment.update(editing.id, { ...form, version: (editing.version || 1) + 1 });
+        await DBCore.update("Payment", editing.id, { ...form, version: (editing.version || 1) + 1 }, { module: "financeiro" });
         await Core.audit({ audit_action: "update", module: "financeiro", entity_type: "Payment", entity_id: editing.id, details: `Editou: ${form.description}` });
       } else {
-        const c = await base44.entities.Payment.create(form);
-        await Core.audit({ audit_action: "create", module: "financeiro", entity_type: "Payment", entity_id: c.id, details: `Criou: ${form.description} - ${brl(form.amount)}` });
+        const result = await DBCore.save("Payment", form, { module: "financeiro" });
+        await Core.audit({ audit_action: "create", module: "financeiro", entity_type: "Payment", entity_id: result.id, details: `Criou: ${form.description} - ${brl(form.amount)}` });
       }
-      toast({ title: "Sucesso!", description: editing ? "Atualizado" : "Criado" });
+      toast({ title: "Salvo com sucesso", description: `${form.description} — persistência confirmada pelo banco (read-back OK).` });
       setDialogOpen(false); load();
-    } catch { toast({ title: "Erro", description: "Falha ao salvar", variant: "destructive" }); }
+    } catch (e) { toast({ title: "Falha ao salvar", description: e.message, variant: "destructive" }); }
     setSaving(false);
   };
 
@@ -87,10 +88,11 @@ export default function ContasPagar() {
 
   const cancel = async (r) => {
     try {
-      await base44.entities.Payment.update(r.id, { status: "cancelado" });
+      await DBCore.update("Payment", r.id, { status: "cancelado" }, { module: "financeiro" });
       await Core.audit({ audit_action: "reject", module: "financeiro", entity_type: "Payment", entity_id: r.id, details: `Cancelou: ${r.description}` });
+      toast({ title: "Cancelado", description: `${r.description} — confirmação do banco recebida.` });
       load();
-    } catch { toast({ title: "Erro", variant: "destructive" }); }
+    } catch (e) { toast({ title: "Falha ao cancelar", description: e.message, variant: "destructive" }); }
   };
 
   const columns = [

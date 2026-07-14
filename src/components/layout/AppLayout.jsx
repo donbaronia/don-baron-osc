@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { getUserRole, ROLE_LABELS } from "@/lib/navigation";
 import { useKeyboardShortcuts } from "@/lib/useKeyboardShortcuts";
 import { base44 } from "@/api/base44Client";
+import { Core } from "@/lib/donBaronCore";
 import BaronPanel from "@/components/command/BaronPanel";
 import QuickActionsDialog from "@/components/command/QuickActionsDialog";
 import ModuleBar from "@/components/layout/ModuleBar";
@@ -14,6 +15,7 @@ import { Menu, X, PanelLeftClose, PanelLeftOpen, Bell, LogOut, Home, Brain, Targ
 
 export default function AppLayout() {
   const { user } = useAuth();
+  Core.setCurrentUser(user);
   const role = getUserRole(user);
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);

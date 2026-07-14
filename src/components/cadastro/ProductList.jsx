@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { Core } from "@/lib/donBaronCore";
 import { searchProducts } from "@/lib/masterData";
+import { useToast } from "@/components/ui/use-toast";
 import Toolbar from "@/components/shared/Toolbar";
 import DataTable from "@/components/shared/DataTable";
 import ProductForm from "./ProductForm";
@@ -23,6 +25,7 @@ export default function ProductList() {
   const [formOpen, setFormOpen] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
   const [historyProduct, setHistoryProduct] = useState(null);
+  const { toast } = useToast();
 
   const loadAll = async () => {
     const [p, s, c, u, t] = await Promise.all([
@@ -42,8 +45,13 @@ export default function ProductList() {
   const handleNew = () => { setEditProduct(null); setFormOpen(true); };
   const handleDelete = async (product) => {
     if (!confirm(`Excluir "${product.name}"?`)) return;
-    await base44.entities.Product.delete(product.id);
-    loadAll();
+    try {
+      await Core.remove("Product", product.id, { module: "cadastro" });
+      toast({ title: "Produto excluído", description: `${product.name} — exclusão confirmada pelo banco.` });
+      loadAll();
+    } catch (e) {
+      toast({ title: "Falha ao excluir", description: e.message, variant: "destructive" });
+    }
   };
 
   const filtered = searchProducts(

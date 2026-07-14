@@ -221,6 +221,45 @@ Deno.serve(async (req) => {
       });
     } catch {}
 
+    // ===== FASE 14: SALVAR EM SYSTEM_HEALTH =====
+    try {
+      await admin.entities.SystemHealth.create({
+        check_timestamp: new Date().toISOString(),
+        overall_status: overallStatus,
+        database_connected: true,
+        database_response_ms: avgCrudTime,
+        total_tables: allEntities.length,
+        accessible_tables: tableMap.filter(t => t.accessible).length,
+        total_records: tableMap.reduce((s, t) => s + t.recordCount, 0),
+        modules_tested: moduleTests.length,
+        modules_passed: totalPassed,
+        modules_failed: moduleTests.length - totalPassed,
+        relationship_test_passed: relationshipTest.passed,
+        avg_crud_ms: avgCrudTime,
+        errors: allErrors,
+        last_error: allErrors.length > 0 ? allErrors[0].error : '',
+        triggered_by: userName,
+      });
+    } catch {}
+
+    // ===== FASE 13: SALVAR EM SYSTEM_LOG =====
+    try {
+      await admin.entities.SystemLog.create({
+        timestamp: new Date().toISOString(),
+        user_name: userName,
+        user_email: user.email,
+        entity_name: 'System',
+        operation: 'diagnostic',
+        payload: { modules_tested: moduleTests.length },
+        bank_response: { status: overallStatus, modules_passed: totalPassed },
+        duration_ms: avgCrudTime,
+        status: 'success',
+        readback_verified: true,
+        module: 'diagnostico',
+        origin: 'backend',
+      });
+    } catch {}
+
     // Buscar últimos logs
     let recentAuditLogs = [];
     try { recentAuditLogs = await admin.entities.AuditLog.list('-created_date', 20); } catch {}

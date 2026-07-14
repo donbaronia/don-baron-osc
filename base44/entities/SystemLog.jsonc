@@ -1,0 +1,104 @@
+{
+  "name": "SystemLog",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora exata da operacao"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Nome do usuario que executou"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "entity_name": {
+      "type": "string",
+      "description": "Tabela afetada (Product, Payment, etc)"
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "create",
+        "update",
+        "delete",
+        "read",
+        "transaction",
+        "diagnostic"
+      ],
+      "description": "Tipo de operacao no banco"
+    },
+    "payload": {
+      "type": "object",
+      "description": "Dados enviados para o banco"
+    },
+    "bank_response": {
+      "type": "object",
+      "description": "Resposta recebida do banco (ID, campos retornados)"
+    },
+    "duration_ms": {
+      "type": "number",
+      "default": 0,
+      "description": "Tempo total da operacao em milissegundos"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "error",
+        "rolled_back"
+      ],
+      "default": "success",
+      "description": "Resultado da operacao"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Mensagem de erro se falhou (nunca null em caso de erro)"
+    },
+    "readback_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se true, operacao foi confirmada via read-back no banco"
+    },
+    "mismatches": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Divergencias encontradas no read-back: [{field, expected, actual}]"
+    },
+    "module": {
+      "type": "string",
+      "description": "Modulo de origem (cadastro, financeiro, estoque, etc)"
+    },
+    "origin": {
+      "type": "string",
+      "enum": [
+        "frontend",
+        "backend",
+        "workflow",
+        "diagnostic"
+      ],
+      "default": "frontend"
+    },
+    "correlation_id": {
+      "type": "string",
+      "description": "ID de correlacao para transacoes multi-step"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "entity_name",
+    "operation",
+    "status"
+  ]
+}
