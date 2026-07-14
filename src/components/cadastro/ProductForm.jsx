@@ -108,14 +108,15 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
     setSaving(true);
     try {
       const data = { ...form, unit: form.control_unit };
+      let saved;
       if (product?.id) {
-        await Core.update("Product", product.id, data, { user, module: "cadastro" });
+        saved = await Core.update("Product", product.id, data, { user, module: "cadastro" });
         toast({ title: "Produto atualizado", description: `${form.name} — persistência confirmada pelo banco.` });
       } else {
-        await Core.save("Product", data, { user, module: "cadastro" });
+        saved = await Core.save("Product", data, { user, module: "cadastro" });
         toast({ title: "Produto criado", description: `${form.name} — gravado e verificado no banco (read-back OK).` });
       }
-      onSaved?.();
+      onSaved?.(saved?.record || { ...form, id: saved?.id });
       onClose();
     } catch (e) {
       toast({ title: "Falha ao salvar produto", description: e.message, variant: "destructive" });

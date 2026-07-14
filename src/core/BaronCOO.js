@@ -121,8 +121,9 @@ export const BaronCOO = {
     try { localStorage.removeItem(PENDING_REG_KEY); } catch {}
 
     const e = pending?.entities || {};
-    const qty = e.quantity || savedProduct.stock_quantity || 0;
-    const unit = (savedProduct.control_unit || savedProduct.unit || "UN").toUpperCase();
+    const sp = savedProduct || {};
+    const qty = e.quantity || sp.stock_quantity || 0;
+    const unit = (sp.control_unit || sp.unit || "UN").toUpperCase();
     const price = e.price || 0;
     const total = e.price_type === "total" ? price : (price * qty);
     const supplier = e.supplier || savedProduct.primary_supplier_name || "";
