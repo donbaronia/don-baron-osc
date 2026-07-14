@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { parseCommand, executeCommand } from "@/lib/baronCommandEngine";
+import { BaronCOO } from "@/core/BaronCOO";
 import { processDocument } from "@/lib/processamentoIA";
+import { useAuth } from "@/lib/AuthContext";
 import { Mic, Paperclip, Camera, Send, Loader2 } from "lucide-react";
 
 const CONV_KEY = "baron_conversation";
-const CTX_KEY = "baron_pending_context";
 
 const FIELD_LABELS = {
   supplier: "Fornecedor?",
@@ -25,6 +25,7 @@ function shortConfirm(msg) {
 }
 
 export default function BaronConsole() {
+  const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
@@ -36,7 +37,7 @@ export default function BaronConsole() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    try { setPendingContext(JSON.parse(localStorage.getItem(CTX_KEY) || "null")); } catch {}
+    setPendingContext(BaronCOO.hasContext() ? { type: "coo_pending" } : null);
   }, []);
 
   useEffect(() => {
@@ -56,7 +57,6 @@ export default function BaronConsole() {
 
   const setContext = (ctx) => {
     setPendingContext(ctx);
-    localStorage.setItem(CTX_KEY, JSON.stringify(ctx));
   };
 
   const handleSend = async () => {
@@ -68,42 +68,42 @@ export default function BaronConsole() {
     setAskLabel(null);
 
     try {
-      if (pendingContext) {
-        if (pendingContext.type === "attachment_offer") {
-          const ans = userMsg.toLowerCase();
-          if (ans.startsWith("n")) {
-            setEphemeral({ text: "✓ Pagamento finalizado.", kind: "done" });
-          } else {
-            setEphemeral({ text: "Anexe o comprovante com 📎", kind: "info" });
-          }
-          setContext(null);
-          return;
+      // Se há oferta de anexo em aberto
+      if (pendingContext?.type === "attachment_offer") {
+        const ans = userMsg.toLowerCase();
+        if (ans.startsWith("n")) {
+          setEphemeral({ text: "✓ Pagamento finalizado.", kind: "done" });
+        } else {
+          setEphemeral({ text: "Anexe o comprovante com 📎", kind: "info" });
         }
-        if (pendingContext.type === "missing_info" && pendingContext.needsField) {
-          const updatedParsed = { ...pendingContext.parsed, [pendingContext.needsField]: userMsg };
-          const result = await executeCommand(updatedParsed, { full_name: "Robson" });
-          handleResult(result, updatedParsed);
-          return;
-        }
+        setContext(null);
+        return;
       }
 
-      const parsed = await parseCommand(userMsg, pendingContext?.parsed?.intent);
-      const result = await executeCommand(parsed, { full_name: "Robson" });
-      handleResult(result, parsed);
+      // BARON COO processa — Intent → Validation → Action → Persistence → ReadBack → Response
+      const result = await BaronCOO.process(userMsg, user);
+      handleResult(result);
     } catch {
       setEphemeral({ text: "Não consegui processar. Repita?", kind: "error" });
+      BaronCOO.clearContext();
       setContext(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResult = (result, parsed) => {
-    if (result.type === "needs_info" && result.needsField) {
+  const handleResult = (result) => {
+    const type = result.status === "executed" ? "done"
+      : result.status === "needs_info" ? "needs_info"
+      : result.status === "navigate" ? "navigate"
+      : result.status === "error" ? "error"
+      : "message";
+
+    if (type === "needs_info" && result.needsField) {
       saveHistory("baron", result.message, result.route);
-      setContext({ type: "missing_info", parsed: result.parsed || parsed, needsField: result.needsField });
+      setContext({ type: "coo_pending" });
       setAskLabel(FIELD_LABELS[result.needsField] || "Continue...");
-    } else if (result.type === "needs_info") {
+    } else if (type === "needs_info") {
       saveHistory("baron", result.message, result.route);
       setEphemeral({ text: result.message, kind: "info" });
       setContext(null);
@@ -113,12 +113,12 @@ export default function BaronConsole() {
       setEphemeral({ text: shortConfirm(result.message), kind: "done" });
       if (result.follow_up) {
         saveHistory("baron", result.follow_up);
-        setContext({ type: "attachment_offer", parsed });
+        setContext({ type: "attachment_offer" });
       } else {
         setContext(null);
       }
-      if (result.type === "navigate" && result.route) {
-        setTimeout(() => navigate(result.route + (result.filter ? `?filtro=${result.filter}` : "")), 1500);
+      if (type === "navigate" && result.route) {
+        setTimeout(() => navigate(result.route + (result.filter ? `?filtro=${result.filter}` : "")), 800);
       }
     }
   };
