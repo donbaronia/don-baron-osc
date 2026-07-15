@@ -1,9 +1,8 @@
 import { base44 } from "@/api/base44Client";
-import { PersistenceEngine } from "@/core/PersistenceEngine";
-import { EventBus } from "@/lib/eventBus";
+import { AppService } from "@/services";
 
 export const HCM = {
-  // Backend function calls (complex operations)
+  // Backend function calls (complex operations) — mantém via função de backend
   init: () => base44.functions.invoke('hcmEngine', { action: 'init' }).then(r => r.data),
   getDashboard: () => base44.functions.invoke('hcmEngine', { action: 'getDashboard' }).then(r => r.data),
   getEmployeeDetail: (employee_id) => base44.functions.invoke('hcmEngine', { action: 'getEmployeeDetail', employee_id }).then(r => r.data),
@@ -11,105 +10,73 @@ export const HCM = {
   generateOnboarding: (employee_id) => base44.functions.invoke('hcmEngine', { action: 'generateOnboarding', employee_id }).then(r => r.data),
   generatePayroll: (employee_id, month, year) => base44.functions.invoke('hcmEngine', { action: 'generatePayroll', employee_id, month, year }).then(r => r.data),
 
+  // ===== DON BARON CORE 3.0 =====
+  // TODA gravação passa por AppService (validação → PersistenceEngine → RecoveryEngine
+  // → read-back → EventBus → auditoria → sync). Nenhuma gravação direta em base44.entities.
+
   // Employee CRUD
-  listEmployees: () => base44.entities.Employee.list('-created_date', 200),
-  getEmployee: (id) => base44.entities.Employee.get(id),
-  createEmployee: (data) => base44.entities.Employee.create(data),
-  updateEmployee: (id, data) => base44.entities.Employee.update(id, data),
-  deleteEmployee: (id) => base44.entities.Employee.delete(id),
+  listEmployees: () => AppService.list("Employee", "-created_date", 200),
+  getEmployee: (id) => AppService.findOne("Employee", id),
+  createEmployee: (data, options = {}) => AppService.create("Employee", data, { ...options, module: "rh", validate: false }),
+  updateEmployee: (id, data, options = {}) => AppService.update("Employee", id, data, { ...options, module: "rh", validate: false }),
+  deleteEmployee: (id, options = {}) => AppService.delete("Employee", id, { ...options, module: "rh", validate: false }),
 
   // Candidates
-  listCandidates: () => base44.entities.Candidate.list('-created_date', 100),
-  createCandidate: (data) => base44.entities.Candidate.create(data),
-  updateCandidate: (id, data) => base44.entities.Candidate.update(id, data),
+  listCandidates: () => AppService.list("Candidate", "-created_date", 100),
+  createCandidate: (data, options = {}) => AppService.create("Candidate", data, { ...options, module: "rh", validate: false }),
+  updateCandidate: (id, data, options = {}) => AppService.update("Candidate", id, data, { ...options, module: "rh", validate: false }),
 
   // Job Openings
-  listJobOpenings: () => base44.entities.JobOpening.list('-created_date', 100),
-  createJobOpening: (data) => base44.entities.JobOpening.create(data),
-  updateJobOpening: (id, data) => base44.entities.JobOpening.update(id, data),
+  listJobOpenings: () => AppService.list("JobOpening", "-created_date", 100),
+  createJobOpening: (data, options = {}) => AppService.create("JobOpening", data, { ...options, module: "rh", validate: false }),
+  updateJobOpening: (id, data, options = {}) => AppService.update("JobOpening", id, data, { ...options, module: "rh", validate: false }),
 
   // Documents
-  listDocuments: () => base44.entities.EmployeeDocument.list('-created_date', 200),
-  listDocumentsByEmployee: (employee_id) => base44.entities.EmployeeDocument.filter({ employee_id }),
-  createDocument: (data) => base44.entities.EmployeeDocument.create(data),
-  updateDocument: (id, data) => base44.entities.EmployeeDocument.update(id, data),
-  deleteDocument: (id) => base44.entities.EmployeeDocument.delete(id),
+  listDocuments: () => AppService.list("EmployeeDocument", "-created_date", 200),
+  listDocumentsByEmployee: (employee_id) => AppService.find("EmployeeDocument", { employee_id }),
+  createDocument: (data, options = {}) => AppService.create("EmployeeDocument", data, { ...options, module: "rh", validate: false }),
+  updateDocument: (id, data, options = {}) => AppService.update("EmployeeDocument", id, data, { ...options, module: "rh", validate: false }),
+  deleteDocument: (id, options = {}) => AppService.delete("EmployeeDocument", id, { ...options, module: "rh", validate: false }),
 
   // Time Records
-  listTimeRecords: () => base44.entities.TimeRecord.list('-date', 200),
-  listTimeRecordsByEmployee: (employee_id) => base44.entities.TimeRecord.filter({ employee_id }, '-date', 30),
-  createTimeRecord: (data) => base44.entities.TimeRecord.create(data),
-  updateTimeRecord: (id, data) => base44.entities.TimeRecord.update(id, data),
+  listTimeRecords: () => AppService.find("TimeRecord", {}, "-date", 200),
+  listTimeRecordsByEmployee: (employee_id) => AppService.find("TimeRecord", { employee_id }, "-date", 30),
+  createTimeRecord: (data, options = {}) => AppService.create("TimeRecord", data, { ...options, module: "rh", validate: false }),
+  updateTimeRecord: (id, data, options = {}) => AppService.update("TimeRecord", id, data, { ...options, module: "rh", validate: false }),
 
-  // Advances — gravação passa pelo RecoveryEngine (write -> read-back -> validar -> commit)
-  // e publica VALE_CREATED no Event Bus, espelhando automaticamente no Financeiro.
-  listAdvances: () => base44.entities.EmployeeAdvance.list('-date', 200),
-  listAdvancesByEmployee: (employee_id) => base44.entities.EmployeeAdvance.filter({ employee_id }),
-  createAdvance: async (data, options = {}) => {
-    const confirmed = await PersistenceEngine.create("EmployeeAdvance", data, {
-      validate: false,
-      module: "rh",
-      origin: options.origin || "frontend",
-      user: options.user,
-    });
-    EventBus.emitAdvanceCreated({
-      entity_type: "EmployeeAdvance",
-      entity_id: confirmed.id,
-      payload: {
-        advance_id: confirmed.id,
-        employee_id: data.employee_id,
-        employee_name: data.employee_name,
-        type: data.type,
-        amount: data.amount,
-        installment_amount: data.installment_amount,
-        installments: data.installments,
-        date: data.date,
-      },
-    }).catch(() => {});
-    return confirmed;
-  },
-  updateAdvance: async (id, data, options = {}) => {
-    const confirmed = await PersistenceEngine.update("EmployeeAdvance", id, data, {
-      validate: false,
-      module: "rh",
-      origin: options.origin || "frontend",
-      user: options.user,
-    });
-    EventBus.emitAdvanceUpdated({
-      entity_type: "EmployeeAdvance",
-      entity_id: id,
-      payload: { employee_id: data.employee_id, employee_name: data.employee_name, type: data.type, amount: data.amount, status: data.status },
-    }).catch(() => {});
-    return confirmed;
-  },
+  // Advances — agora via AppService (read-back + recovery + evento advance_created + auditoria automáticos)
+  listAdvances: () => AppService.find("EmployeeAdvance", {}, "-date", 200),
+  listAdvancesByEmployee: (employee_id) => AppService.find("EmployeeAdvance", { employee_id }),
+  createAdvance: async (data, options = {}) => AppService.create("EmployeeAdvance", data, { ...options, module: "rh", validate: false }),
+  updateAdvance: async (id, data, options = {}) => AppService.update("EmployeeAdvance", id, data, { ...options, module: "rh", validate: false }),
 
   // Performance Reviews
-  listReviews: () => base44.entities.PerformanceReview.list('-review_date', 200),
-  listReviewsByEmployee: (employee_id) => base44.entities.PerformanceReview.filter({ employee_id }, '-review_date'),
-  createReview: (data) => base44.entities.PerformanceReview.create(data),
+  listReviews: () => AppService.find("PerformanceReview", {}, "-review_date", 200),
+  listReviewsByEmployee: (employee_id) => AppService.find("PerformanceReview", { employee_id }, "-review_date", 200),
+  createReview: (data, options = {}) => AppService.create("PerformanceReview", data, { ...options, module: "rh", validate: false }),
 
   // Trainings
-  listTrainings: () => base44.entities.Training.list('-created_date', 200),
-  listTrainingsByEmployee: (employee_id) => base44.entities.Training.filter({ employee_id }),
-  createTraining: (data) => base44.entities.Training.create(data),
-  updateTraining: (id, data) => base44.entities.Training.update(id, data),
+  listTrainings: () => AppService.list("Training", "-created_date", 200),
+  listTrainingsByEmployee: (employee_id) => AppService.find("Training", { employee_id }),
+  createTraining: (data, options = {}) => AppService.create("Training", data, { ...options, module: "rh", validate: false }),
+  updateTraining: (id, data, options = {}) => AppService.update("Training", id, data, { ...options, module: "rh", validate: false }),
 
   // Career Plans
-  listCareerPlans: () => base44.entities.CareerPlan.list('-created_date', 100),
-  createCareerPlan: (data) => base44.entities.CareerPlan.create(data),
-  updateCareerPlan: (id, data) => base44.entities.CareerPlan.update(id, data),
+  listCareerPlans: () => AppService.list("CareerPlan", "-created_date", 100),
+  createCareerPlan: (data, options = {}) => AppService.create("CareerPlan", data, { ...options, module: "rh", validate: false }),
+  updateCareerPlan: (id, data, options = {}) => AppService.update("CareerPlan", id, data, { ...options, module: "rh", validate: false }),
 
   // Recognitions
-  listRecognitions: () => base44.entities.Recognition.list('-date', 200),
-  createRecognition: (data) => base44.entities.Recognition.create(data),
+  listRecognitions: () => AppService.find("Recognition", {}, "-date", 200),
+  createRecognition: (data, options = {}) => AppService.create("Recognition", data, { ...options, module: "rh", validate: false }),
 
   // Occurrences
-  listOccurrences: () => base44.entities.Occurrence.list('-date', 200),
-  createOccurrence: (data) => base44.entities.Occurrence.create(data),
-  updateOccurrence: (id, data) => base44.entities.Occurrence.update(id, data),
+  listOccurrences: () => AppService.find("Occurrence", {}, "-date", 200),
+  createOccurrence: (data, options = {}) => AppService.create("Occurrence", data, { ...options, module: "rh", validate: false }),
+  updateOccurrence: (id, data, options = {}) => AppService.update("Occurrence", id, data, { ...options, module: "rh", validate: false }),
 
   // Payroll
-  listPayrolls: () => base44.entities.Payroll.list('-created_date', 200),
+  listPayrolls: () => AppService.list("Payroll", "-created_date", 200),
 };
 
 export const EMPLOYEE_STATUS_CONFIG = {
