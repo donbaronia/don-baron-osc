@@ -1,5 +1,6 @@
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
+import { EventBus } from "@/lib/eventBus";
 import { brl, todayStr, weekRange, monthRange } from "@/lib/financialCenter";
 
 /**
@@ -184,14 +185,14 @@ export const CMV = {
       status: "ativo",
     });
 
-    // Emitir evento
-    await Core.events.emit({
-      event_type: "cmv_calculated",
-      module: "cmv",
+    // Event Bus corporativo — CMV_UPDATED
+    EventBus.publish({
+      event_type: "cmv_updated",
+      module: "bi",
       entity_type: "CMVRecord",
       entity_id: record.id,
-      payload: { cmv_pct: cmvPct, gross_profit: grossProfit, period_type: periodType },
-    });
+      payload: { cmv_pct: cmvPct, gross_profit: grossProfit, net_profit: netProfit, margin_pct: marginPct, period_type: periodType, range: { start: range.start, end: range.end }, triggered_by: triggeredBy },
+    }).catch(() => {});
 
     return record;
   },

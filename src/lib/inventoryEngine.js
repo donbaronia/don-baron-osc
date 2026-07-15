@@ -1,5 +1,6 @@
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
+import { EventBus } from "@/lib/eventBus";
 
 const brl = (n) => (n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const todayStr = () => new Date().toISOString().slice(0, 10);
@@ -72,6 +73,16 @@ export const IE = {
       entity_id: movement.id,
       details: `${movement_type.toUpperCase()}: ${product_name} — ${quantity} ${unit || ""} ${totalCost > 0 ? brl(totalCost) : ""} ${reason ? `(${reason})` : ""}`,
     });
+
+    // 4. Event Bus corporativo — entrada/saida geram eventos
+    const isInbound = INBOUND_TYPES.includes(movement_type);
+    EventBus.publish({
+      event_type: isInbound ? "stock_entry_created" : "stock_exit_created",
+      module: "estoque",
+      entity_type: "Movement",
+      entity_id: movement.id,
+      payload: { movement_id: movement.id, movement_code, product_id, product_name, movement_type, quantity, unit, unit_cost, total_cost: totalCost, reason, supplier_id, supplier_name, document_id, responsible_name },
+    }).catch(() => {});
 
     return movement;
   },

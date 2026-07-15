@@ -17,6 +17,13 @@ import { Logger } from "./Logger";
 import { Core } from "@/lib/coreEngine";
 import { todayStr, brl } from "@/lib/financialCenter";
 import { convertQuantity } from "@/lib/masterData";
+import { EventBus } from "@/lib/eventBus";
+
+// Emite evento no barramento sem derrubar a execucao (fire-and-forget seguro)
+function emit(eventType, module, payload) {
+  EventBus.publish({ event_type: eventType, module, entity_type: payload.entity_type || "", entity_id: payload.entity_id || "", payload })
+    .catch(() => {});
+}
 
 // ============================================================
 // Validadores por intent
@@ -136,6 +143,13 @@ async function execStockEntry(parsed, user, mem) {
 
   await Core.audit({ audit_action: "update", module: "estoque", entity_type: "Product", entity_id: product.id, details: `Entrada via BARON: +${qty} ${purchaseUnit} ${product.name} | Usuário: ${user?.full_name}` });
 
+  emit("stock_entry_created", "estoque", {
+    entity_type: "Product", entity_id: product.id,
+    product_id: product.id, product_name: product.name, movement_type: "entrada",
+    quantity: controlQty, unit: controlUnit, unit_cost: e.price || 0,
+    supplier_name: e.supplier || "", responsible_name: user?.full_name,
+  });
+
   return {
     status: "executed",
     readBack,
@@ -160,6 +174,12 @@ async function execStockExit(parsed, user, mem) {
 
   await Core.audit({ audit_action: "update", module: "estoque", entity_type: "Product", entity_id: product.id, details: `Baixa via BARON: -${qty} ${controlUnit} ${product.name} | Motivo: ${reason} | Usuário: ${user?.full_name}` });
 
+  emit("stock_exit_created", "estoque", {
+    entity_type: "Product", entity_id: product.id,
+    product_id: product.id, product_name: product.name, movement_type: "saida",
+    quantity: qty, unit: controlUnit, reason, responsible_name: user?.full_name,
+  });
+
   return { status: "executed", readBack, message: `Baixa registrada.\n-${qty} ${controlUnit} ${product.name}.\nEstoque atual: ${newQty} ${controlUnit}.` };
 }
 
@@ -180,6 +200,8 @@ async function execPayment(parsed, user, mem) {
     }, { module: "financeiro", origin: "baron", userId: user?.id });
 
     await Core.audit({ audit_action: "create", module: "financeiro", entity_type: "FinancialTransaction", details: `Despesa via BARON: ${brl(e.amount)} - ${target} | Usuário: ${user?.full_name}` });
+    emit("payment_created", "financeiro", { entity_type: "FinancialTransaction", entity_id: readBack.id, amount: e.amount, target, method: e.payment_method || "pix", responsible: user?.full_name });
+    emit("payment_confirmed", "financeiro", { entity_type: "FinancialTransaction", entity_id: readBack.id, amount: e.amount, target, method: e.payment_method || "pix", responsible: user?.full_name });
     return { status: "executed", readBack, message: `Pagamento registrado.\n${target} — ${brl(e.amount)}.\nFluxo de caixa atualizado.`, follow_up: "Deseja anexar o comprovante?" };
   }
 
@@ -198,6 +220,12 @@ async function execPayment(parsed, user, mem) {
   }, { module: "financeiro", origin: "baron", userId: user?.id });
 
   await Core.audit({ audit_action: "confirm", module: "financeiro", entity_type: "Payment", entity_id: found.id, details: `Pago via BARON: ${found.description} - ${brl(found.amount)} | Usuário: ${user?.full_name}` });
+
+  emit("payment_confirmed", "financeiro", {
+    entity_type: "Payment", entity_id: found.id, payment_id: found.id,
+    amount: found.amount, supplier: found.supplier_name, supplier_id: found.supplier_id,
+    method: e.payment_method || "pix", bank: e.bank || "", responsible: user?.full_name,
+  });
 
   return { status: "executed", readBack, message: `Pagamento registrado.\n${found.description}\n${brl(found.amount)}.\nBanco: ${e.bank || "N/A"} | Forma: ${(e.payment_method || "pix").toUpperCase()}.`, follow_up: "Deseja anexar o comprovante?" };
 }
@@ -225,6 +253,10 @@ async function execProduction(parsed, user, mem) {
   }
 
   await Core.audit({ audit_action: "create", module: "producao", entity_type: "ProductionRecord", entity_id: readBack.id, details: `Produção via BARON: ${qty} ${controlUnit} ${productName} | Usuário: ${user?.full_name}` });
+  emit("production_finished", "producao", {
+    entity_type: "ProductionRecord", entity_id: readBack.id,
+    product_id: match?.product.id, product_name: productName, quantity: qty, unit: controlUnit, responsible: user?.full_name,
+  });
   return { status: "executed", readBack, message: `Produção registrada.\n${qty} ${controlUnit} ${productName}.\nEstoque atualizado.` };
 }
 

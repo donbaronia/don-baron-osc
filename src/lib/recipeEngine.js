@@ -1,5 +1,6 @@
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
+import { EventBus } from "@/lib/eventBus";
 
 const brl = (n) => (n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const todayStr = () => new Date().toISOString().slice(0, 10);
@@ -85,14 +86,14 @@ export const RE = {
       version: (recipe.version || 1) + 1,
     });
 
-    // Emitir evento para outros modulos
-    await Core.events.emit({
-      event_type: "recipe_cost_updated",
-      module: "receitas",
+    // Event Bus corporativo — RECIPE_UPDATED
+    EventBus.publish({
+      event_type: "recipe_updated",
+      module: "producao",
       entity_type: "Recipe",
       entity_id: recipeId,
-      payload: { cost_total: totalCost, cost_per_unit: costPerUnit, margin_pct: marginPct, cmv_pct: cmvPct },
-    });
+      payload: { recipe_id: recipeId, recipe_name: recipe.name, cost_total: totalCost, cost_per_unit: costPerUnit, margin_pct: marginPct, cmv_pct: cmvPct, gross_profit: grossProfit, user: "Sistema" },
+    }).catch(() => {});
 
     return { totalCost, costPerUnit, ingredients, marginPct, cmvPct, grossProfit };
   },

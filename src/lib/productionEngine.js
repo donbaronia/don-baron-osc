@@ -1,6 +1,7 @@
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
 import { IE, brl } from "@/lib/inventoryEngine";
+import { EventBus } from "@/lib/eventBus";
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const minutesBetween = (s, e) => Math.round((new Date(e) - new Date(s)) / 60000);
