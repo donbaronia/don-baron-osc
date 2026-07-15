@@ -12,7 +12,7 @@
 
     /* Cards — #181C22 / Hover — #1F2630 */
     --card: 218 19% 11%;
-    --card-hover: 217 20% 17%;
+    --card-hover: 218 23% 16%;
     --card-foreground: 0 0% 100%;
     --popover: 218 19% 11%;
     --popover-foreground: 0 0% 100%;
@@ -27,15 +27,15 @@
     --baron-blue: 217 91% 60%;
 
     /* Verde — #22C55E */
-    --baron-green: 157 80% 43%;
+    --baron-green: 156 78% 43%;
 
     /* Vermelho — #EF4444 */
-    --baron-red: 359 100% 65%;
+    --baron-red: 4 86% 58%;
 
     /* Roxo / Rosa / Amarelo (acesso semântico) */
     --baron-purple: 280 65% 60%;
     --baron-pink: 330 80% 65%;
-    --baron-yellow: 37 91% 55%;
+    --baron-yellow: 38 92% 50%;
 
     /* Branco — #F8FAFC */
     --baron-white: 210 40% 98%;
@@ -43,8 +43,8 @@
     /* Texto Secundário — #AAB2BF */
     --text-title: 0 0% 100%;
     --text-primary: 0 0% 100%;
-    --text-secondary: 216 16% 76%;
-    --text-small: 215 12% 55%;
+    --text-secondary: 214 17% 76%;
+    --text-small: 215 10% 54%;
     --text-gray: 217 14% 71%;
 
     /* Sidebar — #13171D */
@@ -60,22 +60,22 @@
     /* Header — #171B22 */
     --table-header: 218 19% 11%;
     --table-row: 217 20% 13%;
-    --table-hover: 217 20% 17%;
-    --table-border: 217 22% 21%;
+    --table-hover: 218 23% 16%;
+    --table-border: 215 21% 22%;
 
     /* Linhas — #2B3442 */
-    --border: 217 22% 21%;
-    --input: 217 22% 21%;
+    --border: 215 21% 22%;
+    --input: 215 21% 22%;
     --ring: 29 100% 50%;
 
     /* Secundário */
     --secondary: 218 23% 16%;
     --secondary-foreground: 210 40% 98%;
     --muted: 218 23% 16%;
-    --muted-foreground: 215 12% 55%;
+    --muted-foreground: 215 10% 54%;
     --accent: 29 100% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 359 100% 65%;
+    --destructive: 4 86% 58%;
     --destructive-foreground: 0 0% 100%;
 
     /* Gráficos */
@@ -108,9 +108,9 @@
     --tag-escritorio-fg: 216 17% 11%;
 
     /* Compat legado */
-    --baron-success: 157 80% 43%;
-    --baron-alert: 37 91% 55%;
-    --baron-error: 359 100% 65%;
+    --baron-success: 156 78% 43%;
+    --baron-alert: 38 92% 50%;
+    --baron-error: 4 86% 58%;
     --baron-menu: 216 21% 9%;
 
     /* BDS */
@@ -134,7 +134,7 @@
     --background: 220 17% 7%;
     --foreground: 0 0% 100%;
     --card: 218 19% 11%;
-    --card-hover: 217 20% 17%;
+    --card-hover: 218 23% 16%;
     --card-foreground: 0 0% 100%;
     --popover: 218 19% 11%;
     --popover-foreground: 0 0% 100%;
@@ -143,16 +143,16 @@
     --baron-orange: 29 100% 50%;
     --baron-orange-hover: 29 100% 62%;
     --baron-blue: 217 91% 60%;
-    --baron-green: 157 80% 43%;
-    --baron-red: 359 100% 65%;
+    --baron-green: 156 78% 43%;
+    --baron-red: 4 86% 58%;
     --baron-purple: 280 65% 60%;
     --baron-pink: 330 80% 65%;
-    --baron-yellow: 37 91% 55%;
+    --baron-yellow: 38 92% 50%;
     --baron-white: 210 40% 98%;
     --text-title: 0 0% 100%;
     --text-primary: 0 0% 100%;
-    --text-secondary: 216 16% 76%;
-    --text-small: 215 12% 55%;
+    --text-secondary: 214 17% 76%;
+    --text-small: 215 10% 54%;
     --text-gray: 217 14% 71%;
     --sidebar-background: 216 21% 9%;
     --sidebar-foreground: 216 16% 76%;
@@ -164,18 +164,18 @@
     --sidebar-ring: 29 100% 50%;
     --table-header: 218 19% 11%;
     --table-row: 217 20% 13%;
-    --table-hover: 217 20% 17%;
-    --table-border: 217 22% 21%;
-    --border: 217 22% 21%;
-    --input: 217 22% 21%;
+    --table-hover: 218 23% 16%;
+    --table-border: 215 21% 22%;
+    --border: 215 21% 22%;
+    --input: 215 21% 22%;
     --ring: 29 100% 50%;
     --secondary: 218 23% 16%;
     --secondary-foreground: 210 40% 98%;
     --muted: 218 23% 16%;
-    --muted-foreground: 215 12% 55%;
+    --muted-foreground: 215 10% 54%;
     --accent: 29 100% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 359 100% 65%;
+    --destructive: 4 86% 58%;
     --destructive-foreground: 0 0% 100%;
     --chart-1: 29 100% 50%;
     --chart-2: 142 71% 45%;
@@ -194,9 +194,9 @@
     --tag-marketing-fg: 0 0% 100%;
     --tag-escritorio-bg: 217 14% 71%;
     --tag-escritorio-fg: 216 17% 11%;
-    --baron-success: 157 80% 43%;
-    --baron-alert: 37 91% 55%;
-    --baron-error: 359 100% 65%;
+    --baron-success: 156 78% 43%;
+    --baron-alert: 38 92% 50%;
+    --baron-error: 4 86% 58%;
     --baron-menu: 216 21% 9%;
     --bds-save: 142 71% 45%;
     --bds-save-fg: 0 0% 100%;

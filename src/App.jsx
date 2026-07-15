@@ -47,6 +47,7 @@ import BaronHistorico from '@/pages/BaronHistorico';
 import SaudeSistema from '@/pages/SaudeSistema';
 import RecoveryEnginePage from '@/pages/RecoveryEngine';
 import AgentesCentral from '@/pages/AgentesCentral';
+import DesignAudit from '@/pages/DesignAudit';
 import BDSErrorBoundary from '@/components/bds/BDSErrorBoundary';
 // Add page imports here
 
@@ -109,6 +110,7 @@ const AuthenticatedApp = () => {
         <Route path="/saude" element={<SaudeSistema />} />
         <Route path="/recovery" element={<RecoveryEnginePage />} />
         <Route path="/agentes" element={<AgentesCentral />} />
+        <Route path="/design-audit" element={<DesignAudit />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

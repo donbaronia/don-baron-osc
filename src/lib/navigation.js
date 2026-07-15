@@ -17,6 +17,7 @@ import {
   Activity,
   ShieldCheck,
   Bot,
+  ScanSearch,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -127,6 +128,12 @@ export const NAV_ITEMS = [
     icon: Bot,
     path: "/agentes",
     roles: ["administrador", "gerencia"],
+  },
+  {
+    label: "Auditoria de Design",
+    icon: ScanSearch,
+    path: "/design-audit",
+    roles: ["administrador"],
   },
   {
     label: "BARON Histórico",
