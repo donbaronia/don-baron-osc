@@ -1,0 +1,59 @@
+{
+  "name": "KnowledgeEdge",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "source_type": {
+      "type": "string",
+      "description": "Tipo da entidade de origem (Product, Supplier, Payment, etc)"
+    },
+    "source_id": {
+      "type": "string",
+      "description": "ID do n\u00f3 de origem"
+    },
+    "source_name": {
+      "type": "string"
+    },
+    "target_type": {
+      "type": "string",
+      "description": "Tipo da entidade de destino"
+    },
+    "target_id": {
+      "type": "string",
+      "description": "ID do n\u00f3 de destino"
+    },
+    "target_name": {
+      "type": "string"
+    },
+    "relation": {
+      "type": "string",
+      "description": "Tipo da rela\u00e7\u00e3o: supplied_by, in_category, pay_to, receive_from, produces, ordered_from, recipe_for, works_at, delivers, etc"
+    },
+    "weight": {
+      "type": "number",
+      "default": 1
+    },
+    "context": {
+      "type": "object",
+      "description": "Contexto da rela\u00e7\u00e3o: { agent, created_by, source_event }"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "source_type",
+    "source_id",
+    "target_type",
+    "target_id",
+    "relation"
+  ]
+}

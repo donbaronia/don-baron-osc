@@ -8,6 +8,8 @@
  * Nunca responde texto — apenas classifica.
  */
 
+import { base44 } from "@/api/base44Client";
+
 // Normaliza texto (sem acento, lowercase)
 const norm = (s) =>
   String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -155,6 +157,61 @@ const ROUTE_MAP = {
   people: "/people-analytics", ifood: "/financeiro",
 };
 
+// Códigos canônicos Don Baron X (Intent Engine → Workflow → Action → Agents)
+const CANONICAL = {
+  stock_entry: "ESTOQUE_ENTRADA",
+  stock_exit: "ESTOQUE_SAIDA",
+  stock_transfer: "ESTOQUE_TRANSFERENCIA",
+  stock_query: "ESTOQUE_CONSULTA",
+  purchase: "COMPRAS_PEDIDO",
+  purchase_query: "COMPRAS_CONSULTA",
+  supplier_create: "FORNECEDORES_CADASTRO",
+  supplier_query: "FORNECEDORES_CONSULTA",
+  supplier_block: "FORNECEDORES_BLOQUEIO",
+  payment: "FINANCEIRO_PAGAR",
+  receipt: "FINANCEIRO_RECEBER",
+  expense: "FINANCEIRO_DESPESA",
+  revenue: "FINANCEIRO_RECEITA",
+  boleto_create: "FINANCEIRO_BOLETO",
+  boleto_query: "FINANCEIRO_BOLETOS",
+  transfer: "FINANCEIRO_TRANSFERENCIA",
+  cashflow_query: "FINANCEIRO_FLUXO",
+  cmv_query: "CMV_CONSULTA",
+  dre_query: "DRE_CONSULTA",
+  profit_query: "DRE_LUCRO",
+  production: "PRODUCAO_ORDEM",
+  recipe: "PRODUCAO_RECEITA",
+  production_query: "PRODUCAO_CONSULTA",
+  production_plan: "PRODUCAO_PLANO",
+  employee_create: "RH_CADASTRO",
+  employee_update: "RH_ATUALIZACAO",
+  employee_query: "RH_CONSULTA",
+  payroll: "RH_FOLHA",
+  training: "RH_TREINAMENTO",
+  courier_checkin: "MOTOBOYS_CHECKIN",
+  courier_checkout: "MOTOBOYS_CHECKOUT",
+  courier_query: "MOTOBOYS_CONSULTA",
+  delivery_status: "MOTOBOYS_ENTREGA",
+  sale: "VENDAS_PEDIDO",
+  sale_query: "VENDAS_CONSULTA",
+  order_status: "VENDAS_STATUS",
+  customer_create: "CLIENTES_CADASTRO",
+  customer_query: "CLIENTES_CONSULTA",
+  document_process: "DOCUMENTOS_PROCESSAR",
+  nf_process: "DOCUMENTOS_NF",
+  document_query: "DOCUMENTOS_CONSULTA",
+  navigate: "NAVEGACAO",
+  navigate_filter: "NAVEGACAO_FILTRO",
+  indicators: "INDICADORES",
+  report: "RELATORIO",
+  alert_create: "ALERTA_CRIAR",
+  schedule: "AGENDAMENTO",
+  task_create: "TAREFA_CRIAR",
+  product_create: "PRODUTOS_CADASTRO",
+  product_query: "PRODUTOS_CONSULTA",
+  product_update: "PRODUTOS_ATUALIZACAO",
+};
+
 // ============================================================
 // API
 // ============================================================
@@ -246,6 +303,57 @@ export const IntentEngine = {
     }
 
     return { ...best, entities };
+  },
+
+  /**
+   * Interpretação estruturada Don Baron X.
+   * 1) classify por regex (rápido, determinístico).
+   * 2) Se baixa confiança ou entidades incompletas → LLM extrai payload estruturado.
+   * Retorna { intent, intent_code, category, confidence, entities, payload, source }.
+   */
+  async interpret(text, opts = {}) {
+    const base = this.classify(text);
+    const intent_code = CANONICAL[base.intent] || null;
+    const hasCore =
+      base.entities &&
+      (base.entities.product_name ||
+        base.entities.amount ||
+        base.entities.quantity ||
+        base.entities.route ||
+        base.entities.employee_name ||
+        base.entities.payment_target);
+    if (base.confidence >= 0.85 && (hasCore || base.intent === "navigate" || base.intent === "navigate_filter")) {
+      return { ...base, intent_code, payload: { intent: base.intent, intent_code, entities: base.entities }, source: "regex" };
+    }
+    try {
+      const codes = Object.values(CANONICAL).join(", ");
+      const res = await base44.integrations.Core.InvokeLLM({
+        prompt:
+          `Você é o Intent Engine do Don Baron (ROS de restaurante). Interprete o comando e devolva JSON estruturado.\n` +
+          `Comando: "${text}"\n` +
+          `Devolva: { "intent_code": um destes códigos [${codes}], "entities": { campos extraídos: product_name, quantity, unit, price, price_type, supplier, amount, payment_method, bank, payment_target, employee_name, rh_action, category, route, module, filter } }`,
+        response_json_schema: {
+          type: "object",
+          properties: { intent_code: { type: "string" }, entities: { type: "object", additionalProperties: true } },
+        },
+        add_context_from_internet: false,
+      });
+      const parsed = typeof res === "string" ? JSON.parse(res) : res;
+      const reverse = Object.fromEntries(Object.entries(CANONICAL).map(([k, v]) => [v, k]));
+      const intent = reverse[parsed.intent_code] || base.intent;
+      const entities = { ...base.entities, ...(parsed.entities || {}) };
+      return {
+        intent,
+        intent_code: parsed.intent_code || CANONICAL[intent] || intent_code,
+        category: base.category,
+        confidence: 0.7,
+        entities,
+        payload: { intent, intent_code: parsed.intent_code || CANONICAL[intent], entities },
+        source: "llm",
+      };
+    } catch (e) {
+      return { ...base, intent_code, payload: { intent: base.intent, intent_code, entities: base.entities }, source: "regex", llm_error: e.message };
+    }
   },
 
   /**

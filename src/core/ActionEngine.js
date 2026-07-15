@@ -23,6 +23,8 @@ import { Logger } from "./Logger";
 import { base44 } from "@/api/base44Client";
 import { EventBus } from "@/lib/eventBus";
 import { AGENTS, canWrite } from "./agents";
+import { getAutonomyLevel, shouldConfirm } from "./autonomyLevels";
+import { KnowledgeGraph } from "@/lib/knowledgeGraph";
 
 export const ActionEngine = {
   /**
@@ -42,6 +44,11 @@ export const ActionEngine = {
     // PERMISSÃO: nenhum agente grava fora de sua permissão declarada.
     if (isWrite && entity && !canWrite(agent, entity)) {
       throw new Error(`[PERMISSÃO NEGADA] Agente "${agent.name}" não pode gravar em ${entity}`);
+    }
+
+    // AUTONOMIA: níveis 1/2 exigem confirmação humana para ações de alto impacto.
+    if (isWrite && !options.confirmed && shouldConfirm(getAutonomyLevel(), actionType)) {
+      return { needs_confirmation: true, actionType, agent: agentKey, payload, autonomy_level: getAutonomyLevel() };
     }
 
     const t0 = Date.now();
@@ -85,6 +92,9 @@ export const ActionEngine = {
       });
       const readback = result?.readback || result;
       const duration_ms = Date.now() - t0;
+
+      // KNOWLEDGE GRAPH: cria relações corporativas a partir da gravação (best-effort).
+      try { await KnowledgeGraph.linkFromWrite(entity, result, payload, agentKey); } catch {}
 
       // EVENT BUS: publica evento de domínio (agentes downstream reagem em segundo plano).
       const eventType = action.event || `${String(entity || actionType).toLowerCase()}_created`;
