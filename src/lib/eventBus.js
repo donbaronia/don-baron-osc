@@ -83,6 +83,8 @@ export const EventBus = {
   emitRecipeUpdated: (params) => EventBus.publish({ event_type: "recipe_updated", module: "producao", ...params }),
   emitProductionFinished: (params) => EventBus.publish({ event_type: "production_finished", module: "producao", ...params }),
   emitAlert: (params) => EventBus.publish({ event_type: "alert_generated", module: "bi", ...params }),
+  emitAdvanceCreated: (params) => EventBus.publish({ event_type: "advance_created", module: "rh", ...params }),
+  emitAdvanceUpdated: (params) => EventBus.publish({ event_type: "advance_updated", module: "rh", ...params }),
 };
 
 export default EventBus;

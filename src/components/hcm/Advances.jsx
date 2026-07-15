@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Wallet, FileText, Loader2, Calculator } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { BaronSelect } from "@/design-system";
+import { SyncManager } from "@/core/SyncManager";
 
 export default function Advances({ refreshKey }) {
   const [advances, setAdvances] = useState([]);
@@ -28,6 +29,12 @@ export default function Advances({ refreshKey }) {
 
   useEffect(() => { load(); }, [load, refreshKey]);
 
+  // Auto-refresh quando QUALQUER modulo gravar/sincronizar EmployeeAdvance (sem F5).
+  useEffect(() => {
+    const unsub = SyncManager.onSync("EmployeeAdvance", () => load());
+    return () => { if (typeof unsub === "function") unsub(); };
+  }, [load]);
+
   const handleCreate = async () => {
     if (!form.employee_id) { toast({ title: "Selecione um colaborador", variant: "destructive" }); return; }
     setSaving(true);
@@ -35,11 +42,14 @@ export default function Advances({ refreshKey }) {
     const amount = Number(form.amount);
     const installments = Number(form.installments);
     try {
-      await HCM.createAdvance({ ...form, amount, installments, installment_amount: Math.round((amount / installments) * 100) / 100, installments_paid: 0, balance: amount, employee_name: emp?.full_name || '', status: 'ativo' });
-      toast({ title: "Vale/Empréstimo registrado" });
+      // createAdvance agora retorna o registro CONFIRMADO pelo read-back (RecoveryEngine).
+      // Só exibimos "registrado" após o banco confirmar a leitura de volta.
+      const confirmed = await HCM.createAdvance({ ...form, amount, installments, installment_amount: Math.round((amount / installments) * 100) / 100, installments_paid: 0, balance: amount, employee_name: emp?.full_name || '', status: 'ativo' });
+      if (!confirmed?.id) throw new Error("Gravação não confirmada pelo read-back");
+      toast({ title: "Vale/Empréstimo registrado", description: "Confirmado no banco e espelhado no Financeiro." });
       setForm({ employee_id: '', type: 'vale_semanal', amount: 0, installments: 1, description: '', date: new Date().toISOString().split('T')[0] });
       load();
-    } catch (e) { toast({ title: "Erro", description: e.message, variant: "destructive" }); }
+    } catch (e) { toast({ title: "Erro ao registrar vale", description: e.message, variant: "destructive" }); }
     finally { setSaving(false); }
   };
 

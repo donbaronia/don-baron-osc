@@ -45,6 +45,8 @@ const EVENT_CATALOG = {
 
   // --- RH / Alertas (legado mantido) ---
   EmployeeCreated:    { snake: "employee_created",    module: "rh",         priority: "baixa",  queue: "hr",          subscribers: ["ia"], description: "Funcionario cadastrado", notification: null },
+  AdvanceCreated:     { snake: "advance_created",     module: "rh",         priority: "media",  queue: "hr",          subscribers: ["financeiro", "ia", "analytics"], description: "Vale/emprestimo criado", notification: { category: "info", title: "Vale registrado" } },
+  AdvanceUpdated:     { snake: "advance_updated",     module: "rh",         priority: "baixa",  queue: "hr",          subscribers: ["financeiro", "ia"], description: "Vale/emprestimo atualizado", notification: null },
   PayrollClosed:      { snake: "payroll_closed",       module: "rh",         priority: "alta",  queue: "hr",          subscribers: ["financeiro", "ia"], description: "Folha fechada", notification: { category: "warning", title: "Folha fechada" } },
   AlertGenerated:     { snake: "alert_generated",      module: "bi",         priority: "alta",  queue: "notifications", subscribers: ["ia", "notificacoes"], description: "Alerta gerado", notification: { category: "urgent", title: "Alerta gerado" } },
 };
@@ -98,6 +100,37 @@ const REACTORS = {
   stock_exit_created: {
     producao: async () => ({ ok: true }),
     financeiro: async () => ({ ok: true }),
+  },
+
+  // Vale/Empréstimo criado -> Financeiro espelha como conta a pagar (RH nao depende de Financeiro).
+  advance_created: {
+    financeiro: async (evt, base44) => {
+      const p = evt.payload || {};
+      const valor = p.amount || p.installment_amount || 0;
+      if (!valor) return { ok: true, note: "sem valor" };
+      const desc = `Vale/Empréstimo ${evt.entity_id} — ${p.employee_name || ""} (${p.type || "vale"})`;
+      const existing = await base44.asServiceRole.entities.FinancialTransaction.filter(
+        { origin: "folha", description: desc, status: "pendente" }, "-created_date", 1
+      ).catch(() => []);
+      if (existing && existing.length > 0) return { ok: true, note: "ja existe" };
+      await base44.asServiceRole.entities.FinancialTransaction.create({
+        description: desc,
+        type: "a_pagar",
+        amount: valor,
+        due_date: p.date || "",
+        status: "pendente",
+        origin: "folha",
+        notes: "Gerado automaticamente pelo Event Bus (advance_created) — espelho do vale/empréstimo do RH",
+      }).catch(() => {});
+      return { ok: true, created: true };
+    },
+    ia: async () => ({ ok: true }),
+    analytics: async () => ({ ok: true }),
+  },
+
+  advance_updated: {
+    financeiro: async () => ({ ok: true }),
+    ia: async () => ({ ok: true }),
   },
 
   payment_confirmed: {

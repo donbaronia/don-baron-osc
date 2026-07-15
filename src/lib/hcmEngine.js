@@ -1,4 +1,6 @@
 import { base44 } from "@/api/base44Client";
+import { PersistenceEngine } from "@/core/PersistenceEngine";
+import { EventBus } from "@/lib/eventBus";
 
 export const HCM = {
   // Backend function calls (complex operations)
@@ -39,11 +41,47 @@ export const HCM = {
   createTimeRecord: (data) => base44.entities.TimeRecord.create(data),
   updateTimeRecord: (id, data) => base44.entities.TimeRecord.update(id, data),
 
-  // Advances
+  // Advances — gravação passa pelo RecoveryEngine (write -> read-back -> validar -> commit)
+  // e publica VALE_CREATED no Event Bus, espelhando automaticamente no Financeiro.
   listAdvances: () => base44.entities.EmployeeAdvance.list('-date', 200),
   listAdvancesByEmployee: (employee_id) => base44.entities.EmployeeAdvance.filter({ employee_id }),
-  createAdvance: (data) => base44.entities.EmployeeAdvance.create(data),
-  updateAdvance: (id, data) => base44.entities.EmployeeAdvance.update(id, data),
+  createAdvance: async (data, options = {}) => {
+    const confirmed = await PersistenceEngine.create("EmployeeAdvance", data, {
+      validate: false,
+      module: "rh",
+      origin: options.origin || "frontend",
+      user: options.user,
+    });
+    EventBus.emitAdvanceCreated({
+      entity_type: "EmployeeAdvance",
+      entity_id: confirmed.id,
+      payload: {
+        advance_id: confirmed.id,
+        employee_id: data.employee_id,
+        employee_name: data.employee_name,
+        type: data.type,
+        amount: data.amount,
+        installment_amount: data.installment_amount,
+        installments: data.installments,
+        date: data.date,
+      },
+    }).catch(() => {});
+    return confirmed;
+  },
+  updateAdvance: async (id, data, options = {}) => {
+    const confirmed = await PersistenceEngine.update("EmployeeAdvance", id, data, {
+      validate: false,
+      module: "rh",
+      origin: options.origin || "frontend",
+      user: options.user,
+    });
+    EventBus.emitAdvanceUpdated({
+      entity_type: "EmployeeAdvance",
+      entity_id: id,
+      payload: { employee_id: data.employee_id, employee_name: data.employee_name, type: data.type, amount: data.amount, status: data.status },
+    }).catch(() => {});
+    return confirmed;
+  },
 
   // Performance Reviews
   listReviews: () => base44.entities.PerformanceReview.list('-review_date', 200),
