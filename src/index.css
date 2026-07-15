@@ -8,14 +8,14 @@
 
     /* Fundo principal — #0F1115 */
     --background: 220 17% 7%;
-    --foreground: 210 40% 98%;
+    --foreground: 0 0% 100%;
 
     /* Cards — #181C22 / Hover — #1F2630 */
-    --card: 216 17% 11%;
-    --card-hover: 215 21% 15%;
-    --card-foreground: 210 40% 98%;
-    --popover: 216 17% 11%;
-    --popover-foreground: 210 40% 98%;
+    --card: 218 19% 11%;
+    --card-hover: 217 20% 17%;
+    --card-foreground: 0 0% 100%;
+    --popover: 218 19% 11%;
+    --popover-foreground: 0 0% 100%;
 
     /* Laranja Baron — #FF7A00 / Hover — #FF9B3F */
     --primary: 29 100% 50%;
@@ -27,55 +27,55 @@
     --baron-blue: 217 91% 60%;
 
     /* Verde — #22C55E */
-    --baron-green: 142 71% 45%;
+    --baron-green: 157 80% 43%;
 
     /* Vermelho — #EF4444 */
-    --baron-red: 0 84% 60%;
+    --baron-red: 359 100% 65%;
 
     /* Roxo / Rosa / Amarelo (acesso semântico) */
     --baron-purple: 280 65% 60%;
     --baron-pink: 330 80% 65%;
-    --baron-yellow: 44 96% 56%;
+    --baron-yellow: 37 91% 55%;
 
     /* Branco — #F8FAFC */
     --baron-white: 210 40% 98%;
 
     /* Texto Secundário — #AAB2BF */
     --text-title: 0 0% 100%;
-    --text-primary: 210 40% 98%;
-    --text-secondary: 218 19% 81%;
-    --text-small: 217 14% 60%;
+    --text-primary: 0 0% 100%;
+    --text-secondary: 216 16% 76%;
+    --text-small: 215 12% 55%;
     --text-gray: 217 14% 71%;
 
     /* Sidebar — #13171D */
     --sidebar-background: 216 21% 9%;
-    --sidebar-foreground: 217 14% 71%;
+    --sidebar-foreground: 216 16% 76%;
     --sidebar-primary: 29 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 218 23% 16%;
+    --sidebar-accent: 217 20% 17%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217 21% 21%;
     --sidebar-ring: 29 100% 50%;
 
     /* Header — #171B22 */
     --table-header: 218 19% 11%;
-    --table-row: 216 21% 9%;
-    --table-hover: 218 23% 16%;
-    --table-border: 218 17% 14%;
+    --table-row: 217 20% 13%;
+    --table-hover: 217 20% 17%;
+    --table-border: 217 22% 21%;
 
     /* Linhas — #2B3442 */
-    --border: 217 21% 21%;
-    --input: 217 21% 21%;
+    --border: 217 22% 21%;
+    --input: 217 22% 21%;
     --ring: 29 100% 50%;
 
     /* Secundário */
     --secondary: 218 23% 16%;
     --secondary-foreground: 210 40% 98%;
     --muted: 218 23% 16%;
-    --muted-foreground: 217 14% 60%;
+    --muted-foreground: 215 12% 55%;
     --accent: 29 100% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    --destructive: 359 100% 65%;
     --destructive-foreground: 0 0% 100%;
 
     /* Gráficos */
@@ -108,9 +108,9 @@
     --tag-escritorio-fg: 216 17% 11%;
 
     /* Compat legado */
-    --baron-success: 142 71% 45%;
-    --baron-alert: 44 96% 56%;
-    --baron-error: 0 84% 60%;
+    --baron-success: 157 80% 43%;
+    --baron-alert: 37 91% 55%;
+    --baron-error: 359 100% 65%;
     --baron-menu: 216 21% 9%;
 
     /* BDS */
@@ -132,50 +132,50 @@
 
   .dark {
     --background: 220 17% 7%;
-    --foreground: 210 40% 98%;
-    --card: 216 17% 11%;
-    --card-hover: 215 21% 15%;
-    --card-foreground: 210 40% 98%;
-    --popover: 216 17% 11%;
-    --popover-foreground: 210 40% 98%;
+    --foreground: 0 0% 100%;
+    --card: 218 19% 11%;
+    --card-hover: 217 20% 17%;
+    --card-foreground: 0 0% 100%;
+    --popover: 218 19% 11%;
+    --popover-foreground: 0 0% 100%;
     --primary: 29 100% 50%;
     --primary-foreground: 0 0% 100%;
     --baron-orange: 29 100% 50%;
     --baron-orange-hover: 29 100% 62%;
     --baron-blue: 217 91% 60%;
-    --baron-green: 142 71% 45%;
-    --baron-red: 0 84% 60%;
+    --baron-green: 157 80% 43%;
+    --baron-red: 359 100% 65%;
     --baron-purple: 280 65% 60%;
     --baron-pink: 330 80% 65%;
-    --baron-yellow: 44 96% 56%;
+    --baron-yellow: 37 91% 55%;
     --baron-white: 210 40% 98%;
     --text-title: 0 0% 100%;
-    --text-primary: 210 40% 98%;
-    --text-secondary: 218 19% 81%;
-    --text-small: 217 14% 60%;
+    --text-primary: 0 0% 100%;
+    --text-secondary: 216 16% 76%;
+    --text-small: 215 12% 55%;
     --text-gray: 217 14% 71%;
     --sidebar-background: 216 21% 9%;
-    --sidebar-foreground: 217 14% 71%;
+    --sidebar-foreground: 216 16% 76%;
     --sidebar-primary: 29 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 218 23% 16%;
+    --sidebar-accent: 217 20% 17%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217 21% 21%;
     --sidebar-ring: 29 100% 50%;
     --table-header: 218 19% 11%;
-    --table-row: 216 21% 9%;
-    --table-hover: 218 23% 16%;
-    --table-border: 218 17% 14%;
-    --border: 217 21% 21%;
-    --input: 217 21% 21%;
+    --table-row: 217 20% 13%;
+    --table-hover: 217 20% 17%;
+    --table-border: 217 22% 21%;
+    --border: 217 22% 21%;
+    --input: 217 22% 21%;
     --ring: 29 100% 50%;
     --secondary: 218 23% 16%;
     --secondary-foreground: 210 40% 98%;
     --muted: 218 23% 16%;
-    --muted-foreground: 217 14% 60%;
+    --muted-foreground: 215 12% 55%;
     --accent: 29 100% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    --destructive: 359 100% 65%;
     --destructive-foreground: 0 0% 100%;
     --chart-1: 29 100% 50%;
     --chart-2: 142 71% 45%;
@@ -194,9 +194,9 @@
     --tag-marketing-fg: 0 0% 100%;
     --tag-escritorio-bg: 217 14% 71%;
     --tag-escritorio-fg: 216 17% 11%;
-    --baron-success: 142 71% 45%;
-    --baron-alert: 44 96% 56%;
-    --baron-error: 0 84% 60%;
+    --baron-success: 157 80% 43%;
+    --baron-alert: 37 91% 55%;
+    --baron-error: 359 100% 65%;
     --baron-menu: 216 21% 9%;
     --bds-save: 142 71% 45%;
     --bds-save-fg: 0 0% 100%;
@@ -243,4 +243,29 @@
   .tag-perdas { background: hsl(var(--tag-perdas-bg) / 0.15); color: hsl(var(--tag-perdas-bg)); border: 1px solid hsl(var(--tag-perdas-bg) / 0.3); }
   .tag-marketing { background: hsl(var(--tag-marketing-bg) / 0.15); color: hsl(var(--tag-marketing-bg)); border: 1px solid hsl(var(--tag-marketing-bg) / 0.3); }
   .tag-escritorio { background: hsl(var(--tag-escritorio-bg) / 0.15); color: hsl(var(--tag-escritorio-bg)); border: 1px solid hsl(var(--tag-escritorio-bg) / 0.3); }
+
+  /* === TABELAS DON BARON — padrão único === */
+  .baron-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+  .baron-table thead th { background: hsl(var(--table-header)); color: hsl(var(--text-secondary)); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; padding: 10px 14px; text-align: left; border-bottom: 1px solid hsl(var(--table-border)); white-space: nowrap; }
+  .baron-table tbody td { padding: 11px 14px; color: hsl(var(--foreground)); border-bottom: 1px solid hsl(var(--table-border)); vertical-align: middle; }
+  .baron-table tbody tr:nth-child(odd) { background: hsl(var(--table-row)); }
+  .baron-table tbody tr:nth-child(even) { background: hsl(217 20% 11%); }
+  .baron-table tbody tr:hover { background: hsl(var(--table-hover)); }
+  .baron-table .col-product { color: hsl(var(--foreground)); font-weight: 500; }
+  .baron-table .col-code { color: hsl(var(--text-secondary)); }
+  .baron-table .col-qty { color: hsl(var(--baron-green)); font-weight: 600; }
+  .baron-table .col-value { color: hsl(var(--foreground)); }
+  .baron-table .col-total { color: hsl(var(--baron-orange)); font-weight: 600; }
+
+  /* === FORMULÁRIOS DON BARON — padrão único === */
+  .ds-input { height: 44px; border-radius: 10px; border: 1px solid hsl(var(--border)); background: hsl(217 20% 11%); color: hsl(var(--foreground)); font-size: 14px; padding: 0 14px; transition: border-color .2s, box-shadow .2s; }
+  .ds-input::placeholder { color: hsl(var(--text-small)); }
+  .ds-input:focus { outline: none; border-color: hsl(var(--baron-orange)); box-shadow: 0 0 0 1px hsl(var(--baron-orange)); }
+
+  /* === MOVIMENTAÇÕES DON BARON — cores fixas === */
+  .mov-entrada { color: hsl(var(--baron-green)); }
+  .mov-saida { color: hsl(var(--baron-blue)); }
+  .mov-perda { color: hsl(var(--baron-red)); }
+  .mov-transferencia { color: hsl(var(--baron-yellow)); }
+  .mov-bonificacao { color: hsl(var(--baron-purple)); }
 }
