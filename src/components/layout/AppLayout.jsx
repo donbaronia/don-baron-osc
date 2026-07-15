@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { recoverProcesses } from "@/lib/documentWorkflow";
 import { recoverAll } from "@/lib/enterpriseCore";
+import { RecoveryEngine } from "@/lib/recoveryEngine";
 import Sidebar from "./Sidebar";
 import GlobalSearch from "@/components/bds/GlobalSearch";
 import BDSHelp from "@/components/bds/BDSHelp";
@@ -30,13 +31,15 @@ export default function AppLayout() {
   // do último estado válido. Proibido reiniciar do início. Documentos + comandos do Baron.
   useEffect(() => {
     let mounted = true;
-    Promise.all([recoverAll(user), recoverProcesses(user)])
-      .then(([coreRes, docRes]) => {
+    Promise.all([recoverAll(user), recoverProcesses(user), RecoveryEngine.recoverPending()])
+      .then(([coreRes, docRes, recRes]) => {
         if (mounted) {
           const coreN = coreRes.resumed?.length || 0;
           const docN = docRes.resumed?.length || 0;
-          if (coreN + docN > 0) {
+          const recN = recRes?.resumed || 0;
+          if (coreN + docN + recN > 0) {
             console.log(`[DON BARON ENTERPRISE CORE] ${coreRes.scanned} processo(s) de comando + ${docRes.scanned} de documento verificados. ${coreN + docN} retomado(s) do último estado válido.`);
+            console.log(`[RECOVERY ENGINE] ${recRes?.scanned || 0} operação(ões) de gravação interrompida(s). ${recN} retomada(s) do pipeline.`);
           }
         }
       })

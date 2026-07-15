@@ -1,0 +1,164 @@
+{
+  "name": "RecoveryOperation",
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "Multi-tenant"
+    },
+    "operation_code": {
+      "type": "string",
+      "description": "ID unico sequencial (REC-AAAA-NNNNNNNNN)"
+    },
+    "entity_name": {
+      "type": "string",
+      "description": "Entidade alvo (Product, Payment, FinancialTransaction, etc)"
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "create",
+        "update",
+        "delete"
+      ],
+      "description": "Tipo de operacao persistente"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID do registro apos write (create) ou pre-existente (update/delete)"
+    },
+    "payload": {
+      "type": "object",
+      "description": "Dados gravados (imutaveis). A inten\u00e7\u00e3o original nunca se perde."
+    },
+    "readback": {
+      "type": "object",
+      "description": "Resultado do read-back apos write (prova de gravacao)"
+    },
+    "current_step": {
+      "type": "string",
+      "enum": [
+        "write",
+        "readback",
+        "validate",
+        "commit"
+      ],
+      "default": "write",
+      "description": "Etapa atual do pipeline Recovery"
+    },
+    "current_state": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "write_completed",
+        "readback_completed",
+        "validated",
+        "committed",
+        "retry",
+        "dead_letter"
+      ],
+      "default": "pending",
+      "description": "Estado da maquina de estados do Recovery"
+    },
+    "failed_step": {
+      "type": "string",
+      "enum": [
+        "write",
+        "readback",
+        "validate",
+        "commit",
+        ""
+      ],
+      "default": "",
+      "description": "Etapa exata que falhou (mostrada ao administrador)"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Mensagem do ultimo erro"
+    },
+    "error_stack": {
+      "type": "string",
+      "description": "Stack trace do erro"
+    },
+    "attempt_history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Auditoria de cada tentativa: [{attempt, step, status, error, timestamp, duration_ms}]"
+    },
+    "retry_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Tentativas ja executadas"
+    },
+    "max_retries": {
+      "type": "number",
+      "default": 5
+    },
+    "next_retry_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "queue": {
+      "type": "string",
+      "enum": [
+        "active",
+        "retry",
+        "dead_letter",
+        "committed"
+      ],
+      "default": "active",
+      "description": "Fila atual: active | retry | dead_letter | committed"
+    },
+    "module": {
+      "type": "string",
+      "description": "Modulo de origem (estoque, financeiro, etc)"
+    },
+    "origin": {
+      "type": "string",
+      "enum": [
+        "frontend",
+        "backend",
+        "workflow",
+        "recovery"
+      ],
+      "default": "frontend"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_attempt_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "result": {
+      "type": "object",
+      "description": "Resultado final apos commit confirmado"
+    },
+    "version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "operation_code",
+    "entity_name",
+    "operation",
+    "current_state"
+  ]
+}

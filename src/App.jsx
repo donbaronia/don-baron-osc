@@ -45,6 +45,7 @@ import Motoboys from '@/pages/Motoboys';
 import Relatorios from '@/pages/Relatorios';
 import BaronHistorico from '@/pages/BaronHistorico';
 import SaudeSistema from '@/pages/SaudeSistema';
+import RecoveryEnginePage from '@/pages/RecoveryEngine';
 import BDSErrorBoundary from '@/components/bds/BDSErrorBoundary';
 // Add page imports here
 
@@ -105,6 +106,7 @@ const AuthenticatedApp = () => {
         <Route path="/relatorios" element={<Relatorios />} />
         <Route path="/baron-historico" element={<BaronHistorico />} />
         <Route path="/saude" element={<SaudeSistema />} />
+        <Route path="/recovery" element={<RecoveryEnginePage />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
