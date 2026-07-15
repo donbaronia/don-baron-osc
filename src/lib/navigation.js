@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   Bot,
   ScanSearch,
+  Boxes,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -128,6 +129,12 @@ export const NAV_ITEMS = [
     icon: Bot,
     path: "/agentes",
     roles: ["administrador", "gerencia"],
+  },
+  {
+    label: "Cadastro AI",
+    icon: Boxes,
+    path: "/cadastro-ai",
+    roles: ["administrador", "financeiro", "compras", "estoque", "producao", "gerencia", "rh"],
   },
   {
     label: "Auditoria de Design",
