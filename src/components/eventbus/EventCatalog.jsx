@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { EventBus } from "@/lib/eventBus";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 import { Search, BookOpen } from "lucide-react";
 
 const PRIORITY_CFG = {
@@ -44,20 +44,8 @@ export default function EventCatalog() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
           <Input placeholder="Buscar evento..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
         </div>
-        <Select value={filterModule} onValueChange={setFilterModule}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Módulo" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os módulos</SelectItem>
-            {modules.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        <Select value={filterQueue} onValueChange={setFilterQueue}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Fila" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas as filas</SelectItem>
-            {queues.map(q => <SelectItem key={q} value={q}>{q}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <div className="w-[160px]"><BaronSelect value={filterModule} onChange={setFilterModule} options={[{ value: "all", label: "Todos os módulos" }, ...modules.map((m) => ({ value: m, label: m }))]} placeholder="Módulo" /></div>
+        <div className="w-[160px]"><BaronSelect value={filterQueue} onChange={setFilterQueue} options={[{ value: "all", label: "Todas as filas" }, ...queues.map((q) => ({ value: q, label: q }))]} placeholder="Fila" /></div>
       </div>
 
       <div className="flex items-center gap-2 text-xs text-neutral-500">

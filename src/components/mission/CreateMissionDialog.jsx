@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Loader2 } from "lucide-react";
 import { MissionControl, MISSION_TYPE_CONFIG, PRIORITY_CONFIG, DEPARTMENT_CONFIG } from "@/lib/missionEngine";
 import { toast } from "@/components/ui/use-toast";
+import { BaronSelect } from "@/design-system";
 
 export default function CreateMissionDialog({ onCreated }) {
   const [open, setOpen] = useState(false);
@@ -36,7 +37,7 @@ export default function CreateMissionDialog({ onCreated }) {
     } finally { setLoading(false); }
   };
 
-  const selectClass = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -67,21 +68,15 @@ export default function CreateMissionDialog({ onCreated }) {
           <div className="grid grid-cols-3 gap-3">
             <div>
               <Label className="text-xs">Tipo</Label>
-              <select className={selectClass} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
-                {Object.entries(MISSION_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-              </select>
+              <BaronSelect value={form.type} onChange={(v) => setForm({ ...form, type: v })} options={Object.entries(MISSION_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} />
             </div>
             <div>
               <Label className="text-xs">Prioridade</Label>
-              <select className={selectClass} value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
-                {Object.entries(PRIORITY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-              </select>
+              <BaronSelect value={form.priority} onChange={(v) => setForm({ ...form, priority: v })} options={Object.entries(PRIORITY_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} />
             </div>
             <div>
               <Label className="text-xs">Departamento</Label>
-              <select className={selectClass} value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })}>
-                {Object.entries(DEPARTMENT_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-              </select>
+              <BaronSelect value={form.department} onChange={(v) => setForm({ ...form, department: v })} options={Object.entries(DEPARTMENT_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">

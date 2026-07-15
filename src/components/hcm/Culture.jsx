@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Award, AlertTriangle, Check } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { BaronSelect } from "@/design-system";
 
 export default function Culture({ refreshKey }) {
   const [recognitions, setRecognitions] = useState([]);
@@ -47,7 +48,7 @@ export default function Culture({ refreshKey }) {
 
   const handleResolveOcc = async (id) => { try { await HCM.updateOccurrence(id, { resolved: true, resolved_at: new Date().toISOString() }); load(); } catch (e) { toast({ title: "Erro", description: e.message, variant: "destructive" }); } };
 
-  const selectClass = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+
 
   if (loading) return <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 animate-pulse rounded-xl bg-neutral-200/60" />)}</div>;
 
@@ -62,8 +63,8 @@ export default function Culture({ refreshKey }) {
             <DialogContent className="max-w-md">
               <DialogHeader><DialogTitle>Novo Reconhecimento</DialogTitle></DialogHeader>
               <div className="space-y-3">
-                <div><Label className="text-xs">Colaborador</Label><select className={selectClass} value={recForm.employee_id} onChange={(e) => setRecForm({ ...recForm, employee_id: e.target.value })}><option value="">Selecione...</option>{employees.map(e => <option key={e.id} value={e.id}>{e.full_name}</option>)}</select></div>
-                <div><Label className="text-xs">Tipo</Label><select className={selectClass} value={recForm.type} onChange={(e) => setRecForm({ ...recForm, type: e.target.value })}>{Object.entries(RECOGNITION_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}</select></div>
+                <div><Label className="text-xs">Colaborador</Label><BaronSelect value={recForm.employee_id} onChange={(v) => setRecForm({ ...recForm, employee_id: v })} options={employees.map((e) => ({ value: e.id, label: e.full_name }))} placeholder="Selecione..." /></div>
+                <div><Label className="text-xs">Tipo</Label><BaronSelect value={recForm.type} onChange={(v) => setRecForm({ ...recForm, type: v })} options={Object.entries(RECOGNITION_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: `${v.emoji} ${v.label}` }))} /></div>
                 <div><Label className="text-xs">Título</Label><Input value={recForm.title} onChange={(e) => setRecForm({ ...recForm, title: e.target.value })} /></div>
                 <div><Label className="text-xs">Descrição</Label><Textarea value={recForm.description} onChange={(e) => setRecForm({ ...recForm, description: e.target.value })} rows={2} /></div>
                 <div className="grid grid-cols-2 gap-3">
@@ -112,10 +113,10 @@ export default function Culture({ refreshKey }) {
             <DialogContent className="max-w-md">
               <DialogHeader><DialogTitle>Nova Ocorrência</DialogTitle></DialogHeader>
               <div className="space-y-3">
-                <div><Label className="text-xs">Colaborador</Label><select className={selectClass} value={occForm.employee_id} onChange={(e) => setOccForm({ ...occForm, employee_id: e.target.value })}><option value="">Selecione...</option>{employees.map(e => <option key={e.id} value={e.id}>{e.full_name}</option>)}</select></div>
+                <div><Label className="text-xs">Colaborador</Label><BaronSelect value={occForm.employee_id} onChange={(v) => setOccForm({ ...occForm, employee_id: v })} options={employees.map((e) => ({ value: e.id, label: e.full_name }))} placeholder="Selecione..." /></div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><Label className="text-xs">Tipo</Label><select className={selectClass} value={occForm.type} onChange={(e) => setOccForm({ ...occForm, type: e.target.value })}>{Object.entries(OCCURRENCE_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}</select></div>
-                  <div><Label className="text-xs">Severidade</Label><select className={selectClass} value={occForm.severity} onChange={(e) => setOccForm({ ...occForm, severity: e.target.value })}>{Object.entries(OCCURRENCE_SEVERITY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
+                  <div><Label className="text-xs">Tipo</Label><BaronSelect value={occForm.type} onChange={(v) => setOccForm({ ...occForm, type: v })} options={Object.entries(OCCURRENCE_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: `${v.emoji} ${v.label}` }))} /></div>
+                  <div><Label className="text-xs">Severidade</Label><BaronSelect value={occForm.severity} onChange={(v) => setOccForm({ ...occForm, severity: v })} options={Object.entries(OCCURRENCE_SEVERITY_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
                 </div>
                 <div><Label className="text-xs">Data</Label><Input type="date" value={occForm.date} onChange={(e) => setOccForm({ ...occForm, date: e.target.value })} /></div>
                 <div><Label className="text-xs">Descrição</Label><Textarea value={occForm.description} onChange={(e) => setOccForm({ ...occForm, description: e.target.value })} rows={2} /></div>

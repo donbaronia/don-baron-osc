@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { RefreshCw } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
-
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 
 const CRITERIA = [
   { v: "valor", l: "Por Valor" },
@@ -41,9 +40,9 @@ export default function ABCCurve() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <select className={SEL + " w-48"} value={criteria} onChange={e => setCriteria(e.target.value)}>
-          {CRITERIA.map(c => <option key={c.v} value={c.v}>{c.l}</option>)}
-        </select>
+        <div className="w-48">
+          <BaronSelect value={criteria} onChange={(v) => setCriteria(v)} options={CRITERIA.map((c) => ({ value: c.v, label: c.l }))} />
+        </div>
         <Button variant="outline" size="sm" onClick={() => exportToCsv("curva_abc.csv", data.allItems.map(i => ({ produto: i.product_name, classe: i.abc_class, metrica: i.metric, percentual_acumulado: i.cumulative_pct })))} className="gap-2">Exportar CSV</Button>
       </div>
 

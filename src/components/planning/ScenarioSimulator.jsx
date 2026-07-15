@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, GitCompare, Brain, Loader2, AlertCircle } from "lucide-react";
+import { BaronSelect } from "@/design-system";
 
 const EMPTY = { name: '', description: '', scenario_type: 'preco', assumptions: '', variables: '', baseline_metrics: '', projected_metrics: '', impact_summary: '' };
 
@@ -135,7 +136,7 @@ export default function ScenarioSimulator() {
             <div><Label>Nome *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Aumentar Preço +R$2,00" /></div>
             <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Tipo</Label><select value={form.scenario_type} onChange={(e) => setForm({ ...form, scenario_type: e.target.value })} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm">{Object.entries(SCENARIO_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}</select></div>
+              <div><Label>Tipo</Label><BaronSelect value={form.scenario_type} onChange={(v) => setForm({ ...form, scenario_type: v })} options={Object.entries(SCENARIO_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: `${v.emoji} ${v.label}` }))} /></div>
             </div>
             <div><Label>Premissas</Label><Textarea value={form.assumptions} onChange={(e) => setForm({ ...form, assumptions: e.target.value })} rows={3} placeholder="Descreva as premissas utilizadas..." /></div>
             <div><Label>Variáveis (JSON)</Label><Textarea value={form.variables} onChange={(e) => setForm({ ...form, variables: e.target.value })} rows={2} placeholder='{"price_increase": 2, "volume": 5000}' className="font-mono text-xs" /></div>

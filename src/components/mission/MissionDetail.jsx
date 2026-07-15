@@ -3,6 +3,7 @@ import { MissionControl, MISSION_TYPE_CONFIG, MISSION_STATUS_CONFIG, PRIORITY_CO
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Award, Calendar, Check, Clock, Crown, Link2, Loader2, Sparkles } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { BaronSelect } from "@/design-system";
 
 function ScoreBar({ label, value }) {
   const color = value >= 80 ? 'bg-emerald-500' : value >= 60 ? 'bg-blue-500' : value >= 40 ? 'bg-amber-500' : 'bg-red-500';
@@ -213,9 +214,7 @@ export default function MissionDetail({ missionId, onBack }) {
                               </div>
                             </div>
                             {m.status !== 'concluida' && (
-                              <select value={task.status} onChange={(e) => handleUpdateTask(task.id, e.target.value)} className="rounded-md border border-neutral-200 bg-white px-2 py-1 text-xs text-neutral-700">
-                                {Object.entries(TASK_STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-                              </select>
+                              <div className="w-36"><BaronSelect size="sm" value={task.status} onChange={(v) => handleUpdateTask(task.id, v)} options={Object.entries(TASK_STATUS_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
                             )}
                           </div>
                           {task.progress_pct > 0 && task.status !== 'concluida' && (

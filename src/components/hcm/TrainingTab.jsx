@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, GraduationCap, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { BaronSelect } from "@/design-system";
 
 export default function TrainingTab({ refreshKey }) {
   const [items, setItems] = useState([]);
@@ -42,7 +43,7 @@ export default function TrainingTab({ refreshKey }) {
     catch (e) { toast({ title: "Erro", description: e.message, variant: "destructive" }); }
   };
 
-  const selectClass = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+
   const pending = items.filter(t => t.status === 'pendente');
   const inProgress = items.filter(t => t.status === 'em_andamento');
   const completed = items.filter(t => t.status === 'concluido');
@@ -62,10 +63,10 @@ export default function TrainingTab({ refreshKey }) {
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>Novo Treinamento</DialogTitle></DialogHeader>
             <div className="space-y-3">
-              <div><Label className="text-xs">Colaborador</Label><select className={selectClass} value={form.employee_id} onChange={(e) => setForm({ ...form, employee_id: e.target.value })}><option value="">Selecione...</option>{employees.map(e => <option key={e.id} value={e.id}>{e.full_name}</option>)}</select></div>
+              <div><Label className="text-xs">Colaborador</Label><BaronSelect value={form.employee_id} onChange={(v) => setForm({ ...form, employee_id: v })} options={employees.map((e) => ({ value: e.id, label: e.full_name }))} placeholder="Selecione..." /></div>
               <div><Label className="text-xs">Título</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label className="text-xs">Tipo</Label><select className={selectClass} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>{Object.entries(TRAINING_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
+                <div><Label className="text-xs">Tipo</Label><BaronSelect value={form.type} onChange={(v) => setForm({ ...form, type: v })} options={Object.entries(TRAINING_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
                 <div><Label className="text-xs">Categoria</Label><Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="Ex: Segurança" /></div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -108,9 +109,7 @@ export default function TrainingTab({ refreshKey }) {
                 </div>
                 {t.status !== 'concluido' && (
                   <div className="mt-2">
-                    <select value={t.status} onChange={(e) => handleStatusChange(t.id, e.target.value)} className="rounded-md border border-neutral-200 bg-white px-2 py-1 text-xs text-neutral-700">
-                      {Object.entries(TRAINING_STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-                    </select>
+                    <div className="w-36"><BaronSelect size="sm" value={t.status} onChange={(v) => handleStatusChange(t.id, v)} options={Object.entries(TRAINING_STATUS_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
                   </div>
                 )}
                 {t.completion_date && <p className="mt-2 text-[10px] text-emerald-600">✓ Concluído em {new Date(t.completion_date).toLocaleDateString('pt-BR')}{t.score ? ` · Nota: ${t.score}` : ''}</p>}

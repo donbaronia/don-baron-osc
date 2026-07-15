@@ -12,9 +12,7 @@ import DocumentViewer from "@/components/documentos/DocumentViewer";
 import DocumentReports from "@/components/documentos/DocumentReports";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 
 export default function Documentos() {
   const { user } = useAuth();
@@ -160,13 +158,7 @@ export default function Documentos() {
 
         <TabsContent value="pesquisa" className="mt-4 space-y-4">
           <Toolbar search={search} onSearch={setSearch} placeholder="Pesquisar por fornecedor, valor, número, categoria, data, tags, texto...">
-            <Select value={catFilter} onValueChange={setCatFilter}>
-              <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas categorias</SelectItem>
-                {DOCUMENT_CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.emoji} {c.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <div className="w-48"><BaronSelect value={catFilter} onChange={setCatFilter} options={[{ value: "all", label: "Todas categorias" }, ...DOCUMENT_CATEGORIES.map((c) => ({ value: c.value, label: `${c.emoji} ${c.label}` }))]} /></div>
           </Toolbar>
           <DocumentList
             documents={filtered}

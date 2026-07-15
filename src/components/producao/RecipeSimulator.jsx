@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { RefreshCw, Calculator, ArrowRight, TrendingUp, TrendingDown, DollarSign, Calendar } from "lucide-react";
 
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 
 export default function RecipeSimulator() {
   const { toast } = useToast();
@@ -76,10 +76,7 @@ export default function RecipeSimulator() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
             <label className="text-xs font-medium text-neutral-500 mb-1 block">Receita</label>
-            <select className={SEL} value={selectedId} onChange={e => selectRecipe(e.target.value)}>
-              <option value="">Selecione uma receita...</option>
-              {recipes.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-            </select>
+            <BaronSelect value={selectedId} onChange={(v) => selectRecipe(v)} options={recipes.map((r) => ({ value: r.id, label: r.name }))} placeholder="Selecione uma receita..." />
           </div>
           <div>
             <label className="text-xs font-medium text-neutral-500 mb-1 block">Preço de Venda Simulado</label>

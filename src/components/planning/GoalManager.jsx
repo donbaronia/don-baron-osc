@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Target, Search } from "lucide-react";
+import { BaronSelect } from "@/design-system";
 
 const EMPTY = { name: '', description: '', scope_type: 'empresa', scope_name: '', responsible_name: '', indicator_name: '', expected_value: 0, actual_value: 0, unit: '%', deadline: '', priority: 'media' };
 
@@ -58,10 +59,7 @@ export default function GoalManager() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar meta..." className="pl-9" />
         </div>
-        <select value={scopeFilter} onChange={(e) => setScopeFilter(e.target.value)} className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm">
-          <option value="all">Todos os Escopos</option>
-          {Object.entries(GOAL_SCOPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}
-        </select>
+        <div className="w-48"><BaronSelect value={scopeFilter} onChange={(v) => setScopeFilter(v)} options={Object.entries(GOAL_SCOPE_CONFIG).map(([k, v]) => ({ value: k, label: `${v.emoji} ${v.label}` }))} placeholder="Todos os Escopos" /></div>
         <Button onClick={() => setDialogOpen(true)} size="sm"><Plus className="h-4 w-4" /> Nova Meta</Button>
       </div>
 
@@ -112,7 +110,7 @@ export default function GoalManager() {
             <div><Label>Nome *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Aumentar Receita Anual" /></div>
             <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Escopo</Label><select value={form.scope_type} onChange={(e) => setForm({ ...form, scope_type: e.target.value })} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm">{Object.entries(GOAL_SCOPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}</select></div>
+              <div><Label>Escopo</Label><BaronSelect value={form.scope_type} onChange={(v) => setForm({ ...form, scope_type: v })} options={Object.entries(GOAL_SCOPE_CONFIG).map(([k, v]) => ({ value: k, label: `${v.emoji} ${v.label}` }))} /></div>
               <div><Label>Nome do Escopo</Label><Input value={form.scope_name} onChange={(e) => setForm({ ...form, scope_name: e.target.value })} placeholder="Ex: Produção" /></div>
               <div><Label>Responsável</Label><Input value={form.responsible_name} onChange={(e) => setForm({ ...form, responsible_name: e.target.value })} /></div>
               <div><Label>Indicador</Label><Input value={form.indicator_name} onChange={(e) => setForm({ ...form, indicator_name: e.target.value })} placeholder="Ex: Receita" /></div>
@@ -121,7 +119,7 @@ export default function GoalManager() {
               <div><Label>Unidade</Label><Input value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} placeholder="%, R$, un" /></div>
               <div><Label>Prazo</Label><Input type="date" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })} /></div>
             </div>
-            <div><Label>Prioridade</Label><select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm">{Object.entries(PRIORITY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
+            <div><Label>Prioridade</Label><BaronSelect value={form.priority} onChange={(v) => setForm({ ...form, priority: v })} options={Object.entries(PRIORITY_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button><Button onClick={handleCreate}>Criar Meta</Button></DialogFooter>
         </DialogContent>

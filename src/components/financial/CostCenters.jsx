@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { useToast } from "@/components/ui/use-toast";
 import { Plus, Pencil, Trash2, Tags, Building2 } from "lucide-react";
 
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 const CAT_TYPES = [{ v: "receita", l: "Receita" }, { v: "despesa", l: "Despesa" }, { v: "custo", l: "Custo" }, { v: "investimento", l: "Investimento" }, { v: "imposto", l: "Imposto" }, { v: "folha", l: "Folha" }, { v: "comissao", l: "Comissão" }, { v: "taxa", l: "Taxa" }, { v: "juro", l: "Juro" }, { v: "multa", l: "Multa" }, { v: "outra", l: "Outra" }];
 
 export default function CostCenters() {
@@ -131,7 +131,7 @@ export default function CostCenters() {
             ) : (
               <>
                 <FormField label="Nome *"><Input value={form.name || ""} onChange={e => setForm({ ...form, name: e.target.value })} /></FormField>
-                <FormField label="Tipo *"><select className={SEL} value={form.type || "despesa"} onChange={e => setForm({ ...form, type: e.target.value })}>{CAT_TYPES.map(t => <option key={t.v} value={t.v}>{t.l}</option>)}</select></FormField>
+                <FormField label="Tipo *"><BaronSelect value={form.type || "despesa"} onChange={(v) => setForm({ ...form, type: v })} options={CAT_TYPES.map((t) => ({ value: t.v, label: t.l }))} /></FormField>
                 <FormField label="Descrição"><Input value={form.description || ""} onChange={e => setForm({ ...form, description: e.target.value })} /></FormField>
               </>
             )}

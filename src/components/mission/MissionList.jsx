@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Sparkles, Zap } from "lucide-react";
 import CreateMissionDialog from "@/components/mission/CreateMissionDialog";
 import { toast } from "@/components/ui/use-toast";
+import { BaronSelect } from "@/design-system";
 
 export default function MissionList({ refreshKey, onSelectMission }) {
   const [items, setItems] = useState([]);
@@ -37,14 +38,8 @@ export default function MissionList({ refreshKey, onSelectMission }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm text-neutral-700">
-          <option value="">Todos os status</option>
-          {Object.entries(MISSION_STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-        </select>
-        <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm text-neutral-700">
-          <option value="">Todos os tipos</option>
-          {Object.entries(MISSION_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-        </select>
+        <div className="w-44"><BaronSelect value={filterStatus} onChange={(v) => setFilterStatus(v)} options={Object.entries(MISSION_STATUS_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} placeholder="Todos os status" /></div>
+        <div className="w-44"><BaronSelect value={filterType} onChange={(v) => setFilterType(v)} options={Object.entries(MISSION_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} placeholder="Todos os tipos" /></div>
         <div className="flex-1" />
         <Button onClick={handleAutoCreate} disabled={autoCreating} variant="outline" size="sm">
           {autoCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}

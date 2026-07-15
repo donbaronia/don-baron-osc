@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Settings2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { BaronSelect } from "@/design-system";
 
 const CONFIG_CATEGORIES = ["empresa", "sistema", "ia", "alertas", "smtp", "pix", "integracoes", "notificacoes", "backup", "seguranca", "tema"];
 
@@ -96,9 +97,7 @@ export default function CentralConfig({ refreshKey }) {
               </div>
               <div>
                 <Label>Categoria</Label>
-                <select className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-                  {CONFIG_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
+                <BaronSelect value={form.category} onChange={(v) => setForm({ ...form, category: v })} options={CONFIG_CATEGORIES.map((c) => ({ value: c, label: c }))} />
               </div>
               <div>
                 <Label>Descrição</Label>

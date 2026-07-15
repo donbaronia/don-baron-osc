@@ -13,7 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Plus, Pencil, Check } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 const SOURCES = [{ v: "pix", l: "PIX" }, { v: "ted", l: "TED" }, { v: "doc", l: "DOC" }, { v: "cartao", l: "Cartão" }, { v: "dinheiro", l: "Dinheiro" }, { v: "ifood", l: "iFood" }, { v: "mercado_pago", l: "Mercado Pago" }, { v: "pagbank", l: "PagBank" }, { v: "stone", l: "Stone" }, { v: "cielo", l: "Cielo" }, { v: "rede", l: "Rede" }, { v: "outros", l: "Outros" }];
 const EMPTY = { conciliation_date: "", source: "pix", reference: "", expected_value: 0, actual_value: 0, difference: 0, status: "pendente", notes: "" };
 
@@ -93,7 +93,7 @@ export default function Conciliacao() {
           <DialogHeader><DialogTitle>{editing ? "Editar" : "Nova"} Conciliação</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3 py-2">
             <FormField label="Data *"><Input type="date" value={form.conciliation_date || ""} onChange={e => setForm({ ...form, conciliation_date: e.target.value })} /></FormField>
-            <FormField label="Origem *"><select className={SEL} value={form.source} onChange={e => setForm({ ...form, source: e.target.value })}>{SOURCES.map(s => <option key={s.v} value={s.v}>{s.l}</option>)}</select></FormField>
+            <FormField label="Origem *"><BaronSelect value={form.source} onChange={(v) => setForm({ ...form, source: v })} options={SOURCES.map((s) => ({ value: s.v, label: s.l }))} /></FormField>
             <FormField label="Referência" className="col-span-2"><Input value={form.reference} onChange={e => setForm({ ...form, reference: e.target.value })} /></FormField>
             <FormField label="Valor Esperado"><Input type="number" value={form.expected_value} onChange={e => setForm({ ...form, expected_value: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Valor Realizado"><Input type="number" value={form.actual_value} onChange={e => setForm({ ...form, actual_value: parseFloat(e.target.value) || 0 })} /></FormField>

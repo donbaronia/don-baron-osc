@@ -8,9 +8,7 @@ import DataTable from "@/components/shared/DataTable";
 import ProductForm from "./ProductForm";
 import PriceHistoryDialog from "./PriceHistoryDialog";
 import { Button } from "@/components/ui/button";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 import { Plus, Pencil, History, Trash2, Package } from "lucide-react";
 
 export default function ProductList() {
@@ -105,13 +103,7 @@ export default function ProductList() {
   return (
     <div className="space-y-4">
       <Toolbar search={search} onSearch={setSearch} placeholder="Pesquisar por nome, código, fornecedor, tags, categoria, barras...">
-        <Select value={catFilter} onValueChange={setCatFilter}>
-          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas categorias</SelectItem>
-            {categories.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <div className="w-44"><BaronSelect value={catFilter} onChange={setCatFilter} options={[{ value: "all", label: "Todas categorias" }, ...categories.map((c) => ({ value: c.name, label: c.name }))]} /></div>
         <Button onClick={handleNew} className="gap-2 bg-neutral-900 hover:bg-neutral-800"><Plus className="h-4 w-4" /> Novo Produto</Button>
       </Toolbar>
       <DataTable columns={columns} rows={filtered} loading={loading} emptyTitle="Nenhum produto cadastrado" emptyDescription="Cadastre produtos para reutilizá-los em todos os módulos do sistema." />

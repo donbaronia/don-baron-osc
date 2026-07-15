@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { EventBus } from "@/lib/eventBus";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 import { Button } from "@/components/ui/button";
 import { Radio, RefreshCw, RotateCcw } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -57,20 +57,8 @@ export default function EventStream() {
     <div className="space-y-4">
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-3">
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os status</SelectItem>
-            {Object.entries(STATUS_CFG).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        <Select value={filterModule} onValueChange={setFilterModule}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Módulo" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os módulos</SelectItem>
-            {modules.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <div className="w-[160px]"><BaronSelect value={filterStatus} onChange={setFilterStatus} options={[{ value: "all", label: "Todos os status" }, ...Object.entries(STATUS_CFG).map(([k, v]) => ({ value: k, label: v.label }))]} placeholder="Status" /></div>
+        <div className="w-[160px]"><BaronSelect value={filterModule} onChange={setFilterModule} options={[{ value: "all", label: "Todos os módulos" }, ...modules.map((m) => ({ value: m, label: m }))]} placeholder="Módulo" /></div>
         <Button variant="outline" size="sm" className="gap-2 bg-white" onClick={load}>
           <RefreshCw className="h-4 w-4" /> Atualizar
         </Button>

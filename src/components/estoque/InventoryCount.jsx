@@ -14,8 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Plus, RefreshCw, ClipboardCheck, Check, AlertTriangle } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 import { useAuth } from "@/lib/AuthContext";
-
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 
 const INV_TYPES = [
   { v: "completo", l: "Geral" },
@@ -192,7 +191,7 @@ export default function InventoryCount() {
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Novo Inventário</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3 py-2">
-            <FormField label="Tipo de Inventário" className="col-span-2"><select className={SEL} value={form.inventory_type} onChange={e => setForm({ ...form, inventory_type: e.target.value })}>{INV_TYPES.map(t => <option key={t.v} value={t.v}>{t.l}</option>)}</select></FormField>
+            <FormField label="Tipo de Inventário" className="col-span-2"><BaronSelect value={form.inventory_type} onChange={(v) => setForm({ ...form, inventory_type: v })} options={INV_TYPES.map((t) => ({ value: t.v, label: t.l }))} /></FormField>
             {form.inventory_type === "por_categoria" && <FormField label="Categoria" className="col-span-2"><Input value={form.filter_category} onChange={e => setForm({ ...form, filter_category: e.target.value })} /></FormField>}
             {form.inventory_type === "por_localizacao" && <FormField label="Localização" className="col-span-2"><Input value={form.filter_location} onChange={e => setForm({ ...form, filter_location: e.target.value })} /></FormField>}
             <FormField label="Observações" className="col-span-2"><Textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={2} /></FormField>

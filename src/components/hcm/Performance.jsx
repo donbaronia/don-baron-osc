@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Star, TrendingUp, Award } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { BaronSelect } from "@/design-system";
 
 function ScoreBar({ label, value }) {
   const color = value >= 8 ? 'bg-emerald-500' : value >= 6 ? 'bg-blue-500' : value >= 4 ? 'bg-amber-500' : 'bg-red-500';
@@ -47,7 +48,7 @@ export default function Performance({ refreshKey }) {
     finally { setSaving(false); }
   };
 
-  const selectClass = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+
 
   if (loading) return <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 animate-pulse rounded-xl bg-neutral-200/60" />)}</div>;
 
@@ -63,7 +64,7 @@ export default function Performance({ refreshKey }) {
               <DialogHeader><DialogTitle>Nova Avaliação</DialogTitle></DialogHeader>
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <div><Label className="text-xs">Colaborador</Label><select className={selectClass} value={form.employee_id} onChange={(e) => setForm({ ...form, employee_id: e.target.value })}><option value="">Selecione...</option>{employees.filter(e => e.status === 'ativo').map(e => <option key={e.id} value={e.id}>{e.full_name}</option>)}</select></div>
+                  <div><Label className="text-xs">Colaborador</Label><BaronSelect value={form.employee_id} onChange={(v) => setForm({ ...form, employee_id: v })} options={employees.filter((e) => e.status === 'ativo').map((e) => ({ value: e.id, label: e.full_name }))} placeholder="Selecione..." /></div>
                   <div><Label className="text-xs">Período</Label><Input value={form.period} onChange={(e) => setForm({ ...form, period: e.target.value })} placeholder="Ex: 2026-H2" /></div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">

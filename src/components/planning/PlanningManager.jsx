@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, FileText, GitCompare } from "lucide-react";
+import { BaronSelect } from "@/design-system";
 
 export default function PlanningManager() {
   const [items, setItems] = useState([]);
@@ -78,9 +79,7 @@ export default function PlanningManager() {
                       </div>
                     )}
                   </div>
-                  <select value={plan.status} onChange={(e) => handleStatusChange(plan.id, e.target.value)} className="rounded-lg border border-neutral-200 bg-white px-2 py-1 text-xs text-neutral-700">
-                    {Object.entries(PLAN_STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-                  </select>
+                  <div className="w-36"><BaronSelect size="sm" value={plan.status} onChange={(v) => handleStatusChange(plan.id, v)} options={Object.entries(PLAN_STATUS_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
                 </div>
                 {plan.learnings && (
                   <div className="mt-3 rounded-lg border border-amber-100 bg-amber-50/30 p-2">
@@ -101,7 +100,7 @@ export default function PlanningManager() {
             <div><Label>Nome *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Ex: Plano Estratégico 2026" /></div>
             <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Tipo</Label><select value={form.plan_type} onChange={(e) => setForm({ ...form, plan_type: e.target.value })} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm">{Object.entries(PLAN_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}</select></div>
+              <div><Label>Tipo</Label><BaronSelect value={form.plan_type} onChange={(v) => setForm({ ...form, plan_type: v })} options={Object.entries(PLAN_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: `${v.emoji} ${v.label}` }))} /></div>
               <div><Label>Responsável</Label><Input value={form.responsible_name} onChange={(e) => setForm({ ...form, responsible_name: e.target.value })} /></div>
               <div><Label>Início</Label><Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} /></div>
               <div><Label>Fim</Label><Input type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} /></div>

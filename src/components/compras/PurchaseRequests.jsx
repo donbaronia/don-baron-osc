@@ -14,7 +14,7 @@ import { Plus, Pencil, Trash2, ArrowRight } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 import { useAuth } from "@/lib/AuthContext";
 
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 const EMPTY = { product_name: "", quantity: 0, unit: "un", reason: "", priority: "media", cost_center_name: "", due_date: "", notes: "" };
 
 export default function PurchaseRequests() {
@@ -108,7 +108,7 @@ export default function PurchaseRequests() {
             <FormField label="Produto *" className="col-span-2"><Input value={form.product_name} onChange={e => setForm({ ...form, product_name: e.target.value })} /></FormField>
             <FormField label="Quantidade *"><Input type="number" value={form.quantity} onChange={e => setForm({ ...form, quantity: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Unidade"><Input value={form.unit} onChange={e => setForm({ ...form, unit: e.target.value })} /></FormField>
-            <FormField label="Prioridade"><select className={SEL} value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })}><option value="baixa">Baixa</option><option value="media">Média</option><option value="alta">Alta</option><option value="critica">Crítica</option></select></FormField>
+            <FormField label="Prioridade"><BaronSelect value={form.priority} onChange={(v) => setForm({ ...form, priority: v })} options={[{ value: "baixa", label: "Baixa" }, { value: "media", label: "Média" }, { value: "alta", label: "Alta" }, { value: "critica", label: "Crítica" }]} /></FormField>
             <FormField label="Centro de Custo"><Input value={form.cost_center_name} onChange={e => setForm({ ...form, cost_center_name: e.target.value })} /></FormField>
             <FormField label="Prazo"><Input type="date" value={form.due_date || ""} onChange={e => setForm({ ...form, due_date: e.target.value })} /></FormField>
             <FormField label="Motivo" className="col-span-2"><Input value={form.reason} onChange={e => setForm({ ...form, reason: e.target.value })} /></FormField>

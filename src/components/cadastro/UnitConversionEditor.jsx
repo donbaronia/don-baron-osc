@@ -2,9 +2,7 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 import { Plus, Trash2 } from "lucide-react";
 
 /**
@@ -34,12 +32,7 @@ export default function UnitConversionEditor({ conversions = [], units = [], onC
           <div className="flex flex-col items-center">
             <span className="text-[10px] text-muted-foreground">1</span>
           </div>
-          <Select value={conv.from_unit} onValueChange={(v) => updateConversion(idx, "from_unit", v)}>
-            <SelectTrigger className="w-28"><SelectValue placeholder="De" /></SelectTrigger>
-            <SelectContent>
-              {units.map((u) => <SelectItem key={u.id} value={u.abbreviation}>{u.abbreviation}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <div className="w-28"><BaronSelect size="sm" value={conv.from_unit} onChange={(v) => updateConversion(idx, "from_unit", v)} options={units.map((u) => ({ value: u.abbreviation, label: u.abbreviation }))} placeholder="De" /></div>
           <span className="text-sm font-medium text-primary-info">=</span>
           <Input
             type="number"
@@ -48,12 +41,7 @@ export default function UnitConversionEditor({ conversions = [], units = [], onC
             onChange={(e) => updateConversion(idx, "factor", parseFloat(e.target.value) || 0)}
             className="w-20"
           />
-          <Select value={conv.to_unit} onValueChange={(v) => updateConversion(idx, "to_unit", v)}>
-            <SelectTrigger className="w-28"><SelectValue placeholder="Para" /></SelectTrigger>
-            <SelectContent>
-              {units.map((u) => <SelectItem key={u.id} value={u.abbreviation}>{u.abbreviation}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <div className="w-28"><BaronSelect size="sm" value={conv.to_unit} onChange={(v) => updateConversion(idx, "to_unit", v)} options={units.map((u) => ({ value: u.abbreviation, label: u.abbreviation }))} placeholder="Para" /></div>
           <Input
             value={conv.description || ""}
             onChange={(e) => updateConversion(idx, "description", e.target.value)}

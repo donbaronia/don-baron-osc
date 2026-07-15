@@ -13,7 +13,7 @@ import Toolbar from "@/components/shared/Toolbar";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { useAuth } from "@/lib/AuthContext";
 
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 const EMPTY = { name: "", period_type: "monthly", max_cmv_pct: 30, target_margin_pct: 30, category: "", channel: "" };
 
 export default function CMVReports() {
@@ -102,7 +102,7 @@ export default function CMVReports() {
           <DialogHeader><DialogTitle>Nova Meta de CMV</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3 py-2">
             <FormField label="Nome *" className="col-span-2"><Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ex: CMV Mensal Geral" /></FormField>
-            <FormField label="Período"><select className={SEL} value={form.period_type} onChange={e => setForm({ ...form, period_type: e.target.value })}><option value="daily">Diário</option><option value="weekly">Semanal</option><option value="monthly">Mensal</option><option value="annual">Anual</option></select></FormField>
+            <FormField label="Período"><BaronSelect value={form.period_type} onChange={(v) => setForm({ ...form, period_type: v })} options={[{ value: "daily", label: "Diário" }, { value: "weekly", label: "Semanal" }, { value: "monthly", label: "Mensal" }, { value: "annual", label: "Anual" }]} /></FormField>
             <FormField label="CMV Máximo (%)"><Input type="number" step="0.1" value={form.max_cmv_pct} onChange={e => setForm({ ...form, max_cmv_pct: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Margem Meta (%)"><Input type="number" step="0.1" value={form.target_margin_pct} onChange={e => setForm({ ...form, target_margin_pct: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Categoria (vazio = todas)"><Input value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} /></FormField>

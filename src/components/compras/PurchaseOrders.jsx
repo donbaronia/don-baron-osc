@@ -14,7 +14,7 @@ import { Plus, Pencil, Check, PackageCheck, Ban } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 import { useAuth } from "@/lib/AuthContext";
 
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 const METHODS = [{ v: "pix", l: "PIX" }, { v: "boleto", l: "Boleto" }, { v: "transferencia", l: "Transferência" }, { v: "cartao_credito", l: "Cartão Crédito" }, { v: "dinheiro", l: "Dinheiro" }, { v: "prazo", l: "A Prazo" }];
 const EMPTY = { supplier: "", description: "", items: [], total_amount: 0, discounts: 0, freight: 0, taxes: 0, payment_method: "", payment_terms: "", cost_center_name: "", priority: "media", order_date: todayStr(), expected_delivery_date: "", notes: "" };
 
@@ -121,7 +121,7 @@ export default function PurchaseOrders() {
             <FormField label="Fornecedor *" className="col-span-2"><Input value={form.supplier} onChange={e => setForm({ ...form, supplier: e.target.value })} /></FormField>
             <FormField label="Descrição" className="col-span-2"><Input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></FormField>
             <FormField label="Centro de Custo"><Input value={form.cost_center_name} onChange={e => setForm({ ...form, cost_center_name: e.target.value })} /></FormField>
-            <FormField label="Prioridade"><select className={SEL} value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })}><option value="baixa">Baixa</option><option value="media">Média</option><option value="alta">Alta</option><option value="critica">Crítica</option></select></FormField>
+            <FormField label="Prioridade"><BaronSelect value={form.priority} onChange={(v) => setForm({ ...form, priority: v })} options={[{ value: "baixa", label: "Baixa" }, { value: "media", label: "Média" }, { value: "alta", label: "Alta" }, { value: "critica", label: "Crítica" }]} /></FormField>
             <FormField label="Data do Pedido"><Input type="date" value={form.order_date || ""} onChange={e => setForm({ ...form, order_date: e.target.value })} /></FormField>
             <FormField label="Entrega Prevista"><Input type="date" value={form.expected_delivery_date || ""} onChange={e => setForm({ ...form, expected_delivery_date: e.target.value })} /></FormField>
             <div className="col-span-2">
@@ -140,7 +140,7 @@ export default function PurchaseOrders() {
             <FormField label="Descontos"><Input type="number" step="0.01" value={form.discounts} onChange={e => setForm({ ...form, discounts: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Frete"><Input type="number" step="0.01" value={form.freight} onChange={e => setForm({ ...form, freight: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Impostos"><Input type="number" step="0.01" value={form.taxes} onChange={e => setForm({ ...form, taxes: parseFloat(e.target.value) || 0 })} /></FormField>
-            <FormField label="Forma de Pagamento"><select className={SEL} value={form.payment_method} onChange={e => setForm({ ...form, payment_method: e.target.value })}>{METHODS.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}</select></FormField>
+            <FormField label="Forma de Pagamento"><BaronSelect value={form.payment_method} onChange={(v) => setForm({ ...form, payment_method: v })} options={METHODS.map((m) => ({ value: m.v, label: m.l }))} placeholder="Selecione..." /></FormField>
             <FormField label="Observações" className="col-span-2"><Input value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} /></FormField>
             <div className="col-span-2 flex justify-end border-t pt-2">
               <span className="text-sm font-semibold text-neutral-900">Total: {brl(grandTotal)}</span>

@@ -12,8 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Plus, ArrowDownCircle, ArrowUpCircle, RefreshCw } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 import { useAuth } from "@/lib/AuthContext";
-
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 
 const MOVEMENT_TYPES = [
   { v: "entrada", l: "Entrada", icon: ArrowDownCircle, color: "text-emerald-600", inbound: true },
@@ -121,23 +120,18 @@ export default function MovementManagement() {
           <DialogHeader><DialogTitle>Nova Movimentação de Estoque</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3 py-2 max-h-[60vh] overflow-y-auto">
             <FormField label="Tipo de Movimentação *" className="col-span-2">
-              <select className={SEL} value={form.movement_type} onChange={e => setForm({ ...form, movement_type: e.target.value })}>
-                {MOVEMENT_TYPES.map(t => <option key={t.v} value={t.v}>{t.l}</option>)}
-              </select>
+              <BaronSelect value={form.movement_type} onChange={(v) => setForm({ ...form, movement_type: v })} options={MOVEMENT_TYPES.map((t) => ({ value: t.v, label: t.l, icon: t.icon }))} placeholder="Selecione..." />
             </FormField>
             <FormField label="Produto *" className="col-span-2">
-              <select className={SEL} value={form.product_id} onChange={e => { const p = products.find(x => x.id === e.target.value); setForm({ ...form, product_id: e.target.value, unit: p?.unit || "un" }); }}>
-                <option value="">Selecione...</option>
-                {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </select>
+              <BaronSelect value={form.product_id} onChange={(v) => { const p = products.find((x) => x.id === v); setForm({ ...form, product_id: v, unit: p?.unit || "un" }); }} options={products.map((p) => ({ value: p.id, label: p.name }))} placeholder="Selecione..." />
             </FormField>
             <FormField label="Quantidade *"><Input type="number" step="0.01" value={form.quantity} onChange={e => setForm({ ...form, quantity: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Unidade"><Input value={form.unit} onChange={e => setForm({ ...form, unit: e.target.value })} /></FormField>
             {isInbound && <FormField label="Custo Unit."><Input type="number" step="0.01" value={form.unit_cost} onChange={e => setForm({ ...form, unit_cost: parseFloat(e.target.value) || 0 })} /></FormField>}
             {form.movement_type === "transferencia" ? (
               <>
-                <FormField label="Estoque Origem"><select className={SEL} value={form.from_stock_type} onChange={e => setForm({ ...form, from_stock_type: e.target.value })}><option value="">Selecione...</option>{STOCK_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g, " ")}</option>)}</select></FormField>
-                <FormField label="Estoque Destino"><select className={SEL} value={form.to_stock_type} onChange={e => setForm({ ...form, to_stock_type: e.target.value })}><option value="">Selecione...</option>{STOCK_TYPES.map(t => <option key={t} value={t}>{t.replace(/_/g, " ")}</option>)}</select></FormField>
+                <FormField label="Estoque Origem"><BaronSelect value={form.from_stock_type} onChange={(v) => setForm({ ...form, from_stock_type: v })} options={STOCK_TYPES.map((t) => ({ value: t, label: t.replace(/_/g, " ") }))} placeholder="Selecione..." /></FormField>
+                <FormField label="Estoque Destino"><BaronSelect value={form.to_stock_type} onChange={(v) => setForm({ ...form, to_stock_type: v })} options={STOCK_TYPES.map((t) => ({ value: t, label: t.replace(/_/g, " ") }))} placeholder="Selecione..." /></FormField>
               </>
             ) : isInbound ? (
               <FormField label="Fornecedor"><Input value={form.supplier_name} onChange={e => setForm({ ...form, supplier_name: e.target.value })} /></FormField>

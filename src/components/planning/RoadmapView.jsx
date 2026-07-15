@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Map, Loader2, Brain, AlertTriangle, Shield } from "lucide-react";
+import { BaronSelect } from "@/design-system";
 
 const YEARS = [2026, 2027, 2028, 2029, 2030];
 const EMPTY = { title: '', description: '', year: 2026, quarter: 'anual', item_type: 'meta', responsible_name: '' };
@@ -121,9 +122,9 @@ export default function RoadmapView() {
             <div><Label>Título *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
             <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>
             <div className="grid grid-cols-3 gap-3">
-              <div><Label>Ano</Label><select value={form.year} onChange={(e) => setForm({ ...form, year: parseInt(e.target.value) })} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm">{YEARS.map(y => <option key={y} value={y}>{y}</option>)}</select></div>
-              <div><Label>Trimestre</Label><select value={form.quarter} onChange={(e) => setForm({ ...form, quarter: e.target.value })} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm"><option value="Q1">Q1</option><option value="Q2">Q2</option><option value="Q3">Q3</option><option value="Q4">Q4</option><option value="anual">Anual</option></select></div>
-              <div><Label>Tipo</Label><select value={form.item_type} onChange={(e) => setForm({ ...form, item_type: e.target.value })} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm">{Object.entries(ROADMAP_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}</select></div>
+              <div><Label>Ano</Label><BaronSelect value={String(form.year)} onChange={(v) => setForm({ ...form, year: parseInt(v) })} options={YEARS.map((y) => ({ value: String(y), label: String(y) }))} /></div>
+              <div><Label>Trimestre</Label><BaronSelect value={form.quarter} onChange={(v) => setForm({ ...form, quarter: v })} options={[{ value: "Q1", label: "Q1" }, { value: "Q2", label: "Q2" }, { value: "Q3", label: "Q3" }, { value: "Q4", label: "Q4" }, { value: "anual", label: "Anual" }]} /></div>
+              <div><Label>Tipo</Label><BaronSelect value={form.item_type} onChange={(v) => setForm({ ...form, item_type: v })} options={Object.entries(ROADMAP_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: `${v.emoji} ${v.label}` }))} /></div>
             </div>
             <div><Label>Responsável</Label><Input value={form.responsible_name} onChange={(e) => setForm({ ...form, responsible_name: e.target.value })} /></div>
           </div>

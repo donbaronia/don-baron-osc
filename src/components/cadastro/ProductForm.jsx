@@ -14,9 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 import { Upload, Plus, X } from "lucide-react";
 import UnitConversionEditor from "./UnitConversionEditor";
 
@@ -168,12 +166,7 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
               </div>
               <div>
                 <Label>Categoria</Label>
-                <Select value={form.category} onValueChange={(v) => set("category", v)}>
-                  <SelectTrigger className="mt-1.5"><SelectValue placeholder="Selecionar..." /></SelectTrigger>
-                  <SelectContent>
-                    {categories.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <BaronSelect className="mt-1.5" value={form.category} onChange={(v) => set("category", v)} options={categories.map((c) => ({ value: c.name, label: c.name }))} placeholder="Selecionar..." />
               </div>
               <div>
                 <Label>Subcategoria</Label>
@@ -191,21 +184,11 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Fornecedor Principal</Label>
-                <Select value={form.primary_supplier_id} onValueChange={(v) => selectSupplier("primary", v)}>
-                  <SelectTrigger className="mt-1.5"><SelectValue placeholder="Selecionar..." /></SelectTrigger>
-                  <SelectContent>
-                    {suppliers.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <BaronSelect className="mt-1.5" value={form.primary_supplier_id} onChange={(v) => selectSupplier("primary", v)} options={suppliers.map((s) => ({ value: s.id, label: s.name }))} placeholder="Selecionar..." />
               </div>
               <div>
                 <Label>Fornecedor Alternativo</Label>
-                <Select value={form.alternative_supplier_id} onValueChange={(v) => selectSupplier("alternative", v)}>
-                  <SelectTrigger className="mt-1.5"><SelectValue placeholder="Opcional" /></SelectTrigger>
-                  <SelectContent>
-                    {suppliers.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <BaronSelect className="mt-1.5" value={form.alternative_supplier_id} onChange={(v) => selectSupplier("alternative", v)} options={suppliers.map((s) => ({ value: s.id, label: s.name }))} placeholder="Opcional" />
               </div>
             </div>
           </section>
@@ -216,30 +199,15 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label>Unidade de Compra</Label>
-                <Select value={form.purchase_unit} onValueChange={(v) => set("purchase_unit", v)}>
-                  <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {unitOptions.map((u) => <SelectItem key={u.id} value={u.abbreviation}>{u.name} ({u.abbreviation})</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <BaronSelect className="mt-1.5" value={form.purchase_unit} onChange={(v) => set("purchase_unit", v)} options={unitOptions.map((u) => ({ value: u.abbreviation, label: `${u.name} (${u.abbreviation})` }))} />
               </div>
               <div>
                 <Label>Unidade de Controle *</Label>
-                <Select value={form.control_unit} onValueChange={(v) => set("control_unit", v)}>
-                  <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {unitOptions.map((u) => <SelectItem key={u.id} value={u.abbreviation}>{u.name} ({u.abbreviation})</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <BaronSelect className="mt-1.5" value={form.control_unit} onChange={(v) => set("control_unit", v)} options={unitOptions.map((u) => ({ value: u.abbreviation, label: `${u.name} (${u.abbreviation})` }))} />
               </div>
               <div>
                 <Label>Unidade de Consumo</Label>
-                <Select value={form.consumption_unit} onValueChange={(v) => set("consumption_unit", v)}>
-                  <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {unitOptions.map((u) => <SelectItem key={u.id} value={u.abbreviation}>{u.name} ({u.abbreviation})</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <BaronSelect className="mt-1.5" value={form.consumption_unit} onChange={(v) => set("consumption_unit", v)} options={unitOptions.map((u) => ({ value: u.abbreviation, label: `${u.name} (${u.abbreviation})` }))} />
               </div>
             </div>
           </section>

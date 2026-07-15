@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 import { Upload, FileSpreadsheet, Loader2, Save, ArrowRight } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { IntegrationHub } from "@/lib/integrationHub";
@@ -127,12 +127,7 @@ export default function UniversalImporter() {
           </div>
           <div>
             <Label>Entidade de Destino</Label>
-            <Select value={entity} onValueChange={setEntity}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {ENTITY_OPTIONS.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <BaronSelect value={entity} onChange={setEntity} options={ENTITY_OPTIONS} />
           </div>
         </div>
         <Button className="mt-4" onClick={handleExtract} disabled={!fileUrl || loading}>

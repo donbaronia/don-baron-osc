@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 import { GraduationCap, MessageCircle, Bug, Heart, Plus, Trash2, Loader2 } from "lucide-react";
 
 export default function Aprendizado() {
@@ -187,14 +185,7 @@ export default function Aprendizado() {
           <div className="space-y-3">
             <div>
               <Label className="text-xs">Tipo</Label>
-              <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
-                <SelectTrigger className="bg-white"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="erro_corrigido">Erro Corrigido</SelectItem>
-                  <SelectItem value="preferencia">Preferência</SelectItem>
-                  <SelectItem value="pergunta_frequente">Pergunta Frequente</SelectItem>
-                </SelectContent>
-              </Select>
+              <BaronSelect value={form.type} onChange={(v) => setForm({ ...form, type: v })} options={[{ value: "erro_corrigido", label: "Erro Corrigido" }, { value: "preferencia", label: "Preferência" }, { value: "pergunta_frequente", label: "Pergunta Frequente" }]} />
             </div>
             <div>
               <Label className="text-xs">Título</Label>

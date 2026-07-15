@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Rocket } from "lucide-react";
+import { BaronSelect } from "@/design-system";
 
 const EMPTY = { name: '', description: '', project_type: 'outros', responsible_name: '', team: '', start_date: '', end_date: '', investment_amount: 0, expected_return: 0, priority: 'media' };
 
@@ -101,8 +102,8 @@ export default function ProjectManager() {
             <div><Label>Nome *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
             <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Tipo</Label><select value={form.project_type} onChange={(e) => setForm({ ...form, project_type: e.target.value })} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm">{Object.entries(PROJECT_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}</select></div>
-              <div><Label>Prioridade</Label><select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm">{Object.entries(PRIORITY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
+              <div><Label>Tipo</Label><BaronSelect value={form.project_type} onChange={(v) => setForm({ ...form, project_type: v })} options={Object.entries(PROJECT_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: `${v.emoji} ${v.label}` }))} /></div>
+              <div><Label>Prioridade</Label><BaronSelect value={form.priority} onChange={(v) => setForm({ ...form, priority: v })} options={Object.entries(PRIORITY_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
               <div><Label>Responsável</Label><Input value={form.responsible_name} onChange={(e) => setForm({ ...form, responsible_name: e.target.value })} /></div>
               <div><Label>Equipe (vírgula)</Label><Input value={form.team} onChange={(e) => setForm({ ...form, team: e.target.value })} placeholder="TI, Operações" /></div>
               <div><Label>Início</Label><Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} /></div>

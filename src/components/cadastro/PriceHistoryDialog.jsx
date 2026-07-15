@@ -8,9 +8,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 import { TrendingDown, TrendingUp, Plus, History } from "lucide-react";
 
 export default function PriceHistoryDialog({ open, onClose, product, suppliers }) {
@@ -97,12 +95,7 @@ export default function PriceHistoryDialog({ open, onClose, product, suppliers }
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
             <div className="col-span-2 sm:col-span-1">
               <Label>Fornecedor</Label>
-              <Select value={form.supplier_id} onValueChange={(v) => setForm((f) => ({ ...f, supplier_id: v }))}>
-                <SelectTrigger className="mt-1.5"><SelectValue placeholder="Selecionar..." /></SelectTrigger>
-                <SelectContent>
-                  {suppliers.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <BaronSelect className="mt-1.5" value={form.supplier_id} onChange={(v) => setForm((f) => ({ ...f, supplier_id: v }))} options={suppliers.map((s) => ({ value: s.id, label: s.name }))} placeholder="Selecionar..." />
             </div>
             <div>
               <Label>Preço</Label>

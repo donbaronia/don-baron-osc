@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Clock, Plus, Calendar } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { BaronSelect } from "@/design-system";
 
 export default function TimeTracking({ refreshKey }) {
   const [records, setRecords] = useState([]);
@@ -36,7 +37,7 @@ export default function TimeTracking({ refreshKey }) {
     finally { setSaving(false); }
   };
 
-  const selectClass = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+
 
   const totalBankHours = employees.reduce((s, e) => s + (e.bank_hours_balance || 0), 0);
   const lateToday = records.filter(r => r.status === 'atraso').length;
@@ -64,16 +65,16 @@ export default function TimeTracking({ refreshKey }) {
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>Registrar Ponto</DialogTitle></DialogHeader>
             <div className="space-y-3">
-              <div><Label className="text-xs">Colaborador</Label><select className={selectClass} value={form.employee_id} onChange={(e) => setForm({ ...form, employee_id: e.target.value })}><option value="">Selecione...</option>{employees.filter(e => e.status === 'ativo').map(e => <option key={e.id} value={e.id}>{e.full_name}</option>)}</select></div>
+              <div><Label className="text-xs">Colaborador</Label><BaronSelect value={form.employee_id} onChange={(v) => setForm({ ...form, employee_id: v })} options={employees.filter((e) => e.status === 'ativo').map((e) => ({ value: e.id, label: e.full_name }))} placeholder="Selecione..." /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label className="text-xs">Data</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
-                <div><Label className="text-xs">Tipo</Label><select className={selectClass} value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>{Object.entries(TIME_RECORD_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
+                <div><Label className="text-xs">Tipo</Label><BaronSelect value={form.type} onChange={(v) => setForm({ ...form, type: v })} options={Object.entries(TIME_RECORD_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label className="text-xs">Entrada</Label><Input type="time" value={form.clock_in} onChange={(e) => setForm({ ...form, clock_in: e.target.value })} /></div>
                 <div><Label className="text-xs">Saída</Label><Input type="time" value={form.clock_out} onChange={(e) => setForm({ ...form, clock_out: e.target.value })} /></div>
               </div>
-              <div><Label className="text-xs">Status</Label><select className={selectClass} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>{Object.entries(TIME_RECORD_STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
+              <div><Label className="text-xs">Status</Label><BaronSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} options={Object.entries(TIME_RECORD_STATUS_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
               <div><Label className="text-xs">Observações</Label><Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></div>
               <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => {}}>Cancelar</Button><Button onClick={handleCreate} disabled={saving}>{saving ? "Salvando..." : "Registrar"}</Button></div>
             </div>

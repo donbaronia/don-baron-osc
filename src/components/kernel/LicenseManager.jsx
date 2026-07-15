@@ -3,7 +3,7 @@ import { BaronKernel, LICENSE_PLAN_LABELS } from "@/lib/kernelEngine";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 import { BadgeCheck, Shield, Users, Building2, HardDrive, Package } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
@@ -116,24 +116,11 @@ export default function LicenseManager({ refreshKey }) {
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div>
               <Label>Plano</Label>
-              <Select value={form.plan} onValueChange={(v) => setForm({ ...form, plan: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {Object.entries(LICENSE_PLAN_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <BaronSelect value={form.plan} onChange={(v) => setForm({ ...form, plan: v })} options={Object.entries(LICENSE_PLAN_LABELS).map(([k, v]) => ({ value: k, label: v }))} />
             </div>
             <div>
               <Label>Status</Label>
-              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Ativo</SelectItem>
-                  <SelectItem value="trial">Trial</SelectItem>
-                  <SelectItem value="expired">Expirado</SelectItem>
-                  <SelectItem value="suspended">Suspenso</SelectItem>
-                </SelectContent>
-              </Select>
+              <BaronSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} options={[{ value: "active", label: "Ativo" }, { value: "trial", label: "Trial" }, { value: "expired", label: "Expirado" }, { value: "suspended", label: "Suspenso" }]} />
             </div>
           </div>
         )}

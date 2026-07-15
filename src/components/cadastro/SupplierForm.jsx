@@ -11,9 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 
 const EMPTY = {
   name: "", trade_name: "", document_number: "", phone: "", whatsapp: "",
@@ -104,12 +102,7 @@ export default function SupplierForm({ open, onClose, supplier, onSaved }) {
             </div>
             <div>
               <Label>Estado</Label>
-              <Select value={form.state} onValueChange={(v) => set("state", v)}>
-                <SelectTrigger className="mt-1.5"><SelectValue placeholder="UF" /></SelectTrigger>
-                <SelectContent>
-                  {BR_STATES.map((uf) => <SelectItem key={uf} value={uf}>{uf}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <BaronSelect className="mt-1.5" value={form.state} onChange={(v) => set("state", v)} options={BR_STATES.map((uf) => ({ value: uf, label: uf }))} placeholder="UF" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">

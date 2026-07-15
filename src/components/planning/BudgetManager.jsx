@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Wallet, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
+import { BaronSelect } from "@/design-system";
 
 const EMPTY = { name: '', description: '', budget_type: 'despesa', category: '', expected_amount: 0, actual_amount: 0, period: '', responsible_name: '', justification: '' };
 
@@ -56,10 +57,7 @@ export default function BudgetManager() {
       </div>
 
       <div className="flex items-center justify-between gap-2">
-        <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm">
-          <option value="all">Todos os Tipos</option>
-          {Object.entries(BUDGET_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}
-        </select>
+        <div className="w-48"><BaronSelect value={typeFilter} onChange={(v) => setTypeFilter(v)} options={Object.entries(BUDGET_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: `${v.emoji} ${v.label}` }))} placeholder="Todos os Tipos" /></div>
         <Button onClick={() => setDialogOpen(true)} size="sm"><Plus className="h-4 w-4" /> Novo Item</Button>
       </div>
 
@@ -107,7 +105,7 @@ export default function BudgetManager() {
           <div className="space-y-3">
             <div><Label>Nome *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Tipo</Label><select value={form.budget_type} onChange={(e) => setForm({ ...form, budget_type: e.target.value })} className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm">{Object.entries(BUDGET_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}</select></div>
+              <div><Label>Tipo</Label><BaronSelect value={form.budget_type} onChange={(v) => setForm({ ...form, budget_type: v })} options={Object.entries(BUDGET_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: `${v.emoji} ${v.label}` }))} /></div>
               <div><Label>Categoria</Label><Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} /></div>
               <div><Label>Previsto (R$)</Label><Input type="number" value={form.expected_amount} onChange={(e) => setForm({ ...form, expected_amount: parseFloat(e.target.value) || 0 })} /></div>
               <div><Label>Realizado (R$)</Label><Input type="number" value={form.actual_amount} onChange={(e) => setForm({ ...form, actual_amount: parseFloat(e.target.value) || 0 })} /></div>

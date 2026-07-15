@@ -13,7 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Plus, Check, Pencil, Ban } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 const ORIGINS = [{ v: "balcao", l: "Balcão" }, { v: "ifood", l: "iFood" }, { v: "site", l: "Site" }, { v: "delivery", l: "Delivery" }, { v: "marketplace", l: "Marketplace" }, { v: "outros", l: "Outros" }];
 const METHODS = [{ v: "pix", l: "PIX" }, { v: "dinheiro", l: "Dinheiro" }, { v: "transferencia", l: "Transferência" }, { v: "boleto", l: "Boleto" }, { v: "cartao_credito", l: "Cartão Crédito" }, { v: "cartao_debito", l: "Cartão Débito" }, { v: "outros", l: "Outros" }];
 const EMPTY = { description: "", customer_name: "", origin: "balcao", amount: 0, expected_date: "", receipt_date: "", fees: 0, discounts: 0, commissions: 0, payment_method: "pix", status: "pendente", notes: "" };
@@ -109,16 +109,16 @@ export default function ContasReceber() {
           <div className="grid grid-cols-2 gap-3 py-2 max-h-[60vh] overflow-y-auto">
             <FormField label="Descrição *" className="col-span-2"><Input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></FormField>
             <FormField label="Cliente"><Input value={form.customer_name} onChange={e => setForm({ ...form, customer_name: e.target.value })} /></FormField>
-            <FormField label="Origem"><select className={SEL} value={form.origin} onChange={e => setForm({ ...form, origin: e.target.value })}>{ORIGINS.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}</select></FormField>
+            <FormField label="Origem"><BaronSelect value={form.origin} onChange={(v) => setForm({ ...form, origin: v })} options={ORIGINS.map((o) => ({ value: o.v, label: o.l }))} /></FormField>
             <FormField label="Valor *"><Input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: parseFloat(e.target.value) || 0 })} /></FormField>
-            <FormField label="Forma de Pagamento"><select className={SEL} value={form.payment_method} onChange={e => setForm({ ...form, payment_method: e.target.value })}>{METHODS.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}</select></FormField>
+            <FormField label="Forma de Pagamento"><BaronSelect value={form.payment_method} onChange={(v) => setForm({ ...form, payment_method: v })} options={METHODS.map((m) => ({ value: m.v, label: m.l }))} /></FormField>
             <FormField label="Previsão"><Input type="date" value={form.expected_date || ""} onChange={e => setForm({ ...form, expected_date: e.target.value })} /></FormField>
             <FormField label="Recebimento"><Input type="date" value={form.receipt_date || ""} onChange={e => setForm({ ...form, receipt_date: e.target.value })} /></FormField>
             <FormField label="Taxas"><Input type="number" value={form.fees} onChange={e => setForm({ ...form, fees: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Descontos"><Input type="number" value={form.discounts} onChange={e => setForm({ ...form, discounts: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Comissões"><Input type="number" value={form.commissions} onChange={e => setForm({ ...form, commissions: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Observações" className="col-span-2"><Input value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} /></FormField>
-            <FormField label="Status"><select className={SEL} value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}><option value="pendente">Pendente</option><option value="recebido">Recebido</option><option value="parcial">Parcial</option><option value="cancelado">Cancelado</option></select></FormField>
+            <FormField label="Status"><BaronSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} options={[{ value: "pendente", label: "Pendente" }, { value: "recebido", label: "Recebido" }, { value: "parcial", label: "Parcial" }, { value: "cancelado", label: "Cancelado" }]} /></FormField>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>

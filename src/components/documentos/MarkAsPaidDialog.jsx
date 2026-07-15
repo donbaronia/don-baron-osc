@@ -14,8 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Check, Download, Eye, X, CreditCard, Copy, QrCode } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 
 const PAYMENT_METHODS = [
   { v: "pix", l: "PIX" },
@@ -187,23 +186,15 @@ export default function MarkAsPaidDialog({ open, onClose, payment, document: doc
 
           <div className="space-y-2">
             <Label className="text-xs">Forma de Pagamento</Label>
-            <select className={SEL} value={form.payment_method} onChange={(e) => set("payment_method", e.target.value)}>
-              {PAYMENT_METHODS.map((m) => <option key={m.v} value={m.v}>{m.l}</option>)}
-            </select>
+            <BaronSelect value={form.payment_method} onChange={(v) => set("payment_method", v)} options={PAYMENT_METHODS.map((m) => ({ value: m.v, label: m.l }))} />
           </div>
           <div className="space-y-2">
             <Label className="text-xs">Banco Utilizado <span className="text-destructive">*</span></Label>
-            <select className={SEL} value={form.bank} onChange={(e) => set("bank", e.target.value)}>
-              <option value="">Selecione...</option>
-              {BANKS.map((b) => <option key={b} value={b}>{b}</option>)}
-            </select>
+            <BaronSelect value={form.bank} onChange={(v) => set("bank", v)} options={BANKS.map((b) => ({ value: b, label: b }))} placeholder="Selecione..." />
           </div>
           <div className="space-y-2">
             <Label className="text-xs">Conta Utilizada <span className="text-destructive">*</span></Label>
-            <select className={SEL} value={form.account} onChange={(e) => set("account", e.target.value)}>
-              <option value="">Selecione...</option>
-              {ACCOUNTS.map((a) => <option key={a} value={a}>{a}</option>)}
-            </select>
+            <BaronSelect value={form.account} onChange={(v) => set("account", v)} options={ACCOUNTS.map((a) => ({ value: a, label: a }))} placeholder="Selecione..." />
           </div>
           <div className="space-y-2">
             <Label className="text-xs">Data do Pagamento</Label>

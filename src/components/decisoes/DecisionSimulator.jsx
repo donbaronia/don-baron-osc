@@ -4,7 +4,7 @@ import { brl } from "@/lib/financialCenter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 import { Play, Save } from "lucide-react";
 
 const SCENARIOS = [
@@ -72,12 +72,7 @@ export default function DecisionSimulator() {
 
         <div className="mt-4">
           <Label className="text-xs">Cenário</Label>
-          <Select value={scenario} onValueChange={(v) => { setScenario(v); setResult(null); setParams({}); }}>
-            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {SCENARIOS.map(s => <SelectItem key={s.v} value={s.v}>{s.l}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <BaronSelect className="mt-1" value={scenario} onChange={(v) => { setScenario(v); setResult(null); setParams({}); }} options={SCENARIOS.map((s) => ({ value: s.v, label: s.l }))} />
         </div>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">

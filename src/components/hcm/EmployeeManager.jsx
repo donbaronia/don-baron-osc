@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Plus, Search, Users } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { BaronSelect } from "@/design-system";
 
 const EMPTY = { full_name: '', short_name: '', cpf: '', rg: '', phone: '', email: '', position: '', department: 'producao', shift: 'integral', salary: 0, salary_type: 'mensal', contract_type: 'clt', career_level: 'auxiliar', hire_date: new Date().toISOString().split('T')[0], pix_key: '', pix_type: 'cpf', bank_name: '', bank_agency: '', bank_account: '', city: '', state: 'CE', status: 'ativo', schedule_type: 'fixo', work_schedule: '', transport_vale: 0, food_vale: 0, uniform_delivered: false, badge_delivered: false, epi_delivered: false, notes: '' };
 
@@ -44,7 +45,7 @@ export default function EmployeeManager({ refreshKey, onSelectEmployee }) {
     finally { setSaving(false); }
   };
 
-  const selectClass = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+
 
   return (
     <div className="space-y-4">
@@ -73,12 +74,12 @@ export default function EmployeeManager({ refreshKey, onSelectEmployee }) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label className="text-xs">Cargo</Label><Input value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} /></div>
-                <div><Label className="text-xs">Departamento</Label><select className={selectClass} value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })}>{Object.entries(DEPARTMENT_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
+                <div><Label className="text-xs">Departamento</Label><BaronSelect value={form.department} onChange={(v) => setForm({ ...form, department: v })} options={Object.entries(DEPARTMENT_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
               </div>
               <div className="grid grid-cols-4 gap-3">
-                <div><Label className="text-xs">Nível</Label><select className={selectClass} value={form.career_level} onChange={(e) => setForm({ ...form, career_level: e.target.value })}>{Object.entries(CAREER_LEVEL_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
-                <div><Label className="text-xs">Turno</Label><select className={selectClass} value={form.shift} onChange={(e) => setForm({ ...form, shift: e.target.value })}>{Object.entries(SHIFT_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
-                <div><Label className="text-xs">Contrato</Label><select className={selectClass} value={form.contract_type} onChange={(e) => setForm({ ...form, contract_type: e.target.value })}>{Object.entries(CONTRACT_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
+                <div><Label className="text-xs">Nível</Label><BaronSelect value={form.career_level} onChange={(v) => setForm({ ...form, career_level: v })} options={Object.entries(CAREER_LEVEL_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
+                <div><Label className="text-xs">Turno</Label><BaronSelect value={form.shift} onChange={(v) => setForm({ ...form, shift: v })} options={Object.entries(SHIFT_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
+                <div><Label className="text-xs">Contrato</Label><BaronSelect value={form.contract_type} onChange={(v) => setForm({ ...form, contract_type: v })} options={Object.entries(CONTRACT_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
                 <div><Label className="text-xs">Salário (R$)</Label><Input type="number" value={form.salary} onChange={(e) => setForm({ ...form, salary: e.target.value })} /></div>
               </div>
               <div className="grid grid-cols-2 gap-3">

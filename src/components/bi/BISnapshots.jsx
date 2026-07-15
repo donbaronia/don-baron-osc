@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BI } from "@/lib/biEngine";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 import { brl } from "@/lib/financialCenter";
 import { Database, RefreshCw, Download } from "lucide-react";
 
@@ -68,16 +68,7 @@ export default function BISnapshots() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="w-48">
-          <Select value={periodType} onValueChange={setPeriodType}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="daily">Diário</SelectItem>
-              <SelectItem value="weekly">Semanal</SelectItem>
-              <SelectItem value="monthly">Mensal</SelectItem>
-              <SelectItem value="quarterly">Trimestral</SelectItem>
-              <SelectItem value="annual">Anual</SelectItem>
-            </SelectContent>
-          </Select>
+          <BaronSelect value={periodType} onChange={setPeriodType} options={[{ value: "daily", label: "Diário" }, { value: "weekly", label: "Semanal" }, { value: "monthly", label: "Mensal" }, { value: "quarterly", label: "Trimestral" }, { value: "annual", label: "Anual" }]} />
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleExport} className="gap-2 bg-white">

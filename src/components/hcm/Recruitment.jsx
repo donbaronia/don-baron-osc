@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Plus, Briefcase, UserPlus, Star } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { BaronSelect } from "@/design-system";
 
 export default function Recruitment({ refreshKey }) {
   const [candidates, setCandidates] = useState([]);
@@ -47,7 +48,7 @@ export default function Recruitment({ refreshKey }) {
     finally { setSaveJob(false); }
   };
 
-  const selectClass = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+
 
   if (loading) return <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 animate-pulse rounded-xl bg-neutral-200/60" />)}</div>;
 
@@ -64,7 +65,7 @@ export default function Recruitment({ refreshKey }) {
                 <div className="space-y-3">
                   <div><Label className="text-xs">Título *</Label><Input value={jobForm.title} onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })} /></div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div><Label className="text-xs">Departamento</Label><select className={selectClass} value={jobForm.department} onChange={(e) => setJobForm({ ...jobForm, department: e.target.value })}>{Object.entries(DEPARTMENT_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
+                    <div><Label className="text-xs">Departamento</Label><BaronSelect value={jobForm.department} onChange={(v) => setJobForm({ ...jobForm, department: v })} options={Object.entries(DEPARTMENT_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
                     <div><Label className="text-xs">Cargo</Label><Input value={jobForm.position} onChange={(e) => setJobForm({ ...jobForm, position: e.target.value })} /></div>
                   </div>
                   <div><Label className="text-xs">Descrição</Label><Textarea value={jobForm.description} onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })} rows={2} /></div>
@@ -122,9 +123,9 @@ export default function Recruitment({ refreshKey }) {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div><Label className="text-xs">Cargo Pretendido</Label><Input value={candForm.position_applied} onChange={(e) => setCandForm({ ...candForm, position_applied: e.target.value })} /></div>
-                    <div><Label className="text-xs">Departamento</Label><select className={selectClass} value={candForm.department} onChange={(e) => setCandForm({ ...candForm, department: e.target.value })}>{Object.entries(DEPARTMENT_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
+                    <div><Label className="text-xs">Departamento</Label><BaronSelect value={candForm.department} onChange={(v) => setCandForm({ ...candForm, department: v })} options={Object.entries(DEPARTMENT_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
                   </div>
-                  <div><Label className="text-xs">Origem</Label><select className={selectClass} value={candForm.source} onChange={(e) => setCandForm({ ...candForm, source: e.target.value })}>{Object.entries(CANDIDATE_SOURCE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}</select></div>
+                  <div><Label className="text-xs">Origem</Label><BaronSelect value={candForm.source} onChange={(v) => setCandForm({ ...candForm, source: v })} options={Object.entries(CANDIDATE_SOURCE_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
                   <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => {}}>Cancelar</Button><Button onClick={handleCreateCand} disabled={saveCand}>{saveCand ? "Salvando..." : "Cadastrar"}</Button></div>
                 </div>
               </DialogContent>
@@ -149,9 +150,7 @@ export default function Recruitment({ refreshKey }) {
                     <div className="mt-2 flex items-center gap-2">
                       <span className="text-[10px] text-neutral-400">{srcCfg.emoji} {srcCfg.label}</span>
                       <div className="flex-1" />
-                      <select value={c.status} onChange={(e) => handleStatusChange(c.id, e.target.value)} className="rounded-md border border-neutral-200 bg-white px-2 py-1 text-xs text-neutral-700">
-                        {Object.entries(CANDIDATE_STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-                      </select>
+                      <div className="w-36"><BaronSelect size="sm" value={c.status} onChange={(v) => handleStatusChange(c.id, v)} options={Object.entries(CANDIDATE_STATUS_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
                     </div>
                   </div>
                 );

@@ -16,7 +16,7 @@ import { exportToCsv } from "@/lib/exportCsv";
 import { isImageFile, isPDFFile, getCategoryEmoji } from "@/lib/documentUtils";
 import MarkAsPaidDialog from "@/components/documentos/MarkAsPaidDialog";
 
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 const METHODS = [
   { v: "pix", l: "PIX" }, { v: "dinheiro", l: "Dinheiro" }, { v: "transferencia", l: "Transferência" },
   { v: "boleto", l: "Boleto" }, { v: "cartao_credito", l: "Cartão Crédito" }, { v: "cartao_debito", l: "Cartão Débito" }, { v: "outros", l: "Outros" },
@@ -147,12 +147,12 @@ export default function ContasPagar() {
             <FormField label="Valor *"><Input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Data Emissão"><Input type="date" value={form.issue_date || ""} onChange={e => setForm({ ...form, issue_date: e.target.value })} /></FormField>
             <FormField label="Vencimento"><Input type="date" value={form.due_date || ""} onChange={e => setForm({ ...form, due_date: e.target.value })} /></FormField>
-            <FormField label="Forma de Pagamento"><select className={SEL} value={form.payment_method} onChange={e => setForm({ ...form, payment_method: e.target.value })}>{METHODS.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}</select></FormField>
+            <FormField label="Forma de Pagamento"><BaronSelect value={form.payment_method} onChange={(v) => setForm({ ...form, payment_method: v })} options={METHODS.map((m) => ({ value: m.v, label: m.l }))} /></FormField>
             <FormField label="Banco"><Input value={form.bank} onChange={e => setForm({ ...form, bank: e.target.value })} /></FormField>
             <FormField label="Chave PIX"><Input value={form.pix_key} onChange={e => setForm({ ...form, pix_key: e.target.value })} /></FormField>
             <FormField label="Código de Barras" className="col-span-2"><Input value={form.barcode} onChange={e => setForm({ ...form, barcode: e.target.value })} /></FormField>
             <FormField label="Observações" className="col-span-2"><Input value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} /></FormField>
-            <FormField label="Status"><select className={SEL} value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}><option value="pendente">Pendente</option><option value="pago">Pago</option><option value="parcial">Parcial</option><option value="cancelado">Cancelado</option></select></FormField>
+            <FormField label="Status"><BaronSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} options={[{ value: "pendente", label: "Pendente" }, { value: "pago", label: "Pago" }, { value: "parcial", label: "Parcial" }, { value: "cancelado", label: "Cancelado" }]} /></FormField>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>

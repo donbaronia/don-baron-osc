@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { RefreshCw, Calculator, ArrowRight, TrendingUp, TrendingDown, DollarSign, Calendar } from "lucide-react";
 
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 
 export default function CMVSimulator() {
   const { toast } = useToast();
@@ -58,10 +58,7 @@ export default function CMVSimulator() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div>
             <label className="text-xs font-medium text-neutral-500 mb-1 block">Ingrediente</label>
-            <select className={SEL} value={selectedIng} onChange={e => setSelectedIng(e.target.value)}>
-              <option value="">Selecione...</option>
-              {ingredients.map((ing, i) => <option key={i} value={ing}>{ing}</option>)}
-            </select>
+            <BaronSelect value={selectedIng} onChange={(v) => setSelectedIng(v)} options={ingredients.map((ing) => ({ value: ing, label: ing }))} placeholder="Selecione..." />
           </div>
           <div>
             <label className="text-xs font-medium text-neutral-500 mb-1 block">Variação de Preço (%)</label>

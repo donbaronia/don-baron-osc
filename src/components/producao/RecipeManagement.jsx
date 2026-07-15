@@ -15,7 +15,7 @@ import { Plus, Pencil, Calculator, RefreshCw } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 import { useAuth } from "@/lib/AuthContext";
 
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 
 const CENTERS = ["blend", "molhos", "batata", "bacon", "cebola_crispy", "sobremesas", "bebidas", "pre_preparo", "limpeza", "outros"];
 
@@ -116,9 +116,9 @@ export default function RecipeManagement() {
           <DialogHeader><DialogTitle>{editing ? "Editar" : "Nova"} Receita</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3 py-2 max-h-[60vh] overflow-y-auto">
             <FormField label="Nome *" className="col-span-2"><Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></FormField>
-            <FormField label="Centro de Produção"><select className={SEL} value={form.production_center} onChange={e => setForm({ ...form, production_center: e.target.value })}>{CENTERS.map(c => <option key={c} value={c}>{c.replace(/_/g, " ")}</option>)}</select></FormField>
+            <FormField label="Centro de Produção"><BaronSelect value={form.production_center} onChange={(v) => setForm({ ...form, production_center: v })} options={CENTERS.map((c) => ({ value: c, label: c.replace(/_/g, " ") }))} /></FormField>
             <FormField label="Categoria"><Input value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} /></FormField>
-            <FormField label="Produto Resultante"><select className={SEL} value={form.product_id} onChange={e => { const p = products.find(x => x.id === e.target.value); setForm({ ...form, product_id: e.target.value, product_name: p?.name, yield_unit: p?.unit || form.yield_unit }); }}><option value="">Selecione...</option>{products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></FormField>
+            <FormField label="Produto Resultante"><BaronSelect value={form.product_id} onChange={(v) => { const p = products.find((x) => x.id === v); setForm({ ...form, product_id: v, product_name: p?.name, yield_unit: p?.unit || form.yield_unit }); }} options={products.map((p) => ({ value: p.id, label: p.name }))} placeholder="Selecione..." /></FormField>
             <FormField label="Rendimento"><Input type="number" step="0.01" value={form.yield_quantity} onChange={e => setForm({ ...form, yield_quantity: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Unidade"><Input value={form.yield_unit} onChange={e => setForm({ ...form, yield_unit: e.target.value })} /></FormField>
             <FormField label="Tempo de Preparo (min)"><Input type="number" value={form.preparation_time} onChange={e => setForm({ ...form, preparation_time: parseInt(e.target.value) || 0 })} /></FormField>

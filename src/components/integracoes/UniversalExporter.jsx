@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 import { Download, FileJson, FileSpreadsheet, FileText } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
@@ -93,24 +93,11 @@ export default function UniversalExporter() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label>Entidade</Label>
-          <Select value={entity} onValueChange={setEntity}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {ENTITY_OPTIONS.map((e) => <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <BaronSelect value={entity} onChange={setEntity} options={ENTITY_OPTIONS} />
         </div>
         <div>
           <Label>Formato</Label>
-          <Select value={format} onValueChange={setFormat}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {FORMAT_OPTIONS.map((f) => {
-                const Icon = f.icon;
-                return <SelectItem key={f.value} value={f.value}><span className="flex items-center gap-2"><Icon className="h-4 w-4" /> {f.label}</span></SelectItem>;
-              })}
-            </SelectContent>
-          </Select>
+          <BaronSelect value={format} onChange={setFormat} options={FORMAT_OPTIONS.map((f) => ({ value: f.value, label: f.label, icon: f.icon }))} />
         </div>
       </div>
       <Button onClick={handleExport} disabled={loading}>

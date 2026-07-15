@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Bike } from "lucide-react";
+import { BaronSelect } from "@/design-system";
 
 export default function Motoboys() {
   const [couriers, setCouriers] = useState([]);
@@ -92,11 +93,7 @@ export default function Motoboys() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="vehicle">Veículo</Label>
-                <select id="vehicle" value={form.vehicle} onChange={(e) => setForm({ ...form, vehicle: e.target.value })} className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring">
-                  <option value="moto">Moto</option>
-                  <option value="carro">Carro</option>
-                  <option value="bike">Bicicleta</option>
-                </select>
+                <BaronSelect value={form.vehicle} onChange={(v) => setForm({ ...form, vehicle: v })} options={[{ value: "moto", label: "Moto" }, { value: "carro", label: "Carro" }, { value: "bike", label: "Bicicleta" }]} />
               </div>
               <div>
                 <Label htmlFor="plate">Placa</Label>

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 import { Switch } from "@/components/ui/switch";
 import { Play, Plus, Trash2, Zap } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
@@ -178,43 +178,19 @@ export default function IntegrationList({ refreshKey }) {
             </div>
             <div>
               <Label>Tipo de Integração</Label>
-              <Select value={form.integration_type} onValueChange={(v) => {
-                const cat = catalog.find(c => c.type === v);
+              <BaronSelect value={form.integration_type} onChange={(v) => {
+                const cat = catalog.find((c) => c.type === v);
                 setForm({ ...form, integration_type: v, category: cat?.category || "", base_url: cat?.base_url || form.base_url, name: form.name || cat?.name || "" });
-              }}>
-                <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                <SelectContent>
-                  {catalog.map((c) => (
-                    <SelectItem key={c.type} value={c.type}>
-                      {INTEGRATION_ICONS[c.type]} {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              }} options={catalog.map((c) => ({ value: c.type, label: `${INTEGRATION_ICONS[c.type] || ""} ${c.name}` }))} placeholder="Selecione..." />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Direção</Label>
-                <Select value={form.direction} onValueChange={(v) => setForm({ ...form, direction: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="both">Bidirecional</SelectItem>
-                    <SelectItem value="inbound">Entrada</SelectItem>
-                    <SelectItem value="outbound">Saída</SelectItem>
-                  </SelectContent>
-                </Select>
+                <BaronSelect value={form.direction} onChange={(v) => setForm({ ...form, direction: v })} options={[{ value: "both", label: "Bidirecional" }, { value: "inbound", label: "Entrada" }, { value: "outbound", label: "Saída" }]} />
               </div>
               <div>
                 <Label>Status Inicial</Label>
-                <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sandbox">Sandbox</SelectItem>
-                    <SelectItem value="pendente">Pendente</SelectItem>
-                    <SelectItem value="ativo">Ativo</SelectItem>
-                    <SelectItem value="inativo">Inativo</SelectItem>
-                  </SelectContent>
-                </Select>
+                <BaronSelect value={form.status} onChange={(v) => setForm({ ...form, status: v })} options={[{ value: "sandbox", label: "Sandbox" }, { value: "pendente", label: "Pendente" }, { value: "ativo", label: "Ativo" }, { value: "inativo", label: "Inativo" }]} />
               </div>
             </div>
             <div>
@@ -224,16 +200,7 @@ export default function IntegrationList({ refreshKey }) {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Tipo de Auth</Label>
-                <Select value={form.auth_type} onValueChange={(v) => setForm({ ...form, auth_type: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="oauth2">OAuth2</SelectItem>
-                    <SelectItem value="api_key">API Key</SelectItem>
-                    <SelectItem value="bearer_token">Bearer Token</SelectItem>
-                    <SelectItem value="basic_auth">Basic Auth</SelectItem>
-                    <SelectItem value="none">Nenhuma</SelectItem>
-                  </SelectContent>
-                </Select>
+                <BaronSelect value={form.auth_type} onChange={(v) => setForm({ ...form, auth_type: v })} options={[{ value: "oauth2", label: "OAuth2" }, { value: "api_key", label: "API Key" }, { value: "bearer_token", label: "Bearer Token" }, { value: "basic_auth", label: "Basic Auth" }, { value: "none", label: "Nenhuma" }]} />
               </div>
               <div>
                 <Label>Req/min</Label>

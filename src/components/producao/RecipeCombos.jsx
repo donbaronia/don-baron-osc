@@ -12,7 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Plus, Pencil, RefreshCw, Trash2, Package } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 
 export default function RecipeCombos() {
   const { toast } = useToast();
@@ -126,10 +126,7 @@ export default function RecipeCombos() {
               <div className="flex items-center justify-between mb-2"><span className="text-xs font-semibold text-neutral-500">ITENS DO COMBO</span><Button variant="outline" size="sm" onClick={addItem} className="gap-1 h-7 text-xs"><Plus className="h-3.5 w-3.5" />Adicionar</Button></div>
               {(form.combo_items || []).map((item, i) => (
                 <div key={i} className="grid grid-cols-12 items-center gap-1 mb-1">
-                  <select className={`${SEL} col-span-8 h-8 text-xs`} value={item.recipe_id} onChange={e => updateItem(i, "recipe_id", e.target.value)}>
-                    <option value="">Selecione...</option>
-                    {recipes.map(r => <option key={r.id} value={r.id}>{r.name} — {brl(r.cost_per_unit)}</option>)}
-                  </select>
+                  <div className="col-span-8"><BaronSelect size="sm" value={item.recipe_id} onChange={(v) => updateItem(i, "recipe_id", v)} options={recipes.map((r) => ({ value: r.id, label: `${r.name} — ${brl(r.cost_per_unit)}` }))} placeholder="Selecione..." /></div>
                   <Input type="number" step="0.01" value={item.quantity} onChange={e => updateItem(i, "quantity", parseFloat(e.target.value) || 1)} className="col-span-3 h-8 text-xs" />
                   <button onClick={() => removeItem(i)} className="col-span-1 flex justify-center text-neutral-400 hover:text-rose-500"><Trash2 className="h-4 w-4" /></button>
                 </div>

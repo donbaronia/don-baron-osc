@@ -12,7 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Plus, Pencil, RefreshCw, PlusCircle } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 const EMPTY = { name: "", product_id: "", product_name: "", quantity: 1, unit: "un", unit_cost: 0, addition_price: 0, category: "adicionais" };
 
 export default function RecipeAdditions() {
@@ -94,7 +94,7 @@ export default function RecipeAdditions() {
           <DialogHeader><DialogTitle>{editing ? "Editar" : "Novo"} Adicional</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3 py-2">
             <FormField label="Nome *" className="col-span-2"><Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ex: Bacon, Cheddar, Catupiry..." /></FormField>
-            <FormField label="Produto" className="col-span-2"><select className={SEL} value={form.product_id} onChange={e => { const p = products.find(x => x.id === e.target.value); setForm({ ...form, product_id: e.target.value, product_name: p?.name, unit: p?.unit || form.unit }); }}><option value="">Selecione...</option>{products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></FormField>
+            <FormField label="Produto" className="col-span-2"><BaronSelect value={form.product_id} onChange={(v) => { const p = products.find((x) => x.id === v); setForm({ ...form, product_id: v, product_name: p?.name, unit: p?.unit || form.unit }); }} options={products.map((p) => ({ value: p.id, label: p.name }))} placeholder="Selecione..." /></FormField>
             <FormField label="Quantidade"><Input type="number" step="0.01" value={form.quantity} onChange={e => setForm({ ...form, quantity: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Unidade"><Input value={form.unit} onChange={e => setForm({ ...form, unit: e.target.value })} /></FormField>
             <FormField label="Custo Unitário"><Input type="number" step="0.01" value={form.unit_cost} onChange={e => setForm({ ...form, unit_cost: parseFloat(e.target.value) || 0 })} /></FormField>

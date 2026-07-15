@@ -12,9 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import { BaronSelect } from "@/design-system";
 import { Plus, Trash2, ZoomIn, ZoomOut, Check, X, Loader2, AlertTriangle, Sparkles, TrendingUp, Tag } from "lucide-react";
 
 const EMPTY_FORM = {
@@ -232,12 +230,7 @@ export default function DocumentConfirmDialog({ open, onClose, document: doc, on
 
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Categoria">
-                  <Select value={form.category} onValueChange={(v) => set("category", v)}>
-                    <SelectTrigger className={inputCls}><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {DOCUMENT_CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.emoji} {c.label}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                  <BaronSelect className={inputCls} value={form.category} onChange={(v) => set("category", v)} options={DOCUMENT_CATEGORIES.map((c) => ({ value: c.value, label: `${c.emoji} ${c.label}` }))} />
                 </Field>
                 <Field label="Nº do Documento">
                   <Input value={form.document_number} onChange={(e) => set("document_number", e.target.value)} className={inputCls} />

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { PeopleAnalytics, scoreColor, SCORE_DIMENSIONS, RISK_CONFIG, DEPARTMENT_CONFIG, SHIFT_CONFIG } from "@/lib/peopleAnalytics";
 import { Loader2, Search, Users, Info } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { BaronSelect } from "@/design-system";
 
 export default function EmployeeScores({ refreshKey, onSelectEmployee }) {
   const [items, setItems] = useState([]);
@@ -46,12 +47,7 @@ export default function EmployeeScores({ refreshKey, onSelectEmployee }) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar colaborador, cargo, departamento..." className="pl-9" />
         </div>
-        <select value={sortKey} onChange={(e) => setSortKey(e.target.value)} className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm text-neutral-700">
-          <option value="overall">Maior Score</option>
-          <option value="name">Nome A-Z</option>
-          <option value="turnover">Risco de Turnover</option>
-          <option value="bank">Banco de Horas (menor)</option>
-        </select>
+        <div className="w-48"><BaronSelect value={sortKey} onChange={(v) => setSortKey(v)} options={[{ value: "overall", label: "Maior Score" }, { value: "name", label: "Nome A-Z" }, { value: "turnover", label: "Risco de Turnover" }, { value: "bank", label: "Banco de Horas (menor)" }]} /></div>
       </div>
 
       {sorted.length === 0 ? (

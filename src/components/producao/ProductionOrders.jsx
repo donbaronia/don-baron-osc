@@ -14,7 +14,7 @@ import { Plus, Play, Pause, Check, Ban, RefreshCw, Clock } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
 import { useAuth } from "@/lib/AuthContext";
 
-const SEL = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+import { BaronSelect } from "@/design-system";
 
 const CENTERS = ["blend", "molhos", "batata", "bacon", "cebola_crispy", "sobremesas", "bebidas", "pre_preparo", "limpeza", "outros"];
 
@@ -136,14 +136,16 @@ export default function ProductionOrders() {
           <DialogHeader><DialogTitle>Nova Ordem de Produção</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3 py-2">
             <FormField label="Receita" className="col-span-2">
-              <select className={SEL} value={form.recipe_id} onChange={e => { const r = recipes.find(x => x.id === e.target.value); setForm({ ...form, recipe_id: e.target.value, recipe_name: r?.name, item: r?.product_name || r?.name || form.item, unit: r?.yield_unit || form.unit, production_center: r?.production_center || form.production_center, expected_time_min: r?.preparation_time || 0 }); }}>
-                <option value="">Selecione...</option>
-                {recipes.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-              </select>
+              <BaronSelect
+                value={form.recipe_id}
+                onChange={(v) => { const r = recipes.find((x) => x.id === v); setForm({ ...form, recipe_id: v, recipe_name: r?.name, item: r?.product_name || r?.name || form.item, unit: r?.yield_unit || form.unit, production_center: r?.production_center || form.production_center, expected_time_min: r?.preparation_time || 0 }); }}
+                options={recipes.map((r) => ({ value: r.id, label: r.name }))}
+                placeholder="Selecione..."
+              />
             </FormField>
             <FormField label="Item *" className="col-span-2"><Input value={form.item} onChange={e => setForm({ ...form, item: e.target.value })} /></FormField>
-            <FormField label="Centro de Produção"><select className={SEL} value={form.production_center} onChange={e => setForm({ ...form, production_center: e.target.value })}>{CENTERS.map(c => <option key={c} value={c}>{c.replace(/_/g, " ")}</option>)}</select></FormField>
-            <FormField label="Prioridade"><select className={SEL} value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })}><option value="baixa">Baixa</option><option value="media">Média</option><option value="alta">Alta</option><option value="critica">Crítica</option></select></FormField>
+            <FormField label="Centro de Produção"><BaronSelect value={form.production_center} onChange={(v) => setForm({ ...form, production_center: v })} options={CENTERS.map((c) => ({ value: c, label: c.replace(/_/g, " ") }))} /></FormField>
+            <FormField label="Prioridade"><BaronSelect value={form.priority} onChange={(v) => setForm({ ...form, priority: v })} options={[{ value: "baixa", label: "Baixa" }, { value: "media", label: "Média" }, { value: "alta", label: "Alta" }, { value: "critica", label: "Crítica" }]} /></FormField>
             <FormField label="Qtd. Planejada *"><Input type="number" step="0.01" value={form.planned_quantity} onChange={e => setForm({ ...form, planned_quantity: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Unidade"><Input value={form.unit} onChange={e => setForm({ ...form, unit: e.target.value })} /></FormField>
             <FormField label="Tempo Previsto (min)"><Input type="number" value={form.expected_time_min} onChange={e => setForm({ ...form, expected_time_min: parseInt(e.target.value) || 0 })} /></FormField>
@@ -170,7 +172,7 @@ export default function ProductionOrders() {
               <FormField label="Motivo Rendimento"><Input value={finalizeForm.yield_reason} onChange={e => setFinalizeForm({ ...finalizeForm, yield_reason: e.target.value })} /></FormField>
               {finalizeForm.lost_quantity > 0 && (
                 <>
-                  <FormField label="Tipo de Perda" className="col-span-2"><select className={SEL} value={finalizeForm.loss_type} onChange={e => setFinalizeForm({ ...finalizeForm, loss_type: e.target.value })}><option value="">Selecione...</option>{LOSS_TYPES.map(l => <option key={l.v} value={l.v}>{l.l}</option>)}</select></FormField>
+                  <FormField label="Tipo de Perda" className="col-span-2"><BaronSelect value={finalizeForm.loss_type} onChange={(v) => setFinalizeForm({ ...finalizeForm, loss_type: v })} options={LOSS_TYPES.map((l) => ({ value: l.v, label: l.l }))} placeholder="Selecione..." /></FormField>
                   <FormField label="Motivo da Perda" className="col-span-2"><Input value={finalizeForm.loss_reason} onChange={e => setFinalizeForm({ ...finalizeForm, loss_reason: e.target.value })} /></FormField>
                 </>
               )}
