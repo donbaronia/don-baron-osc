@@ -23,6 +23,11 @@ export const ActionTypes = {
   CREATE_CUSTOMER: "CREATE_CUSTOMER",
   UPDATE_PRODUCT_STOCK: "UPDATE_PRODUCT_STOCK",
   DELETE_ENTITY: "DELETE_ENTITY",
+  CREATE_STOCK_EXIT: "CREATE_STOCK_EXIT",
+  CREATE_PRODUCTION: "CREATE_PRODUCTION",
+  CREATE_PURCHASE: "CREATE_PURCHASE",
+  UPDATE_EMPLOYEE: "UPDATE_EMPLOYEE",
+  CLASSIFY_DOCUMENT: "CLASSIFY_DOCUMENT",
 };
 
 // Mapa: ActionType -> executor
@@ -121,6 +126,49 @@ export const ActionRegistry = {
     description: "Exclui um registro (soft-delete)",
     execute: (payload, opts) => PersistenceEngine.delete(payload.entity, payload.id, opts),
   },
+
+  [ActionTypes.CREATE_STOCK_EXIT]: {
+    entity: "Product",
+    description: "Registra saída/consumo de estoque de um produto",
+    execute: async (payload, opts) => {
+      const { product_id, quantity, ...rest } = payload;
+      const product = await PersistenceEngine.findOne("Product", product_id);
+      if (!product) throw new Error(`Produto nao encontrado: ${product_id}`);
+      const newQty = Math.max(0, (product.stock_quantity || 0) - Number(quantity));
+      return PersistenceEngine.update("Product", product_id, { stock_quantity: newQty, ...rest }, opts);
+    },
+  },
+
+  [ActionTypes.CREATE_PRODUCTION]: {
+    entity: "ProductionRecord",
+    description: "Cria uma ordem de produção",
+    execute: (payload, opts) => PersistenceEngine.create("ProductionRecord", payload, opts),
+  },
+
+  [ActionTypes.CREATE_PURCHASE]: {
+    entity: "Purchase",
+    description: "Cria um pedido de compra",
+    execute: (payload, opts) => PersistenceEngine.create("Purchase", payload, opts),
+  },
+
+  [ActionTypes.UPDATE_EMPLOYEE]: {
+    entity: "Employee",
+    description: "Atualiza um funcionário",
+    execute: (payload, opts) => PersistenceEngine.update("Employee", payload.id, payload.data || payload, opts),
+  },
+
+  [ActionTypes.CLASSIFY_DOCUMENT]: {
+    entity: "DBDocument",
+    description: "Classifica e extrai dados de um documento (agente somente-leitura/extrator)",
+    write: false,
+    execute: async (payload, opts) => {
+      // Agente Documentos apenas LÊ e retorna dados estruturados — nunca grava.
+      if (payload.document_id) {
+        return PersistenceEngine.findOne("DBDocument", payload.document_id, opts);
+      }
+      return { extracted: payload.extracted || {}, classified: payload.classified || "outros" };
+    },
+  },
 };
 
 // Mapa de intenções em linguagem natural -> ActionType (para o Baron IA)
@@ -135,4 +183,9 @@ export const IntentPatterns = [
   { pattern: /cadast?rar?\s+(funcionario|colaborador)/i, action: ActionTypes.CREATE_EMPLOYEE },
   { pattern: /cadast?rar?\s+(motoboy|entregador)/i, action: ActionTypes.CREATE_COURIER },
   { pattern: /cadast?rar?\s+(cliente)/i, action: ActionTypes.CREATE_CUSTOMER },
+  { pattern: /(sa[ií]da|vend(ei|ido)|consum(i|o))\s+\d+/i, action: ActionTypes.CREATE_STOCK_EXIT },
+  { pattern: /produz(i|imos|ir)?\s+\d+/i, action: ActionTypes.CREATE_PRODUCTION },
+  { pattern: /(pedido\s+de\s+compra|comprar\s+|repor\s+estoque)/i, action: ActionTypes.CREATE_PURCHASE },
+  { pattern: /atualiz?ar?\s+(funcionario|sal[aá]rio|escala)/i, action: ActionTypes.UPDATE_EMPLOYEE },
+  { pattern: /(classificar|processar|analisar)\s+(documento|nota|boleto)/i, action: ActionTypes.CLASSIFY_DOCUMENT },
 ];

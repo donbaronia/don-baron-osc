@@ -16,6 +16,7 @@ import {
   Brain,
   Activity,
   ShieldCheck,
+  Bot,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -120,6 +121,12 @@ export const NAV_ITEMS = [
     icon: ShieldCheck,
     path: "/recovery",
     roles: ["administrador"],
+  },
+  {
+    label: "Central dos Agentes",
+    icon: Bot,
+    path: "/agentes",
+    roles: ["administrador", "gerencia"],
   },
   {
     label: "BARON Histórico",

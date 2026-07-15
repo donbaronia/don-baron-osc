@@ -8,7 +8,7 @@
     },
     "agent_key": {
       "type": "string",
-      "description": "Identificador unico (ex: ceo_ai, fin_fluxo_caixa)"
+      "description": "Identificador unico (ex: baron, ag_estoque, ag_financeiro)"
     },
     "name": {
       "type": "string",
@@ -35,6 +35,10 @@
       ],
       "default": "financeira"
     },
+    "module": {
+      "type": "string",
+      "description": "Modulo de origem do agente (estoque, financeiro, cmv, etc)"
+    },
     "specialization": {
       "type": "string"
     },
@@ -49,6 +53,13 @@
       },
       "description": "Tipos de entidade que o agente pode ler"
     },
+    "write_permissions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Entidades que o agente pode gravar via ActionEngine. '*' = todas (apenas BARON). [] = somente leitura."
+    },
     "event_subscriptions": {
       "type": "array",
       "items": {
@@ -56,12 +67,19 @@
       },
       "description": "Eventos que o agente reage"
     },
+    "event_emissions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Eventos que o agente emite"
+    },
     "capabilities": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "description": "Capacidades: analyze, recommend, alert, forecast, simulate"
+      "description": "Capacidades: analyze, recommend, alert, forecast, simulate, extract, etc"
     },
     "avatar_emoji": {
       "type": "string",
