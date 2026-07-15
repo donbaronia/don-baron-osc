@@ -1,4 +1,4 @@
-import { base44 } from "@/api/base44Client";
+import { AppService } from "@/services";
 import { Core } from "@/lib/coreEngine";
 import { EventBus } from "@/lib/eventBus";
 
@@ -14,12 +14,16 @@ const TRANSFER_TYPES = ["transferencia"];
  * InventoryEngine — motor central do Centro de Estoque Inteligente.
  *
  * UNICO responsavel por alterar estoque. Nenhum outro modulo altera estoque diretamente.
+ * DON BARON CORE 3.0: toda gravação/leitura passa por AppService (validação →
+ * PersistenceEngine → RecoveryEngine → read-back → EventBus → auditoria → sync).
+ * Erros são propagados (nunca silenciados).
+ *
  * Toda movimentacao passa por processMovement(), que:
- * 1. Registra o movimento (com auditoria)
+ * 1. Registra o movimento (com read-back + recovery + auditoria via AppService)
  * 2. Atualiza o Stock (quantidade, custo medio, valor total)
  * 3. Atualiza lotes (se aplicavel)
  * 4. Recalcula cobertura, ABC, giro
- * 5. Emite alertas automaticos
+ * 5. Emite alertas automaticos + evento de domínio (stock_entry/exit_created)
  */
 
 export const IE = {
@@ -40,12 +44,12 @@ export const IE = {
     const movementDate = new Date().toISOString();
     const totalCost = (unit_cost || 0) * quantity;
 
-    // 1. Criar movimento
-    const count = await base44.entities.Movement.filter({}, "-created_date", 1).catch(() => []);
+    // 1. Criar movimento (via AppService — read-back + recovery + evento movement_created + auditoria)
+    const count = await AppService.find("Movement", {}, "-created_date", 1);
     const seq = (count[0]?.movement_code?.match(/(\d+)$/)?.[1] || 0) + 1;
     const movement_code = `MOV-${new Date().getFullYear()}-${String(seq).padStart(4, "0")}`;
 
-    const movement = await base44.entities.Movement.create({
+    const movement = await AppService.create("Movement", {
       movement_code,
       movement_type,
       product_id, product_name,
@@ -60,12 +64,12 @@ export const IE = {
       origin_type, origin_id,
       movement_date: movementDate,
       status: "ativo",
-    });
+    }, { module: "estoque", validate: false });
 
     // 2. Atualizar Stock
     await this._updateStock(product_id, product_name, movement_type, quantity, unit_cost, to_stock_type, batch_number, expiry_date, supplier_id, supplier_name, movementDate);
 
-    // 3. Auditoria
+    // 3. Auditoria (Core — complementar à auditoria automática do AppService)
     await Core.audit({
       audit_action: movement_type === "perda" || movement_type === "quebra" ? "delete" : movement_type === "entrada" || movement_type === "compra" ? "create" : "update",
       module: "estoque",
@@ -74,7 +78,7 @@ export const IE = {
       details: `${movement_type.toUpperCase()}: ${product_name} — ${quantity} ${unit || ""} ${totalCost > 0 ? brl(totalCost) : ""} ${reason ? `(${reason})` : ""}`,
     });
 
-    // 4. Event Bus corporativo — entrada/saida geram eventos
+    // 4. Event Bus corporativo — evento de domínio específico (entrada/saída)
     const isInbound = INBOUND_TYPES.includes(movement_type);
     EventBus.publish({
       event_type: isInbound ? "stock_entry_created" : "stock_exit_created",
@@ -90,14 +94,14 @@ export const IE = {
   // ===== INTERNAL: Update Stock =====
   async _updateStock(productId, productName, movementType, quantity, unitCost, stockType, batchNumber, expiryDate, supplierId, supplierName, movementDate) {
     // Buscar ou criar Stock
-    let stocks = await base44.entities.Stock.filter({ product_id: productId, deleted_at: null }, "-created_date", 10).catch(() => []);
+    let stocks = await AppService.find("Stock", { product_id: productId, deleted_at: null }, "-created_date", 10);
     const effectiveStockType = stockType || (stocks[0]?.stock_type || "materia_prima");
     let stock = stocks.find(s => s.stock_type === effectiveStockType);
 
     if (!stock) {
       // Buscar product para herdar min/ideal/max
-      const product = await base44.entities.Product.get(productId).catch(() => null);
-      stock = await base44.entities.Stock.create({
+      const product = await AppService.findOne("Product", productId);
+      stock = await AppService.create("Stock", {
         product_id: productId,
         product_name: productName || product?.name,
         stock_type: effectiveStockType,
@@ -110,15 +114,13 @@ export const IE = {
         total_value: 0,
         last_cost: 0,
         status: "ativo",
-      });
+      }, { module: "estoque", validate: false });
     }
 
     const oldQty = stock.quantity || 0;
     const oldAvgCost = stock.average_cost || 0;
-    const oldTotalValue = stock.total_value || 0;
     let newQty = oldQty;
     let newAvgCost = oldAvgCost;
-    let newTotalValue = 0;
 
     if (INBOUND_TYPES.includes(movementType)) {
       // Entrada: recalcula custo medio ponderado
@@ -130,17 +132,14 @@ export const IE = {
     } else if (OUTBOUND_TYPES.includes(movementType)) {
       // Saida: diminui quantidade, mantem custo medio
       newQty = Math.max(0, oldQty - quantity);
-      newAvgCost = oldAvgCost;
     } else if (TRANSFER_TYPES.includes(movementType)) {
       // Transferencia: remove do stock atual, cria/atualiza stock destino
       newQty = Math.max(0, oldQty - quantity);
-      newAvgCost = oldAvgCost;
 
-      // Criar/atualizar stock de destino
       if (stockType && stockType !== effectiveStockType) {
         let destStock = stocks.find(s => s.stock_type === stockType);
         if (!destStock) {
-          destStock = await base44.entities.Stock.create({
+          destStock = await AppService.create("Stock", {
             product_id: productId,
             product_name: productName,
             stock_type: stockType,
@@ -152,24 +151,23 @@ export const IE = {
             average_cost: oldAvgCost,
             total_value: 0,
             status: "ativo",
-          });
+          }, { module: "estoque", validate: false });
         }
-        await base44.entities.Stock.update(destStock.id, {
+        await AppService.update("Stock", destStock.id, {
           quantity: (destStock.quantity || 0) + quantity,
           total_value: ((destStock.quantity || 0) + quantity) * (destStock.average_cost || oldAvgCost),
           last_movement_date: movementDate,
           last_movement_type: movementType,
           version: (destStock.version || 1) + 1,
-        });
+        }, { module: "estoque", validate: false });
       }
     }
 
-    newTotalValue = newQty * newAvgCost;
+    const newTotalValue = newQty * newAvgCost;
 
     // Atualizar lotes
     let batches = stock.batches || [];
     if (batchNumber && (INBOUND_TYPES.includes(movementType))) {
-      // Adicionar lote
       const existingBatch = batches.find(b => b.batch_number === batchNumber);
       if (existingBatch) {
         existingBatch.quantity += quantity;
@@ -189,7 +187,6 @@ export const IE = {
         });
       }
     } else if (batchNumber && OUTBOUND_TYPES.includes(movementType)) {
-      // Remover do lote (FIFO/FEFO)
       const batch = batches.find(b => b.batch_number === batchNumber);
       if (batch) {
         batch.quantity = Math.max(0, (batch.quantity || 0) - quantity);
@@ -218,7 +215,7 @@ export const IE = {
     // Calcular alerta de validade
     const expiryAlert = this._calculateExpiryAlert(batches);
 
-    await base44.entities.Stock.update(stock.id, {
+    await AppService.update("Stock", stock.id, {
       quantity: newQty,
       average_cost: newAvgCost,
       last_cost: INBOUND_TYPES.includes(movementType) ? (unitCost || stock.last_cost) : stock.last_cost,
@@ -230,29 +227,28 @@ export const IE = {
       last_movement_date: movementDate,
       last_movement_type: movementType,
       version: (stock.version || 1) + 1,
-    });
+    }, { module: "estoque", validate: false });
 
     // Atualizar Product.stock_quantity
-    await base44.entities.Product.update(productId, {
+    await AppService.update("Product", productId, {
       stock_quantity: newQty,
       cost_price: newAvgCost,
       coverage_days: coverage,
-    }).catch(() => {});
+    }, { module: "estoque", validate: false });
 
     return { stock_id: stock.id, new_quantity: newQty, average_cost: newAvgCost };
   },
 
   // ===== COVERAGE CALCULATION =====
   async _calculateCoverage(productId, currentQty, stockId) {
-    // Consumo medio diario dos ultimos 30 dias
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const movements = await base44.entities.Movement.filter({
+    const movements = await AppService.find("Movement", {
       product_id: productId,
       movement_type: { $in: ["saida", "perda", "quebra", "vencimento", "consumo", "venda"] },
       movement_date: { $gte: thirtyDaysAgo.toISOString() },
       deleted_at: null,
-    }, "-movement_date", 500).catch(() => []);
+    }, "-movement_date", 500);
 
     const totalConsumption = movements.reduce((s, m) => s + (m.quantity || 0), 0);
     const avgDaily = totalConsumption / 30;
@@ -288,33 +284,26 @@ export const IE = {
   // ===== OPERATIONAL DASHBOARD =====
   async getOperationalDashboard() {
     const [stocks, movements, products] = await Promise.all([
-      base44.entities.Stock.filter({ deleted_at: null }, "-created_date", 500).catch(() => []),
-      base44.entities.Movement.filter({ deleted_at: null }, "-movement_date", 500).catch(() => []),
-      base44.entities.Product.filter({ active: true }, "name", 500).catch(() => []),
+      AppService.find("Stock", { deleted_at: null }, "-created_date", 500),
+      AppService.find("Movement", { deleted_at: null }, "-movement_date", 500),
+      AppService.find("Product", { active: true }, "name", 500),
     ]);
 
     const today = new Date();
     const weekAgo = new Date(today.getTime() - 7 * 86400000);
     const monthAgo = new Date(today.getTime() - 30 * 86400000);
 
-    // Valor total do estoque
     const totalStockValue = stocks.reduce((s, st) => s + (st.total_value || 0), 0);
-
-    // Itens criticos (abaixo do min)
     const criticalItems = stocks.filter(st => (st.quantity || 0) <= (st.min_quantity || 0) && st.min_quantity > 0);
-
-    // Itens vencendo
     const expiringSoon = stocks.filter(st => st.expiry_alert_level && st.expiry_alert_level !== "normal");
     const expired = stocks.filter(st => st.expiry_alert_level === "vencido");
 
-    // Produtos sem movimentacao (parados)
     const stoppedItems = stocks.filter(st => {
       if (!st.last_movement_date) return true;
       const lastDate = new Date(st.last_movement_date);
       return (today - lastDate) > 30 * 86400000;
     });
 
-    // Perdas da semana e do mes
     const weekLosses = movements.filter(m =>
       ["perda", "quebra", "vencimento"].includes(m.movement_type) &&
       new Date(m.movement_date) >= weekAgo
@@ -326,14 +315,12 @@ export const IE = {
     const weekLossValue = weekLosses.reduce((s, m) => s + (m.total_cost || 0), 0);
     const monthLossValue = monthLosses.reduce((s, m) => s + (m.total_cost || 0), 0);
 
-    // Consumo da semana
     const weekConsumption = movements.filter(m =>
       ["saida", "consumo", "producao"].includes(m.movement_type) &&
       new Date(m.movement_date) >= weekAgo
     );
     const weekConsumptionValue = weekConsumption.reduce((s, m) => s + (m.total_cost || 0), 0);
 
-    // Itens mais/menos utilizados
     const usageStats = {};
     for (const m of movements) {
       if (!["saida", "consumo", "producao", "venda"].includes(m.movement_type)) continue;
@@ -346,10 +333,8 @@ export const IE = {
     const mostUsed = Object.values(usageStats).sort((a, b) => b.totalValue - a.totalValue).slice(0, 10);
     const leastUsed = Object.values(usageStats).sort((a, b) => a.totalValue - b.totalValue).slice(0, 10);
 
-    // Compras sugeridas
     const suggestedPurchases = await this._getSuggestedPurchases(stocks, products);
 
-    // Alertas
     const alerts = [];
     for (const item of criticalItems.slice(0, 5)) {
       alerts.push({ severity: "urgent", message: `Estoque crítico: ${item.product_name} — ${item.quantity} ${item.unit || ""} (mín: ${item.min_quantity})` });
@@ -400,18 +385,12 @@ export const IE = {
       const idealQty = stock.ideal_quantity || 0;
       const avgDaily = stock.average_daily_consumption || 0;
 
-      // Calcular lead time do fornecedor (approx: 3 dias default)
       const product = products.find(p => p.id === stock.product_id);
-      const leadTime = 3; // default
+      const leadTime = 3;
 
-      // Sugerir compra se:
-      // - Cobertura < leadTime + 2 dias (precisa repor antes que acabe)
-      // - Quantidade atual abaixo do ideal
-      // - Tem consumo medio diario > 0
       const needsReplenish = (coverage > 0 && coverage < leadTime + 2) || (stock.quantity <= minQty && minQty > 0);
 
       if (needsReplenish && (avgDaily > 0 || minQty > 0)) {
-        // Calcular quantidade sugerida
         const targetQty = idealQty > 0 ? idealQty : (avgDaily > 0 ? Math.ceil(avgDaily * 14) : minQty * 2);
         const suggestedQty = Math.max(0, targetQty - stock.quantity);
         const urgency = coverage === 0 ? "critica" : coverage <= 1 ? "alta" : coverage <= leadTime ? "media" : "baixa";
@@ -447,8 +426,8 @@ export const IE = {
 
   // ===== ABC CURVE =====
   async getABCCurve(criteria = "valor") {
-    const stocks = await base44.entities.Stock.filter({ deleted_at: null }, "name", 500).catch(() => []);
-    const movements = await base44.entities.Movement.filter({ deleted_at: null }, "-movement_date", 1000).catch(() => []);
+    const stocks = await AppService.find("Stock", { deleted_at: null }, "name", 500);
+    const movements = await AppService.find("Movement", { deleted_at: null }, "-movement_date", 1000);
 
     const items = stocks.map(stock => {
       let metric = 0;
@@ -493,7 +472,7 @@ export const IE = {
     for (const item of classified) {
       const stock = stocks.find(s => s.id === item.stock_id);
       if (stock && stock.abc_class !== item.abc_class) {
-        await base44.entities.Stock.update(stock.id, { abc_class: item.abc_class, abc_criteria: criteria }).catch(() => {});
+        await AppService.update("Stock", stock.id, { abc_class: item.abc_class, abc_criteria: criteria }, { module: "estoque", validate: false });
       }
     }
 
@@ -509,7 +488,7 @@ export const IE = {
 
   // ===== EXPIRY ALERTS =====
   async getExpiryAlerts() {
-    const stocks = await base44.entities.Stock.filter({ deleted_at: null, expiry_alert_level: { $ne: "normal" } }, "product_name", 500).catch(() => []);
+    const stocks = await AppService.find("Stock", { deleted_at: null, expiry_alert_level: { $ne: "normal" } }, "product_name", 500);
 
     const categories = {
       alerta_60: [],
@@ -557,16 +536,15 @@ export const IE = {
 
   // ===== FORECAST =====
   async getForecast(productId, productName) {
-    const movements = await base44.entities.Movement.filter({
+    const movements = await AppService.find("Movement", {
       product_id: productId,
       movement_type: { $in: ["saida", "consumo", "producao", "venda"] },
       deleted_at: null,
-    }, "-movement_date", 500).catch(() => []);
+    }, "-movement_date", 500);
 
     if (movements.length === 0) return null;
 
-    // Consumo por dia da semana
-    const dayOfWeekConsumption = [0, 0, 0, 0, 0, 0, 0]; // Dom-Sab
+    const dayOfWeekConsumption = [0, 0, 0, 0, 0, 0, 0];
     const dailyConsumption = {};
 
     for (const m of movements) {
@@ -576,7 +554,6 @@ export const IE = {
       dailyConsumption[dayKey] = (dailyConsumption[dayKey] || 0) + (m.quantity || 0);
     }
 
-    // Media movel dos ultimos 7, 14, 30 dias
     const now = new Date();
     const calcAvg = (days) => {
       const limit = new Date(now.getTime() - days * 86400000);
@@ -589,7 +566,6 @@ export const IE = {
     const avg14 = calcAvg(14);
     const avg30 = calcAvg(30);
 
-    // Tendencia: comparar ultimos 7 dias vs 7 dias anteriores
     const weekAgo = new Date(now.getTime() - 7 * 86400000);
     const twoWeeksAgo = new Date(now.getTime() - 14 * 86400000);
     const recentWeek = movements.filter(m => new Date(m.movement_date) >= weekAgo).reduce((s, m) => s + (m.quantity || 0), 0);
@@ -600,7 +576,6 @@ export const IE = {
 
     const trend = previousWeek > 0 ? ((recentWeek - previousWeek) / previousWeek) * 100 : 0;
 
-    // Previsao para amanha, semana, mes (usando media ponderada: 50% ultimos 7, 30% 14, 20% 30)
     const weightedAvg = (avg7 * 0.5) + (avg14 * 0.3) + (avg30 * 0.2);
     const tomorrowForecast = weightedAvg;
     const weekForecast = weightedAvg * 7;
@@ -627,7 +602,7 @@ export const IE = {
     if (startDate) filter.movement_date = { $gte: new Date(startDate).toISOString() };
     if (endDate) { filter.movement_date = filter.movement_date || {}; filter.movement_date.$lte = new Date(endDate).toISOString(); }
 
-    const movements = await base44.entities.Movement.filter(filter, "-movement_date", 500).catch(() => []);
+    const movements = await AppService.find("Movement", filter, "-movement_date", 500);
 
     const byType = { perda: 0, quebra: 0, vencimento: 0 };
     const byProduct = {};
