@@ -109,18 +109,26 @@ export const FinancialCenter = {
   },
 
   async getDRE(startDate, endDate) {
-    const [receipts, payments, cmvResult] = await Promise.all([
+    const [receipts, payments, ifoodReceipts, cmvResult] = await Promise.all([
       base44.entities.Receipt.list("-expected_date", 500).catch(() => []),
       base44.entities.Payment.list("-due_date", 500).catch(() => []),
+      base44.entities.IFoodReceipt.list("-expected_date", 200).catch(() => []),
       DataEngine.calculate("cmv", { start_date: startDate, end_date: endDate }).catch(() => ({ result: { cmv_estimado: 0 } })),
     ]);
 
     const inPeriod = (date) => date && date >= startDate && date <= endDate;
     const periodReceipts = receipts.filter(r => inPeriod(r.expected_date));
     const periodPayments = payments.filter(p => inPeriod(p.due_date));
+    // iFood grava em entidade própria (IFoodReceipt) — precisa entrar no DRE
+    // junto com os recebimentos genéricos, senão a receita do iFood nunca aparece.
+    const periodIfood = ifoodReceipts.filter(r => r.status !== "cancelado" && inPeriod(r.expected_date));
 
-    const receitaBruta = periodReceipts.reduce((s, r) => s + (r.amount || 0), 0);
-    const descontos = periodReceipts.reduce((s, r) => s + (r.discounts || 0), 0);
+    const receitaBrutaGenerica = periodReceipts.reduce((s, r) => s + (r.amount || 0), 0);
+    const receitaBrutaIfood = periodIfood.reduce((s, r) => s + (r.gross_value || 0), 0);
+    const receitaBruta = receitaBrutaGenerica + receitaBrutaIfood;
+    const descontosGenericos = periodReceipts.reduce((s, r) => s + (r.discounts || 0), 0);
+    const descontosIfood = periodIfood.reduce((s, r) => s + (r.fees || 0) + (r.commissions || 0) + (r.campaigns || 0) + (r.chargebacks || 0) + (r.refunds || 0) + (r.cancellations || 0), 0);
+    const descontos = descontosGenericos + descontosIfood;
     const receitaLiquida = receitaBruta - descontos;
     const cmv = (cmvResult.result || {}).cmv_estimado || 0;
     const lucroBruto = receitaLiquida - cmv;
@@ -136,6 +144,7 @@ export const FinancialCenter = {
 
     return {
       receita_bruta: receitaBruta,
+      receita_bruta_ifood: receitaBrutaIfood,
       descontos,
       receita_liquida: receitaLiquida,
       cmv,
