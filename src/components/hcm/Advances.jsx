@@ -81,7 +81,7 @@ export default function Advances({ refreshKey }) {
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>Novo Vale/Empréstimo</DialogTitle></DialogHeader>
             <div className="space-y-3">
-              <div><Label className="text-xs">Colaborador</Label><BaronSelect value={form.employee_id} onChange={(v) => setForm({ ...form, employee_id: v })} options={employees.filter((e) => e.status === 'ativo').map((e) => ({ value: e.id, label: e.full_name }))} placeholder="Selecione..." /></div>
+              <div><Label className="text-xs">Colaborador</Label><BaronSelect value={form.employee_id} onChange={(v) => setForm({ ...form, employee_id: v })} options={employees.filter((e) => e.status !== 'demitido' && e.status !== 'inativo').map((e) => ({ value: e.id, label: e.full_name }))} placeholder="Selecione..." /></div>
               <div><Label className="text-xs">Tipo</Label><BaronSelect value={form.type} onChange={(v) => setForm({ ...form, type: v })} options={Object.entries(ADVANCE_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: `${v.emoji} ${v.label}` }))} /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label className="text-xs">Valor (R$)</Label><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></div>
@@ -99,7 +99,7 @@ export default function Advances({ refreshKey }) {
       <div className="rounded-2xl border border-neutral-200 bg-white p-5">
         <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-neutral-500"><Calculator className="h-4 w-4" /> Calculadora de Folha</h3>
         <div className="flex items-center gap-2">
-          <div className="flex-1"><BaronSelect value={payrollEmp} onChange={(v) => setPayrollEmp(v)} options={employees.filter((e) => e.status === 'ativo').map((e) => ({ value: e.id, label: e.full_name }))} placeholder="Selecione um colaborador..." /></div>
+          <div className="flex-1"><BaronSelect value={payrollEmp} onChange={(v) => setPayrollEmp(v)} options={employees.filter((e) => e.status !== 'demitido' && e.status !== 'inativo').map((e) => ({ value: e.id, label: e.full_name }))} placeholder="Selecione um colaborador..." /></div>
           <Button onClick={handleGeneratePayroll} disabled={calcPayroll} size="sm">{calcPayroll ? <Loader2 className="h-4 w-4 animate-spin" /> : <Calculator className="h-4 w-4" />}Calcular</Button>
         </div>
         {payrollData && (

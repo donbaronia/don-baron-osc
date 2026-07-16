@@ -74,7 +74,13 @@ export const OperationalMemory = {
   },
 
   // --- Funcionários ---
-  async getEmployees() { return load("Employee", { status: "ativo" }); },
+  // Busca TODOS e filtra em memória — evitar filtro rígido no servidor por
+  // status, já que cadastros de origens diferentes (RH manual, Baron,
+  // promoção de candidato) podem gravar o campo status de formas distintas.
+  async getEmployees() {
+    const all = await load("Employee", {});
+    return all.filter((e) => e.status !== "demitido" && e.status !== "inativo" && !e.deleted_at);
+  },
 
   async findEmployee(name) {
     if (!name) return null;
