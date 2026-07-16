@@ -110,11 +110,17 @@ export const RecoveryEngine = {
     }
 
     // --- STEP 2: READ BACK ---
+    // Pequena tolerância a atraso de consistência do banco: tenta ler de volta
+    // até 3 vezes com espera curta antes de considerar falha de verdade.
     const t1 = Date.now();
     let readBack;
     try {
       await mark({ current_step: "readback" });
-      readBack = await base44.entities[op.entity_name].get(op.entity_id);
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        readBack = await base44.entities[op.entity_name].get(op.entity_id).catch(() => null);
+        if (readBack && readBack.id === op.entity_id) break;
+        if (attempt < 3) await new Promise((r) => setTimeout(r, 400 * attempt));
+      }
       if (!readBack || readBack.id !== op.entity_id) {
         throw new Error("Read-back falhou: " + op.entity_name + ":" + op.entity_id + " não encontrado após gravação");
       }
