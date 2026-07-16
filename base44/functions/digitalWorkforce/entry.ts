@@ -564,12 +564,24 @@ async function handleExecuteAll(base44, user, body) {
   return Response.json({ results, executed: results.length });
 }
 
+const AUTOMATION_SAFE_ACTIONS = new Set(['init', 'executeRoutine', 'executeAll', 'generateAlerts']);
+const SYSTEM_USER = { id: 'system', full_name: 'BARON (Automação)', email: 'automacao@donbaron.local', company_id: '' };
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     const body = await req.json();
+    let user = null;
+    try { user = await base44.auth.me(); } catch { user = null; }
+    if (!user) {
+      // Execução agendada (cron) não tem usuário logado no navegador.
+      // Para ações de segundo plano isso é esperado — segue com usuário de sistema.
+      if (AUTOMATION_SAFE_ACTIONS.has(body.action)) {
+        user = SYSTEM_USER;
+      } else {
+        return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
     switch (body.action) {
       case 'init': return await handleInit(base44, user);
       case 'getDashboard': return await handleGetDashboard(base44, user);

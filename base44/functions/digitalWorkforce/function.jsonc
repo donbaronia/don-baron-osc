@@ -1,0 +1,26 @@
+{
+  "automations": [
+    {
+      "type": "scheduled",
+      "name": "funcionarios_digitais_horario",
+      "description": "Executa a rotina mais atrasada de cada Funcionário Digital ativo, a cada hora. É isso que torna o monitoramento autônomo de verdade — sem depender de ninguém clicar em nada.",
+      "is_active": true,
+      "schedule_mode": "recurring",
+      "schedule_type": "simple",
+      "repeat_unit": "hours",
+      "repeat_interval": 1,
+      "function_args": { "action": "executeAll", "max_workers": 5 }
+    },
+    {
+      "type": "scheduled",
+      "name": "funcionarios_digitais_alertas",
+      "description": "Gera alertas (estoque crítico, boleto vencendo, etc.) duas vezes ao dia.",
+      "is_active": true,
+      "schedule_mode": "recurring",
+      "schedule_type": "simple",
+      "repeat_unit": "hours",
+      "repeat_interval": 12,
+      "function_args": { "action": "generateAlerts" }
+    }
+  ]
+}
