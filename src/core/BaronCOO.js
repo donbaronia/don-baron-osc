@@ -210,6 +210,18 @@ export const BaronCOO = {
       } catch {}
     }
 
+    // Sincroniza a entidade Stock (a que a tela Estoque > Estoque Atual realmente lê)
+    try {
+      await PersistenceEngine.upsert("Stock", { product_id: savedProduct.id }, {
+        product_name: savedProduct.name,
+        quantity: savedProduct.stock_quantity || qty,
+        unit,
+        last_movement_date: new Date().toISOString(),
+        last_movement_type: "cadastro_inicial",
+        status: "ativo",
+      }, { module: "estoque", origin: "baron", userId: user?.id, validate: false });
+    } catch {}
+
     await Core.audit({ audit_action: "create", module: "estoque", entity_type: "Product", entity_id: savedProduct.id, details: `Cadastro + entrada via BARON: ${qty} ${unit} ${savedProduct.name}${price > 0 ? ` | ${brl(total)}` : ""}${supplier ? ` | ${supplier}` : ""} | Usuário: ${user?.full_name}` });
 
     const returnMsg = `Entrada concluída.\n${qty} ${unit} ${savedProduct.name} adicionados.\nEstoque atual: ${savedProduct.stock_quantity || qty} ${unit}.`;
