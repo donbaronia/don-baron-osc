@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { HCM, ADVANCE_TYPE_CONFIG, ADVANCE_STATUS_CONFIG } from "@/lib/hcmEngine";
+import { AppService } from "@/services";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,6 +64,70 @@ export default function Advances({ refreshKey }) {
     finally { setCalcPayroll(false); }
   };
 
+  const [confirmingPayroll, setConfirmingPayroll] = useState(false);
+
+  // Lança de verdade: cria a despesa no Financeiro (entra no DRE), grava o
+  // registro histórico da folha, e quita os vales que entraram no cálculo —
+  // sem isso, o "calcular" nunca virava lançamento contábil de fato.
+  const handleConfirmPayroll = async () => {
+    if (!payrollData) return;
+    setConfirmingPayroll(true);
+    try {
+      const now = new Date().toISOString().split("T")[0];
+      const month = payrollData.month || new Date().getMonth() + 1;
+      const year = payrollData.year || new Date().getFullYear();
+
+      const transaction = await AppService.create("FinancialTransaction", {
+        description: `Folha de pagamento — ${payrollData.employee_name} (${month}/${year})`,
+        type: "a_pagar",
+        amount: payrollData.net_salary,
+        due_date: now,
+        payment_date: now,
+        status: "pago",
+        category: "salarios",
+        origin: "folha",
+        payment_method: payrollData.payment_method || "pix",
+        notes: `Bruto: R$ ${payrollData.gross_salary?.toFixed(2)} | Descontos: R$ ${payrollData.total_discounts?.toFixed(2)} | Líquido: R$ ${payrollData.net_salary?.toFixed(2)}`,
+      }, { module: "rh", validate: false });
+
+      await AppService.create("Payroll", {
+        employee_id: payrollData.employee_id,
+        employee_name: payrollData.employee_name,
+        period_month: month,
+        period_year: year,
+        period_type: "folha",
+        base_salary: payrollData.base_salary,
+        overtime_hours: payrollData.overtime_hours,
+        overtime_value: payrollData.overtime_value,
+        gross_salary: payrollData.gross_salary,
+        advances: payrollData.advances,
+        inss_discount: payrollData.inss_discount,
+        total_discounts: payrollData.total_discounts,
+        net_salary: payrollData.net_salary,
+        payment_method: payrollData.payment_method || "pix",
+        pix_key: payrollData.pix_key || "",
+        payment_date: now,
+        transaction_id: transaction.id,
+        status: "pago",
+      }, { module: "rh", validate: false });
+
+      // Quita os vales ativos do funcionário que entraram nesse cálculo
+      const empAdvances = advances.filter((a) => a.employee_id === payrollData.employee_id && a.status === "ativo");
+      for (const adv of empAdvances) {
+        await AppService.update("EmployeeAdvance", adv.id, { status: "quitado", balance: 0 }, { module: "rh", validate: false }).catch(() => {});
+      }
+
+      toast({ title: "Folha lançada", description: "Despesa criada no Financeiro (entra no DRE) e vales quitados." });
+      setPayrollData(null);
+      setPayrollEmp("");
+      load();
+    } catch (e) {
+      toast({ title: "Erro ao lançar folha", description: e.message, variant: "destructive" });
+    } finally {
+      setConfirmingPayroll(false);
+    }
+  };
+
 
   const activeAdvances = advances.filter(a => a.status === 'ativo');
   const totalBalance = activeAdvances.reduce((s, a) => s + (a.balance || 0), 0);
@@ -116,6 +181,10 @@ export default function Advances({ refreshKey }) {
               <div className="flex justify-between border-t border-neutral-100 pt-2"><span className="text-neutral-500">Total Descontos:</span><span className="font-medium text-red-500">R$ {payrollData.total_discounts?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
               <div className="flex justify-between col-span-2 border-t-2 border-neutral-200 pt-2 mt-1"><span className="font-semibold text-neutral-700">Salário Líquido:</span><span className="text-lg font-bold text-emerald-600">R$ {payrollData.net_salary?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
             </div>
+            <Button onClick={handleConfirmPayroll} disabled={confirmingPayroll} className="mt-4 w-full gap-2">
+              {confirmingPayroll ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+              {confirmingPayroll ? "Lançando..." : "Confirmar e Lançar Pagamento (gera despesa no DRE + quita vales)"}
+            </Button>
           </div>
         )}
       </div>
