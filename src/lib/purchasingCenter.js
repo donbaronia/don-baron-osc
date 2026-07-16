@@ -1,4 +1,5 @@
 import { base44 } from "@/api/base44Client";
+import { AppService } from "@/services";
 
 const brl = (n) => (n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const todayStr = () => new Date().toISOString().slice(0, 10);
@@ -249,7 +250,7 @@ export const PC = {
 
     const lastPurchase = purchases.find(p => p.order_date);
 
-    await base44.entities.Supplier.update(supplierId, {
+    await AppService.update("Supplier", supplierId, {
       total_purchases: totalPurchases,
       total_amount_purchased: totalAmount,
       pontuality_score: pontualityScore,
@@ -258,7 +259,7 @@ export const PC = {
       last_purchase_date: lastPurchase?.order_date || supplier.last_purchase_date || null,
       last_evaluation_date: todayStr(),
       version: (supplier.version || 1) + 1,
-    });
+    }, { module: "compras", validate: false });
 
     return { overallScore, pontualityScore, avgLeadTime, totalPurchases, totalAmount, riskLevel };
   },

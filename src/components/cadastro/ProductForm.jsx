@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { generateInternalCode } from "@/lib/masterData";
 import { logAudit } from "@/lib/audit";
 import { Core } from "@/lib/donBaronCore";
+import { EventBus } from "@/lib/eventBus";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import {
@@ -110,9 +111,11 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
       if (product?.id) {
         saved = await Core.update("Product", product.id, data, { user, module: "cadastro" });
         toast({ title: "Produto atualizado", description: `${form.name} — persistência confirmada pelo banco.` });
+        EventBus.emitProductUpdated({ entity_type: "Product", entity_id: product.id, payload: { product_id: product.id, name: form.name }, user_name: user?.full_name }).catch((e) => console.error("[ProductForm] Falha ao publicar product_updated:", e));
       } else {
         saved = await Core.save("Product", data, { user, module: "cadastro" });
         toast({ title: "Produto criado", description: `${form.name} — gravado e verificado no banco (read-back OK).` });
+        EventBus.emitProductCreated({ entity_type: "Product", entity_id: saved?.id, payload: { product_id: saved?.id, name: form.name }, user_name: user?.full_name }).catch((e) => console.error("[ProductForm] Falha ao publicar product_created:", e));
       }
       onSaved?.(saved?.record || { ...form, id: saved?.id });
       onClose();

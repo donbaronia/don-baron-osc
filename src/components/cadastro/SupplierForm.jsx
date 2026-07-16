@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
+import { AppService } from "@/services";
 import { BR_STATES } from "@/lib/masterData";
-import { logAudit } from "@/lib/audit";
+import { toast } from "@/components/ui/use-toast";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -35,14 +35,16 @@ export default function SupplierForm({ open, onClose, supplier, onSaved }) {
     setSaving(true);
     try {
       if (supplier?.id) {
-        await base44.entities.Supplier.update(supplier.id, form);
-        await logAudit({ user, module: "Cadastro Mestre", action: "Editou fornecedor", details: form.name });
+        await AppService.update("Supplier", supplier.id, form, { user, module: "cadastro" });
+        toast({ title: "Fornecedor atualizado", description: `${form.name} — persistência confirmada.` });
       } else {
-        await base44.entities.Supplier.create(form);
-        await logAudit({ user, module: "Cadastro Mestre", action: "Criou fornecedor", details: form.name });
+        await AppService.create("Supplier", form, { user, module: "cadastro" });
+        toast({ title: "Fornecedor criado", description: `${form.name} — persistência confirmada.` });
       }
       onSaved?.();
       onClose();
+    } catch (e) {
+      toast({ title: "Falha ao salvar fornecedor", description: e.message, variant: "destructive" });
     } finally {
       setSaving(false);
     }
