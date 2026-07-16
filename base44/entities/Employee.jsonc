@@ -10,6 +10,10 @@
       "type": "string",
       "description": "Vinculo com usuario do sistema"
     },
+    "candidate_id": {
+      "type": "string",
+      "description": "Vinculo com o Candidate de origem (Selecao), quando o funcionario veio de um processo seletivo"
+    },
     "full_name": {
       "type": "string",
       "description": "Nome completo"

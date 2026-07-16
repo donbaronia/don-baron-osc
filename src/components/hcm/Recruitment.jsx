@@ -28,7 +28,20 @@ export default function Recruitment({ refreshKey }) {
   useEffect(() => { load(); }, [load, refreshKey]);
 
   const handleStatusChange = async (id, status) => {
-    try { await HCM.updateCandidate(id, { status }); load(); }
+    try {
+      if (status === 'contratado') {
+        const candidate = candidates.find(c => c.id === id);
+        if (candidate?.hired_employee_id) {
+          toast({ title: "Este candidato já foi contratado anteriormente" });
+          return;
+        }
+        const employee = await HCM.promoteCandidateToEmployee(id);
+        toast({ title: "Candidato contratado!", description: `${employee.full_name} foi criado em Colaboradores.` });
+      } else {
+        await HCM.updateCandidate(id, { status });
+      }
+      load();
+    }
     catch (e) { toast({ title: "Erro", description: e.message, variant: "destructive" }); }
   };
 
@@ -144,6 +157,7 @@ export default function Recruitment({ refreshKey }) {
                       <div className="flex-1">
                         <h4 className="text-sm font-semibold text-neutral-800">{c.name}</h4>
                         <p className="text-xs text-neutral-400">{c.position_applied}</p>
+                        {c.hired_employee_id && <p className="mt-0.5 text-[10px] font-medium text-teal-600">✅ Funcionário criado</p>}
                       </div>
                       {c.rating > 0 && <div className="flex items-center gap-0.5">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`h-3 w-3 ${i < c.rating ? 'fill-amber-400 text-amber-400' : 'text-neutral-200'}`} />)}</div>}
                     </div>

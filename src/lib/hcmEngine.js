@@ -26,6 +26,40 @@ export const HCM = {
   createCandidate: (data, options = {}) => AppService.create("Candidate", data, { ...options, module: "rh", validate: false }),
   updateCandidate: (id, data, options = {}) => AppService.update("Candidate", id, data, { ...options, module: "rh", validate: false }),
 
+  // Promove um Candidate para Employee — a PONTE que faltava entre Seleção e RH.
+  // Cria o funcionário com os dados já preenchidos do candidato e grava o vínculo
+  // nos dois lados (Candidate.hired_employee_id / Employee.candidate_id).
+  promoteCandidateToEmployee: async (candidateId, extra = {}, options = {}) => {
+    const candidate = await AppService.findOne("Candidate", candidateId);
+    if (!candidate) throw new Error("Candidato não encontrado");
+
+    const employeeData = {
+      full_name: candidate.name,
+      phone: candidate.phone || "",
+      email: candidate.email || "",
+      position: candidate.position_applied || "",
+      department: candidate.department || "producao",
+      hire_date: new Date().toISOString().split("T")[0],
+      status: "ativo",
+      career_level: "auxiliar",
+      contract_type: "clt",
+      shift: "integral",
+      salary: 0,
+      salary_type: "mensal",
+      candidate_id: candidateId,
+      ...extra,
+    };
+
+    const employee = await AppService.create("Employee", employeeData, { ...options, module: "rh", validate: false });
+
+    await AppService.update("Candidate", candidateId, {
+      status: "contratado",
+      hired_employee_id: employee.id,
+    }, { ...options, module: "rh", validate: false });
+
+    return employee;
+  },
+
   // Job Openings
   listJobOpenings: () => AppService.list("JobOpening", "-created_date", 100),
   createJobOpening: (data, options = {}) => AppService.create("JobOpening", data, { ...options, module: "rh", validate: false }),
