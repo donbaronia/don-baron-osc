@@ -1,7 +1,12 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { HCM, EMPLOYEE_STATUS_CONFIG, DEPARTMENT_CONFIG, CAREER_LEVEL_CONFIG, SHIFT_CONFIG, CONTRACT_TYPE_CONFIG, DOC_TYPE_CONFIG, DOC_STATUS_CONFIG, ADVANCE_TYPE_CONFIG, ADVANCE_STATUS_CONFIG, TRAINING_STATUS_CONFIG, TRAINING_TYPE_CONFIG, REVIEW_CRITERIA, RISK_CONFIG } from "@/lib/hcmEngine";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Brain, Loader2, Shield, Check, Clock, FileText, GraduationCap, Award, AlertTriangle, Rocket, CheckCircle2, Sparkles } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { BaronSelect } from "@/design-system";
+import { toast } from "@/components/ui/use-toast";
+import { ArrowLeft, Brain, Loader2, Shield, Check, Clock, FileText, GraduationCap, Award, AlertTriangle, Rocket, CheckCircle2, Sparkles, Pencil } from "lucide-react";
 
 export default function EmployeeDetail({ employeeId, onBack }) {
   const [data, setData] = useState(null);
@@ -10,6 +15,9 @@ export default function EmployeeDetail({ employeeId, onBack }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [onboarding, setOnboarding] = useState(null);
   const [loadingOnboarding, setLoadingOnboarding] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState(null);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -34,6 +42,31 @@ export default function EmployeeDetail({ employeeId, onBack }) {
     finally { setLoadingOnboarding(false); }
   };
 
+  const openEdit = () => {
+    const emp = data.employee;
+    setEditForm({
+      full_name: emp.full_name || "", short_name: emp.short_name || "", phone: emp.phone || "", email: emp.email || "",
+      position: emp.position || "", department: emp.department || "producao", career_level: emp.career_level || "auxiliar",
+      shift: emp.shift || "integral", contract_type: emp.contract_type || "clt", status: emp.status || "ativo",
+      salary: emp.salary || 0, hire_date: emp.hire_date || "",
+    });
+    setEditOpen(true);
+  };
+
+  const saveEdit = async () => {
+    setSavingEdit(true);
+    try {
+      await HCM.updateEmployee(employeeId, { ...editForm, salary: Number(editForm.salary) });
+      toast({ title: "Colaborador atualizado" });
+      setEditOpen(false);
+      load();
+    } catch (e) {
+      toast({ title: "Erro ao salvar", description: e.message, variant: "destructive" });
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   if (loading || !data) return <div className="h-96 animate-pulse rounded-2xl bg-neutral-200/60" />;
 
   const e = data.employee;
@@ -45,7 +78,10 @@ export default function EmployeeDetail({ employeeId, onBack }) {
 
   return (
     <div className="space-y-6">
-      <button onClick={onBack} className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800"><ArrowLeft className="h-4 w-4" /> Voltar</button>
+      <div className="flex items-center justify-between">
+        <button onClick={onBack} className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800"><ArrowLeft className="h-4 w-4" /> Voltar</button>
+        <Button size="sm" variant="outline" onClick={openEdit} className="gap-1.5"><Pencil className="h-3.5 w-3.5" /> Editar cadastro</Button>
+      </div>
 
       {/* Header */}
       <div className="rounded-2xl border border-neutral-200 bg-white p-6">
@@ -211,6 +247,42 @@ export default function EmployeeDetail({ employeeId, onBack }) {
           </div>
         )}
       </div>
+
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Editar Colaborador</DialogTitle></DialogHeader>
+          {editForm && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="text-xs">Nome Completo</Label><Input value={editForm.full_name} onChange={(ev) => setEditForm({ ...editForm, full_name: ev.target.value })} /></div>
+                <div><Label className="text-xs">Nome de Guerra</Label><Input value={editForm.short_name} onChange={(ev) => setEditForm({ ...editForm, short_name: ev.target.value })} /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="text-xs">Telefone</Label><Input value={editForm.phone} onChange={(ev) => setEditForm({ ...editForm, phone: ev.target.value })} /></div>
+                <div><Label className="text-xs">Email</Label><Input value={editForm.email} onChange={(ev) => setEditForm({ ...editForm, email: ev.target.value })} /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label className="text-xs">Cargo</Label><Input value={editForm.position} onChange={(ev) => setEditForm({ ...editForm, position: ev.target.value })} /></div>
+                <div><Label className="text-xs">Departamento</Label><BaronSelect value={editForm.department} onChange={(v) => setEditForm({ ...editForm, department: v })} options={Object.entries(DEPARTMENT_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div><Label className="text-xs">Nível</Label><BaronSelect value={editForm.career_level} onChange={(v) => setEditForm({ ...editForm, career_level: v })} options={Object.entries(CAREER_LEVEL_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
+                <div><Label className="text-xs">Turno</Label><BaronSelect value={editForm.shift} onChange={(v) => setEditForm({ ...editForm, shift: v })} options={Object.entries(SHIFT_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
+                <div><Label className="text-xs">Contrato</Label><BaronSelect value={editForm.contract_type} onChange={(v) => setEditForm({ ...editForm, contract_type: v })} options={Object.entries(CONTRACT_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div><Label className="text-xs">Status</Label><BaronSelect value={editForm.status} onChange={(v) => setEditForm({ ...editForm, status: v })} options={Object.entries(EMPLOYEE_STATUS_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>
+                <div><Label className="text-xs">Salário (R$)</Label><Input type="number" value={editForm.salary} onChange={(ev) => setEditForm({ ...editForm, salary: ev.target.value })} /></div>
+                <div><Label className="text-xs">Admissão</Label><Input type="date" value={editForm.hire_date} onChange={(ev) => setEditForm({ ...editForm, hire_date: ev.target.value })} /></div>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => setEditOpen(false)}>Cancelar</Button>
+                <Button onClick={saveEdit} disabled={savingEdit}>{savingEdit ? "Salvando..." : "Salvar alterações"}</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
