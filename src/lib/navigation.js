@@ -19,6 +19,7 @@ import {
   Bot,
   ScanSearch,
   Boxes,
+  Tags,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -57,6 +58,12 @@ export const NAV_ITEMS = [
     icon: Activity,
     path: "/processos",
     roles: ["administrador", "financeiro", "gerencia", "compras", "estoque"],
+  },
+  {
+    label: "Cadastro",
+    icon: Tags,
+    path: "/cadastro",
+    roles: ["administrador", "estoque", "compras", "gerencia", "producao"],
   },
   {
     label: "Estoque",
