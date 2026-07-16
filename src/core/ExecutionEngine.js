@@ -156,6 +156,21 @@ async function execStockEntry(parsed, user, mem) {
     supplier_name: e.supplier || "", responsible_name: user?.full_name,
   });
 
+  // Sincroniza a entidade Stock (é ela que a tela de Estoque > Estoque Atual lê de verdade —
+  // sem isso, o Baron grava certo em Product mas a tela some com a informação)
+  try {
+    await PersistenceEngine.upsert("Stock", { product_id: product.id }, {
+      product_name: product.name,
+      quantity: newQty,
+      unit: controlUnit,
+      last_movement_date: new Date().toISOString(),
+      last_movement_type: "entrada",
+      status: "ativo",
+    }, { module: "estoque", origin: "baron", userId: user?.id, validate: false });
+  } catch (syncErr) {
+    Logger.audit({ entity_name: "Stock", operation: "sync", status: "error", error_message: syncErr.message, module: "estoque" });
+  }
+
   return {
     status: "executed",
     readBack,
@@ -185,6 +200,19 @@ async function execStockExit(parsed, user, mem) {
     product_id: product.id, product_name: product.name, movement_type: "saida",
     quantity: qty, unit: controlUnit, reason, responsible_name: user?.full_name,
   });
+
+  try {
+    await PersistenceEngine.upsert("Stock", { product_id: product.id }, {
+      product_name: product.name,
+      quantity: newQty,
+      unit: controlUnit,
+      last_movement_date: new Date().toISOString(),
+      last_movement_type: "saida",
+      status: "ativo",
+    }, { module: "estoque", origin: "baron", userId: user?.id, validate: false });
+  } catch (syncErr) {
+    Logger.audit({ entity_name: "Stock", operation: "sync", status: "error", error_message: syncErr.message, module: "estoque" });
+  }
 
   return { status: "executed", readBack, message: `Baixa registrada.\n-${qty} ${controlUnit} ${product.name}.\nEstoque atual: ${newQty} ${controlUnit}.` };
 }
@@ -256,6 +284,14 @@ async function execProduction(parsed, user, mem) {
       stock_quantity: newQty,
       movement_history: [...(match.product.movement_history || []), { date: todayStr(), type: "producao", quantity: qty, unit: controlUnit, reason: "produção", user: user?.full_name }],
     }, { module: "producao", origin: "baron", userId: user?.id });
+    try {
+      await PersistenceEngine.upsert("Stock", { product_id: match.product.id }, {
+        product_name: match.product.name, quantity: newQty, unit: controlUnit,
+        last_movement_date: new Date().toISOString(), last_movement_type: "producao", status: "ativo",
+      }, { module: "estoque", origin: "baron", userId: user?.id, validate: false });
+    } catch (syncErr) {
+      Logger.audit({ entity_name: "Stock", operation: "sync", status: "error", error_message: syncErr.message, module: "estoque" });
+    }
   }
 
   await Core.audit({ audit_action: "create", module: "producao", entity_type: "ProductionRecord", entity_id: readBack.id, details: `Produção via BARON: ${qty} ${controlUnit} ${productName} | Usuário: ${user?.full_name}` });
