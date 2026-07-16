@@ -78,8 +78,10 @@ export default function BaronChat() {
       const parsed = await parseCommand(userMsg, pendingContext?.parsed?.intent);
       const result = await executeCommand(parsed, { full_name: "Robson" });
       handleResult(result, parsed);
-    } catch {
-      addMessage("baron", "Não consegui processar agora. Pode repetir?");
+    } catch (e) {
+      console.error("[BaronChat] Falha ao processar comando:", e);
+      const detail = e?.message || "erro desconhecido";
+      addMessage("baron", `Não consegui processar agora (${detail}). Pode repetir?`);
       setContext(null);
     } finally {
       setLoading(false);
