@@ -58,6 +58,12 @@ const VALIDATORS = {
     if (!e.employee_name) return { field: "employee_name", message: "Qual funcionário?" };
     return null;
   },
+  payroll: (parsed) => {
+    const e = parsed.entities;
+    if (!e.employee_name) return { field: "employee_name", message: "Vale para qual funcionário?" };
+    if (!e.amount) return { field: "amount", message: "Qual o valor do vale?" };
+    return null;
+  },
 };
 
 // ============================================================
@@ -274,6 +280,37 @@ async function execEmployeeUpdate(parsed, user, mem) {
   return { status: "executed", readBack, message: `RH atualizado.\n${emp.full_name} ${labels[e.rh_action] || "atualizado"}.` };
 }
 
+async function execAdvance(parsed, user, mem) {
+  const e = parsed.entities;
+  const emp = await mem.findEmployee(e.employee_name);
+  if (!emp) return { status: "needs_info", message: `Funcionário "${e.employee_name}" não encontrado.`, route: "/rh" };
+
+  const amount = e.amount || 0;
+  const readBack = await PersistenceEngine.create("EmployeeAdvance", {
+    employee_id: emp.id,
+    employee_name: emp.full_name,
+    type: "vale_semanal",
+    amount,
+    installments: 1,
+    installment_amount: amount,
+    balance: amount,
+    date: todayStr(),
+    status: "ativo",
+    description: `Vale registrado via BARON`,
+  }, { module: "rh", origin: "baron", userId: user?.id });
+
+  await Core.audit({ audit_action: "create", module: "rh", entity_type: "EmployeeAdvance", entity_id: readBack.id, details: `Vale via BARON: ${brl(amount)} para ${emp.full_name} | Usuário: ${user?.full_name}` });
+
+  // Espelha no Financeiro — mesmo evento que o vale manual do RH publica
+  emit("advance_created", "rh", {
+    entity_type: "EmployeeAdvance", entity_id: readBack.id,
+    advance_id: readBack.id, employee_id: emp.id, employee_name: emp.full_name,
+    type: "vale_semanal", amount, installment_amount: amount, installments: 1, date: todayStr(),
+  });
+
+  return { status: "executed", readBack, message: `Vale registrado.\n${brl(amount)} para ${emp.full_name}.\nLançado na conta da funcionária e espelhado no Financeiro.` };
+}
+
 async function execExpense(parsed, user, mem) {
   const e = parsed.entities;
   const readBack = await PersistenceEngine.create("FinancialTransaction", {
@@ -341,6 +378,7 @@ const EXECUTORS = {
   expense: execExpense,
   production: execProduction,
   employee_update: execEmployeeUpdate,
+  payroll: execAdvance,
 };
 
 // ============================================================
