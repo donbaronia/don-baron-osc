@@ -171,6 +171,27 @@ async function execStockEntry(parsed, user, mem) {
     Logger.audit({ entity_name: "Stock", operation: "sync", status: "error", error_message: syncErr.message, module: "estoque" });
   }
 
+  // Registra na entidade Movement — é ela que a aba Movimentações e o motor de CMV/DRE leem
+  try {
+    await PersistenceEngine.create("Movement", {
+      movement_type: "entrada",
+      product_id: product.id,
+      product_name: product.name,
+      quantity: controlQty,
+      unit: controlUnit,
+      unit_cost: e.price || 0,
+      total_cost: (e.price || 0) * controlQty,
+      reason: "Entrada via BARON",
+      origin_type: "compra",
+      supplier_name: e.supplier || "",
+      responsible_name: user?.full_name || "Sistema",
+      movement_date: new Date().toISOString(),
+      status: "ativo",
+    }, { module: "estoque", origin: "baron", userId: user?.id, validate: false });
+  } catch (syncErr) {
+    Logger.audit({ entity_name: "Movement", operation: "sync", status: "error", error_message: syncErr.message, module: "estoque" });
+  }
+
   return {
     status: "executed",
     readBack,
@@ -212,6 +233,23 @@ async function execStockExit(parsed, user, mem) {
     }, { module: "estoque", origin: "baron", userId: user?.id, validate: false });
   } catch (syncErr) {
     Logger.audit({ entity_name: "Stock", operation: "sync", status: "error", error_message: syncErr.message, module: "estoque" });
+  }
+
+  try {
+    await PersistenceEngine.create("Movement", {
+      movement_type: "saida",
+      product_id: product.id,
+      product_name: product.name,
+      quantity: qty,
+      unit: controlUnit,
+      reason: `Baixa via BARON: ${reason}`,
+      origin_type: "baixa",
+      responsible_name: user?.full_name || "Sistema",
+      movement_date: new Date().toISOString(),
+      status: "ativo",
+    }, { module: "estoque", origin: "baron", userId: user?.id, validate: false });
+  } catch (syncErr) {
+    Logger.audit({ entity_name: "Movement", operation: "sync", status: "error", error_message: syncErr.message, module: "estoque" });
   }
 
   return { status: "executed", readBack, message: `Baixa registrada.\n-${qty} ${controlUnit} ${product.name}.\nEstoque atual: ${newQty} ${controlUnit}.` };
@@ -291,6 +329,18 @@ async function execProduction(parsed, user, mem) {
       }, { module: "estoque", origin: "baron", userId: user?.id, validate: false });
     } catch (syncErr) {
       Logger.audit({ entity_name: "Stock", operation: "sync", status: "error", error_message: syncErr.message, module: "estoque" });
+    }
+    try {
+      await PersistenceEngine.create("Movement", {
+        movement_type: "producao",
+        product_id: match.product.id, product_name: match.product.name,
+        quantity: qty, unit: controlUnit,
+        reason: "Produção via BARON", origin_type: "producao",
+        responsible_name: user?.full_name || "Sistema",
+        movement_date: new Date().toISOString(), status: "ativo",
+      }, { module: "producao", origin: "baron", userId: user?.id, validate: false });
+    } catch (syncErr) {
+      Logger.audit({ entity_name: "Movement", operation: "sync", status: "error", error_message: syncErr.message, module: "producao" });
     }
   }
 
