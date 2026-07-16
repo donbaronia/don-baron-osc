@@ -89,7 +89,7 @@ export async function parseCommand(text, previousIntent) {
 
 async function findProduct(name) {
   if (!name) return null;
-  const products = await base44.entities.Product.filter({ active: true, status: "ativo" }, "-created_date", 500).catch(() => []);
+  const products = await base44.entities.Product.filter({ active: true }, "-created_date", 500).catch(() => []);
   const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, "").trim();
   const target = norm(name);
   for (const p of products) {
@@ -112,7 +112,7 @@ async function learnAlias(product, aliasName) {
 
 async function findEmployee(name) {
   if (!name) return null;
-  const employees = await base44.entities.Employee.filter({ status: "ativo" }, "-created_date", 200).catch(() => []);
+  const employees = await base44.entities.Employee.filter({}, "-created_date", 200).then((list) => list.filter((e) => e.status !== "demitido" && e.status !== "inativo")).catch(() => []);
   const norm = (s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
   const target = norm(name);
   return employees.find((e) => {

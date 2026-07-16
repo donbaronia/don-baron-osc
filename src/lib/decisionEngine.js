@@ -23,8 +23,8 @@ export const DecisionEngine = {
     const forecasts = await BI.getForecasts().catch(() => null);
     const temporal = await BI.getTemporalAnalysis().catch(() => null);
     const [suppliers, products, stocks, recipes, priceHistories] = await Promise.all([
-      base44.entities.Supplier.filter({ status: "ativo", deleted_at: null }, "name", 200).catch(() => []),
-      base44.entities.Product.filter({ status: "ativo", deleted_at: null }, "name", 500).catch(() => []),
+      base44.entities.Supplier.filter({ deleted_at: null }, "name", 200).catch(() => []),
+      base44.entities.Product.filter({ deleted_at: null }, "name", 500).catch(() => []),
       base44.entities.Stock.filter({ deleted_at: null }, "product_name", 500).catch(() => []),
       base44.entities.Recipe.filter({ active: true, deleted_at: null }, "name", 500).catch(() => []),
       base44.entities.PriceHistory.filter({ deleted_at: null }, "-created_date", 500).catch(() => []),

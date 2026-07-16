@@ -27,10 +27,10 @@ export default function CommandPriorities() {
 
     Promise.all([
       base44.entities.Payment.filter({ status: "pendente" }, "-due_date", 200).catch(() => []),
-      base44.entities.Product.filter({ active: true, status: "ativo" }, "-created_date", 300).catch(() => []),
+      base44.entities.Product.filter({ active: true }, "-created_date", 300).catch(() => []),
       base44.entities.ProductionRecord.list("-created_date", 100).catch(() => []),
       base44.entities.Courier.filter({ status: { $in: ["ativo", "em_entrega"] } }, "-created_date", 100).catch(() => []),
-      base44.entities.Employee.filter({ status: "ativo" }, "-created_date", 200).catch(() => []),
+      base44.entities.Employee.filter({}, "-created_date", 200).then((list) => list.filter((e) => e.status !== "demitido" && e.status !== "inativo")).catch(() => []),
       base44.entities.Sale.list("-created_date", 100).catch(() => []),
       base44.entities.DBDocument.filter({ status: "aguardando_confirmacao" }, "-created_date", 50).catch(() => []),
     ]).then(([payments, products, production, couriers, employees, sales, pendingDocs]) => {

@@ -34,7 +34,12 @@ const norm = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0
 // ============================================================
 export const OperationalMemory = {
   // --- Produtos ---
-  async getProducts() { return load("Product", { active: true, status: "ativo" }); },
+  // Mesmo cuidado do getEmployees: busca tudo e filtra em memoria, sem exigir
+  // "ativo" exato no servidor (produtos tem varios caminhos de cadastro).
+  async getProducts() {
+    const all = await load("Product", {});
+    return all.filter((p) => p.active !== false && p.status !== "inativo" && p.status !== "arquivado" && !p.deleted_at);
+  },
 
   async findProduct(name) {
     if (!name) return null;
@@ -64,7 +69,10 @@ export const OperationalMemory = {
   },
 
   // --- Fornecedores ---
-  async getSuppliers() { return load("Supplier", { active: true, status: "ativo" }); },
+  async getSuppliers() {
+    const all = await load("Supplier", {});
+    return all.filter((s) => s.active !== false && s.status !== "inativo" && s.status !== "bloqueado" && !s.deleted_at);
+  },
 
   async findSupplier(name) {
     if (!name) return null;

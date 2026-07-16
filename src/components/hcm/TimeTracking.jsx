@@ -65,7 +65,7 @@ export default function TimeTracking({ refreshKey }) {
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>Registrar Ponto</DialogTitle></DialogHeader>
             <div className="space-y-3">
-              <div><Label className="text-xs">Colaborador</Label><BaronSelect value={form.employee_id} onChange={(v) => setForm({ ...form, employee_id: v })} options={employees.filter((e) => e.status === 'ativo').map((e) => ({ value: e.id, label: e.full_name }))} placeholder="Selecione..." /></div>
+              <div><Label className="text-xs">Colaborador</Label><BaronSelect value={form.employee_id} onChange={(v) => setForm({ ...form, employee_id: v })} options={employees.filter((e) => e.status !== 'demitido' && e.status !== 'inativo').map((e) => ({ value: e.id, label: e.full_name }))} placeholder="Selecione..." /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label className="text-xs">Data</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
                 <div><Label className="text-xs">Tipo</Label><BaronSelect value={form.type} onChange={(v) => setForm({ ...form, type: v })} options={Object.entries(TIME_RECORD_TYPE_CONFIG).map(([k, v]) => ({ value: k, label: v.label }))} /></div>

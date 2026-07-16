@@ -13,7 +13,7 @@ export default function MorningMissions() {
     const today = new Date().toISOString().slice(0, 10);
     Promise.all([
       base44.entities.Payment.filter({ status: "pendente" }, "-due_date", 200).catch(() => []),
-      base44.entities.Product.filter({ active: true, status: "ativo", controls_stock: { $ne: false } }, "-stock_quantity", 300).catch(() => []),
+      base44.entities.Product.filter({ active: true, controls_stock: { $ne: false } }, "-stock_quantity", 300).catch(() => []),
       base44.entities.ProductionRecord.filter({ status: { $in: ["planejada", "em_producao", "pausada"] } }, "-created_date", 50).catch(() => []),
       base44.entities.Courier.filter({ status: { $in: ["ativo", "em_entrega"] } }, "-created_date", 50).catch(() => []),
     ]).then(([payments, products, production, couriers]) => {

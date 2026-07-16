@@ -64,7 +64,7 @@ export default function Performance({ refreshKey }) {
               <DialogHeader><DialogTitle>Nova Avaliação</DialogTitle></DialogHeader>
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <div><Label className="text-xs">Colaborador</Label><BaronSelect value={form.employee_id} onChange={(v) => setForm({ ...form, employee_id: v })} options={employees.filter((e) => e.status === 'ativo').map((e) => ({ value: e.id, label: e.full_name }))} placeholder="Selecione..." /></div>
+                  <div><Label className="text-xs">Colaborador</Label><BaronSelect value={form.employee_id} onChange={(v) => setForm({ ...form, employee_id: v })} options={employees.filter((e) => e.status !== 'demitido' && e.status !== 'inativo').map((e) => ({ value: e.id, label: e.full_name }))} placeholder="Selecione..." /></div>
                   <div><Label className="text-xs">Período</Label><Input value={form.period} onChange={(e) => setForm({ ...form, period: e.target.value })} placeholder="Ex: 2026-H2" /></div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
