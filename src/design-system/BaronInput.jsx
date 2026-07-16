@@ -32,17 +32,30 @@ export const BaronTextarea = React.forwardRef(({ className, ...props }, ref) => 
 ));
 BaronTextarea.displayName = "BaronTextarea";
 
-// Select padronizado — usa select nativo estilizado
-export const BaronSelect = React.forwardRef(({ className, children, ...props }, ref) => (
-  <select
-    ref={ref}
-    className={cn(
-      "flex h-10 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-primary-info shadow-sm transition-all duration-200 focus-visible:border-baron-orange focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-baron-orange disabled:cursor-not-allowed disabled:opacity-50",
-      className
-    )}
-    {...props}
-  >
-    {children}
-  </select>
-));
+// Select padronizado — usa select nativo estilizado.
+// Aceita `options` (array de {value, label}) + `onChange(value)` recebendo
+// o VALOR selecionado direto (não o evento) — é o formato usado em todo o
+// sistema. Também aceita `children` com <option> manual, se preferir.
+export const BaronSelect = React.forwardRef(
+  ({ className, children, options, placeholder, onChange, size, value, ...props }, ref) => (
+    <select
+      ref={ref}
+      value={value ?? ""}
+      onChange={(e) => onChange?.(e.target.value)}
+      className={cn(
+        "flex w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-primary-info shadow-sm transition-all duration-200 focus-visible:border-baron-orange focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-baron-orange disabled:cursor-not-allowed disabled:opacity-50",
+        size === "sm" ? "h-8 text-xs" : "h-10",
+        className
+      )}
+      {...props}
+    >
+      {placeholder && <option value="" disabled={value !== ""}>{placeholder}</option>}
+      {options
+        ? options.map((opt) => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))
+        : children}
+    </select>
+  )
+);
 BaronSelect.displayName = "BaronSelect";
