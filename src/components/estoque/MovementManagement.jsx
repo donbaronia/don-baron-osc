@@ -37,6 +37,7 @@ export default function MovementManagement() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [products, setProducts] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -48,11 +49,12 @@ export default function MovementManagement() {
   const load = async () => {
     setLoading(true);
     try {
-      const [prods, movs] = await Promise.all([
+      const [prods, movs, sups] = await Promise.all([
         base44.entities.Product.filter({ active: true }, "name", 500).catch(() => []),
         base44.entities.Movement.filter({ deleted_at: null }, "-movement_date", 300).catch(() => []),
+        base44.entities.Supplier.list("name", 300).catch(() => []),
       ]);
-      setProducts(prods); setRows(movs);
+      setProducts(prods); setRows(movs); setSuppliers(sups);
     } catch { toast({ title: "Erro", description: "Falha ao carregar", variant: "destructive" }); }
     setLoading(false);
   };
@@ -67,6 +69,10 @@ export default function MovementManagement() {
 
   const handleSave = async () => {
     if (!form.product_id || !form.movement_type || form.quantity === undefined) { toast({ title: "Erro", description: "Produto, tipo e quantidade são obrigatórios", variant: "destructive" }); return; }
+    if (form.movement_type === "entrada" && (!form.unit_cost || form.unit_cost <= 0)) {
+      toast({ title: "Custo obrigatório", description: "Toda entrada precisa do valor gasto (custo unitário) para entrar corretamente no DRE.", variant: "destructive" });
+      return;
+    }
     const product = products.find(p => p.id === form.product_id);
     setSaving(true);
     try {
@@ -127,14 +133,21 @@ export default function MovementManagement() {
             </FormField>
             <FormField label="Quantidade *"><Input type="number" step="0.01" value={form.quantity} onChange={e => setForm({ ...form, quantity: parseFloat(e.target.value) || 0 })} /></FormField>
             <FormField label="Unidade"><Input value={form.unit} onChange={e => setForm({ ...form, unit: e.target.value })} /></FormField>
-            {isInbound && <FormField label="Custo Unit."><Input type="number" step="0.01" value={form.unit_cost} onChange={e => setForm({ ...form, unit_cost: parseFloat(e.target.value) || 0 })} /></FormField>}
+            {isInbound && <FormField label={form.movement_type === "entrada" ? "Custo Unit. *" : "Custo Unit."}><Input type="number" step="0.01" value={form.unit_cost} onChange={e => setForm({ ...form, unit_cost: parseFloat(e.target.value) || 0 })} /></FormField>}
             {form.movement_type === "transferencia" ? (
               <>
                 <FormField label="Estoque Origem"><BaronSelect value={form.from_stock_type} onChange={(v) => setForm({ ...form, from_stock_type: v })} options={STOCK_TYPES.map((t) => ({ value: t, label: t.replace(/_/g, " ") }))} placeholder="Selecione..." /></FormField>
                 <FormField label="Estoque Destino"><BaronSelect value={form.to_stock_type} onChange={(v) => setForm({ ...form, to_stock_type: v })} options={STOCK_TYPES.map((t) => ({ value: t, label: t.replace(/_/g, " ") }))} placeholder="Selecione..." /></FormField>
               </>
             ) : isInbound ? (
-              <FormField label="Fornecedor"><Input value={form.supplier_name} onChange={e => setForm({ ...form, supplier_name: e.target.value })} /></FormField>
+              <FormField label="Fornecedor">
+                <BaronSelect
+                  value={form.supplier_name}
+                  onChange={(v) => setForm({ ...form, supplier_name: v })}
+                  options={suppliers.map((s) => ({ value: s.name, label: s.name }))}
+                  placeholder={suppliers.length ? "Selecione..." : "Nenhum fornecedor cadastrado — cadastre em Cadastro > Fornecedores"}
+                />
+              </FormField>
             ) : null}
             {isInbound && <FormField label="Lote"><Input value={form.batch_number} onChange={e => setForm({ ...form, batch_number: e.target.value })} /></FormField>}
             {isInbound && <FormField label="Validade"><Input type="date" value={form.expiry_date || ""} onChange={e => setForm({ ...form, expiry_date: e.target.value })} /></FormField>}
