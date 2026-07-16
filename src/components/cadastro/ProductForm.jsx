@@ -5,6 +5,8 @@ import { generateInternalCode } from "@/lib/masterData";
 import { logAudit } from "@/lib/audit";
 import { Core } from "@/lib/donBaronCore";
 import { EventBus } from "@/lib/eventBus";
+import { AppService } from "@/services";
+import { PersistenceEngine } from "@/core";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import {
@@ -108,6 +110,7 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
     try {
       const data = { ...form, unit: form.control_unit };
       let saved;
+      const isNew = !product?.id;
       if (product?.id) {
         saved = await Core.update("Product", product.id, data, { user, module: "cadastro" });
         toast({ title: "Produto atualizado", description: `${form.name} — persistência confirmada pelo banco.` });
@@ -117,6 +120,48 @@ export default function ProductForm({ open, onClose, product, onSaved, suppliers
         toast({ title: "Produto criado", description: `${form.name} — gravado e verificado no banco (read-back OK).` });
         EventBus.emitProductCreated({ entity_type: "Product", entity_id: saved?.id, payload: { product_id: saved?.id, name: form.name }, user_name: user?.full_name }).catch((e) => console.error("[ProductForm] Falha ao publicar product_created:", e));
       }
+
+      // Sincroniza a entidade Stock (é ela que a tela Estoque > Estoque Atual lê)
+      const productId = product?.id || saved?.id;
+      if (productId) {
+        try {
+          await PersistenceEngine.upsert("Stock", { product_id: productId }, {
+            product_name: form.name,
+            quantity: form.stock_quantity || 0,
+            unit: form.control_unit,
+            average_cost: form.cost_price || form.avg_price || 0,
+            total_value: (form.stock_quantity || 0) * (form.cost_price || form.avg_price || 0),
+            min_quantity: form.min_quantity || 0,
+            ideal_quantity: form.ideal_quantity || 0,
+            physical_location: form.physical_location || "",
+            last_movement_date: new Date().toISOString(),
+            last_movement_type: isNew ? "cadastro_inicial" : "ajuste_cadastro",
+            status: "ativo",
+          }, { module: "estoque", validate: false });
+        } catch (syncErr) { console.error("[ProductForm] Falha ao sincronizar Stock:", syncErr); }
+
+        // Se é produto novo com estoque inicial, registra a movimentação de abertura
+        if (isNew && (form.stock_quantity || 0) > 0) {
+          try {
+            await AppService.create("Movement", {
+              movement_type: "entrada",
+              product_id: productId,
+              product_name: form.name,
+              quantity: form.stock_quantity,
+              unit: form.control_unit,
+              unit_cost: form.cost_price || form.avg_price || 0,
+              total_cost: (form.stock_quantity || 0) * (form.cost_price || form.avg_price || 0),
+              reason: "Estoque inicial no cadastro",
+              origin_type: "cadastro",
+              supplier_name: form.primary_supplier_name || "",
+              responsible_name: user?.full_name || "Sistema",
+              movement_date: new Date().toISOString(),
+              status: "ativo",
+            }, { module: "estoque", validate: false });
+          } catch (syncErr) { console.error("[ProductForm] Falha ao criar Movement inicial:", syncErr); }
+        }
+      }
+
       onSaved?.(saved?.record || { ...form, id: saved?.id });
       onClose();
     } catch (e) {

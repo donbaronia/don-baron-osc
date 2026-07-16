@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { brl } from "@/lib/inventoryEngine";
+import { useAuth } from "@/lib/AuthContext";
 import Toolbar from "@/components/shared/Toolbar";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, MapPin, TrendingUp, Package } from "lucide-react";
+import { RefreshCw, MapPin, TrendingUp, Package, Pencil } from "lucide-react";
 import { exportToCsv } from "@/lib/exportCsv";
+import ProductForm from "@/components/cadastro/ProductForm";
 
 const STOCK_TYPES = [
   { v: "materia_prima", l: "Matéria-Prima", tag: "tag-materia" },
@@ -58,18 +60,45 @@ const expiryBadge = (level) => {
 };
 
 export default function StockList() {
+  const { user } = useAuth();
   const [rows, setRows] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [units, setUnits] = useState([]);
+  const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("todos");
+  const [editingProduct, setEditingProduct] = useState(null);
 
   const load = async () => {
     setLoading(true);
-    try { setRows(await base44.entities.Stock.filter({ deleted_at: null }, "product_name", 500)); }
-    catch { }
+    try {
+      const [stock, prods, sup, cat, uni, tg] = await Promise.all([
+        base44.entities.Stock.filter({ deleted_at: null }, "product_name", 500).catch(() => []),
+        base44.entities.Product.filter({ active: true }, "name", 1000).catch(() => []),
+        base44.entities.Supplier.list("-created_date", 200).catch(() => []),
+        base44.entities.Category.list("-created_date", 200).catch(() => []),
+        base44.entities.UnitOfMeasure.list("-created_date", 200).catch(() => []),
+        base44.entities.Tag.list("-created_date", 200).catch(() => []),
+      ]);
+      setRows(stock);
+      setProducts(prods);
+      setSuppliers(sup); setCategories(cat); setUnits(uni); setTags(tg);
+    } catch { }
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
+
+  const openEdit = (stockRow) => {
+    const product = products.find((p) => p.id === stockRow.product_id);
+    if (!product) {
+      alert(`Não achei o cadastro do produto "${stockRow.product_name}". Ele pode ter sido criado só no estoque, sem cadastro completo — abra em Cadastro > Produtos para criar do zero.`);
+      return;
+    }
+    setEditingProduct(product);
+  };
 
   const filtered = rows.filter(r =>
     (typeFilter === "todos" || r.stock_type === typeFilter) &&
@@ -97,6 +126,11 @@ export default function StockList() {
     { key: "abc_class", label: "ABC", render: r => abcBadge(r.abc_class) },
     { key: "expiry_alert_level", label: "Validade", render: r => expiryBadge(r.expiry_alert_level) },
     { key: "physical_location", label: "Localização", render: r => r.physical_location ? <span className="inline-flex items-center gap-1 text-xs text-small-info"><MapPin className="h-3 w-3" />{r.physical_location}</span> : <span className="text-small-info">—</span> },
+    { key: "_actions", label: "", render: r => (
+      <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => openEdit(r)}>
+        <Pencil className="h-3.5 w-3.5" /> Editar
+      </Button>
+    )},
   ];
 
   const totalValue = filtered.reduce((s, r) => s + (r.total_value || 0), 0);
@@ -153,6 +187,17 @@ export default function StockList() {
       </div>
 
       <DataTable columns={columns} rows={filtered} loading={loading} emptyTitle="Nenhum estoque" emptyDescription="Registre movimentações para criar estoques automaticamente." />
+
+      <ProductForm
+        open={!!editingProduct}
+        onClose={() => setEditingProduct(null)}
+        product={editingProduct}
+        onSaved={() => { setEditingProduct(null); load(); }}
+        suppliers={suppliers}
+        categories={categories}
+        units={units}
+        tags={tags}
+      />
     </div>
   );
 }
