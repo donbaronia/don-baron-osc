@@ -33,12 +33,12 @@ export default function Motoboys() {
   };
 
   const columns = [
-    { key: "name", header: "Nome", render: (v) => <span className="font-medium text-foreground">{v || "—"}</span> },
-    { key: "phone", header: "Telefone" },
-    { key: "vehicle", header: "Veículo", render: (v) => v === "moto" ? "Moto" : v === "carro" ? "Carro" : v === "bike" ? "Bicicleta" : v },
-    { key: "plate", header: "Placa" },
-    { key: "commission_pct", header: "Comissão", render: (v) => `${v || 0}%` },
-    { key: "status", header: "Status", render: (v) => <span className={v === "ativo" ? "text-baron-success" : "text-muted-foreground"}>{v || "ativo"}</span> },
+    { key: "name", header: "Nome", render: (r) => <span className="font-medium text-foreground">{r.name || "—"}</span> },
+    { key: "phone", header: "Telefone", render: (r) => r.phone || "—" },
+    { key: "vehicle", header: "Veículo", render: (r) => r.vehicle === "moto" ? "Moto" : r.vehicle === "carro" ? "Carro" : r.vehicle === "bike" ? "Bicicleta" : (r.vehicle || "—") },
+    { key: "plate", header: "Placa", render: (r) => r.plate || "—" },
+    { key: "commission_pct", header: "Comissão", render: (r) => `${r.commission_pct || 0}%` },
+    { key: "status", header: "Status", render: (r) => <span className={r.status === "ativo" ? "text-baron-success" : "text-muted-foreground"}>{r.status || "ativo"}</span> },
   ];
 
   return (
