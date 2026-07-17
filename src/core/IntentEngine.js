@@ -223,6 +223,23 @@ export const IntentEngine = {
    */
   classify(text) {
     const ntext = norm(text);
+
+    // Comando "nu": só o nome do módulo, sem "abrir/ir para/mostrar" na
+    // frente (ex: digitar só "RH" ou "Estoque"). Sem isso só reconhecia
+    // com o verbo explícito — jeito mais natural de falar não funcionava.
+    const bareWords = ntext.trim().split(/\s+/).filter(Boolean);
+    if (bareWords.length > 0 && bareWords.length <= 2) {
+      const bareText = bareWords.join(" ");
+      for (const [mod, route] of Object.entries(ROUTE_MAP)) {
+        if (bareText === norm(mod)) {
+          return {
+            intent: "navigate", category: "navegacao", confidence: 0.95,
+            entities: { route, module: mod }, rawMatch: "bare_module",
+          };
+        }
+      }
+    }
+
     let best = null;
 
     for (const def of INTENT_CATALOG) {
