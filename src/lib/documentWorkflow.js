@@ -305,14 +305,44 @@ export async function resumeProcess(processId, user) {
       const processed = [];
       for (const m of matches) {
         const prod = m.match.product;
-        const newQty = (prod.stock_quantity || 0) + (m.noteProduct.quantity || 0);
-        const newCost = m.noteProduct.unit_price || prod.cost_price;
+        const qty = m.noteProduct.quantity || 0;
+        const unitCost = m.noteProduct.unit_price || prod.cost_price || 0;
+        const newQty = (prod.stock_quantity || 0) + qty;
         await base44.entities.Product.update(prod.id, {
           stock_quantity: newQty,
-          cost_price: newCost,
+          cost_price: unitCost,
           primary_supplier_name: ctx.supplier || prod.primary_supplier_name,
         });
-        processed.push({ name: prod.name, quantity: m.noteProduct.quantity, product_id: prod.id });
+        // Sincroniza Stock (tela Estoque Atual) e cria Movement (aba Movimentações
+        // + CMV/DRE) — sem isso a entrada por documento fica invisível fora do
+        // cadastro do produto, exatamente como acontecia com o Baron antes.
+        try {
+          await base44.entities.Stock.filter({ product_id: prod.id }, null, 1).then(async ([existing]) => {
+            const stockPayload = {
+              product_name: prod.name, quantity: newQty, unit: prod.control_unit || prod.unit || "UN",
+              average_cost: unitCost, total_value: newQty * unitCost,
+              last_movement_date: new Date().toISOString(), last_movement_type: "entrada", status: "ativo",
+            };
+            if (existing) await base44.entities.Stock.update(existing.id, stockPayload);
+            else await base44.entities.Stock.create({ product_id: prod.id, ...stockPayload });
+          });
+        } catch (syncErr) {
+          await Core.audit({ audit_action: "error", module: "estoque", entity_type: "Stock", details: `Falha ao sincronizar Stock via documento: ${syncErr.message}` });
+        }
+        try {
+          await base44.entities.Movement.create({
+            movement_type: "entrada", product_id: prod.id, product_name: prod.name,
+            quantity: qty, unit: prod.control_unit || prod.unit || "UN",
+            unit_cost: unitCost, total_cost: qty * unitCost,
+            reason: "Entrada via documento processado pelo BARON", origin_type: "documento",
+            supplier_name: ctx.supplier || "", document_id: doc.id,
+            responsible_name: user?.full_name || "BARON IA",
+            movement_date: new Date().toISOString(), status: "ativo",
+          });
+        } catch (syncErr) {
+          await Core.audit({ audit_action: "error", module: "estoque", entity_type: "Movement", details: `Falha ao criar Movement via documento: ${syncErr.message}` });
+        }
+        processed.push({ name: prod.name, quantity: qty, product_id: prod.id });
       }
       results.stock = processed;
       await transition(processId, "ESTOQUE_PROCESSADO", {
