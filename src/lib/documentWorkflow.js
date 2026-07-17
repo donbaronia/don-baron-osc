@@ -285,26 +285,65 @@ export async function resumeProcess(processId, user) {
     const matches = products.map((p) => ({ noteProduct: p, match: matchProductName(p.name, allProducts) }));
     const unmatched = matches.filter((m) => !m.match || m.match.confidence < 0.85);
 
-    if (unmatched.length > 0) {
-      return pauseForProduct(processId, {
-        product_names: unmatched.map((m) => m.noteProduct.name),
-        reason: `${unmatched.length} produto(s) ainda sem cadastro`,
-        context: ctx,
-        user,
-      });
-    }
-
-    if (proc.current_state !== "PRODUTO_CRIADO") {
-      await transition(processId, "PRODUTO_CRIADO", {
-        actor: user?.full_name || "Sistema",
-        reason: "Todos os produtos cadastrados — retomando do ponto exato",
-      });
-    }
-
     const results = { ...(proc.results || {}) };
 
-    // ESTOQUE + CUSTO MEDIO (CMV)
+    // FINANCEIRO primeiro, e INDEPENDENTE do cadastro de produto — o valor da
+    // nota não deve ficar esperando produto ser cadastrado pra entrar no
+    // Financeiro/DRE. Antes, qualquer produto sem cadastro travava tudo.
+    if (FINANCE_ROUTES.includes(route_type) && !results.payment_id) {
+      if (!(ctx.value > 0)) {
+        await recordResults(processId, results);
+        return pauseForApproval(processId, {
+          reason: "Valor do documento não identificado automaticamente — confirme o valor manualmente para gerar a conta a pagar.",
+          context: ctx,
+          user,
+        });
+      }
+      const payment = await base44.entities.Payment.create({
+        description: `${ctx.supplier || "Documento"}${ctx.document_number ? ` - ${ctx.document_number}` : ""}`.trim(),
+        supplier_name: ctx.supplier || "",
+        amount: ctx.value,
+        issue_date: ctx.document_date || todayStr(),
+        due_date: ctx.due_date || "",
+        bank: ctx.bank || "",
+        pix_key: ctx.pix_copia_cola || "",
+        barcode: ctx.codigo_barras || ctx.linha_digitavel || "",
+        document_number: ctx.document_number || "",
+        document_id: doc.id,
+        payment_method: route_type === "comprovante_pix" ? "pix" : "boleto",
+        status: "pendente",
+      });
+      results.payment_id = payment.id;
+      await Core.audit({
+        audit_action: "create", module: "financeiro", entity_type: "Payment",
+        entity_id: payment.id, details: `Conta a pagar criada via retomada de processo ${proc.process_id}`,
+      });
+      await transition(processId, "FINANCEIRO_PROCESSADO", {
+        actor: "BARON IA",
+        reason: `Conta a pagar criada: ${payment.id}`,
+      });
+    }
+
+    // ESTOQUE — só roda quando TODOS os produtos da nota já estão cadastrados.
+    // Se faltar produto, pausa aqui (com o financeiro já lançado acima).
     if (STOCK_ROUTES.includes(route_type) && !results.stock) {
+      if (unmatched.length > 0) {
+        await recordResults(processId, results);
+        return pauseForProduct(processId, {
+          product_names: unmatched.map((m) => m.noteProduct.name),
+          reason: `${unmatched.length} produto(s) ainda sem cadastro — o financeiro já foi lançado, falta só dar entrada no estoque.`,
+          context: ctx,
+          user,
+        });
+      }
+
+      if (proc.current_state !== "PRODUTO_CRIADO") {
+        await transition(processId, "PRODUTO_CRIADO", {
+          actor: user?.full_name || "Sistema",
+          reason: "Todos os produtos cadastrados — retomando do ponto exato",
+        });
+      }
+
       const processed = [];
       for (const m of matches) {
         const prod = m.match.product;
@@ -355,44 +394,6 @@ export async function resumeProcess(processId, user) {
       await transition(processId, "CMV_PROCESSADO", {
         actor: "BARON IA",
         reason: "Custo medio (CMV) atualizado",
-      });
-    }
-
-    // FINANCEIRO (idempotente: so cria se ainda nao existe)
-    if (FINANCE_ROUTES.includes(route_type) && !results.payment_id) {
-      if (!(ctx.value > 0)) {
-        // Salva o progresso ANTES de pausar — sem isso, ao retomar o processo
-        // reprocessaria o estoque de novo (duplicando quantidade), pois
-        // releria resultados vazios do banco.
-        await recordResults(processId, results);
-        return pauseForApproval(processId, {
-          reason: "Valor do documento não identificado automaticamente — confirme o valor manualmente para gerar a conta a pagar.",
-          context: ctx,
-          user,
-        });
-      }
-      const payment = await base44.entities.Payment.create({
-        description: `${ctx.supplier || "Documento"}${ctx.document_number ? ` - ${ctx.document_number}` : ""}`.trim(),
-        supplier_name: ctx.supplier || "",
-        amount: ctx.value,
-        issue_date: ctx.document_date || todayStr(),
-        due_date: ctx.due_date || "",
-        bank: ctx.bank || "",
-        pix_key: ctx.pix_copia_cola || "",
-        barcode: ctx.codigo_barras || ctx.linha_digitavel || "",
-        document_number: ctx.document_number || "",
-        document_id: doc.id,
-        payment_method: route_type === "comprovante_pix" ? "pix" : "boleto",
-        status: "pendente",
-      });
-      results.payment_id = payment.id;
-      await Core.audit({
-        audit_action: "create", module: "financeiro", entity_type: "Payment",
-        entity_id: payment.id, details: `Conta a pagar criada via retomada de processo ${proc.process_id}`,
-      });
-      await transition(processId, "FINANCEIRO_PROCESSADO", {
-        actor: "BARON IA",
-        reason: `Conta a pagar criada: ${payment.id}`,
       });
     }
 
