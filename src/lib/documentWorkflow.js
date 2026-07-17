@@ -326,7 +326,17 @@ export async function resumeProcess(processId, user) {
     }
 
     // FINANCEIRO (idempotente: so cria se ainda nao existe)
-    if (FINANCE_ROUTES.includes(route_type) && !results.payment_id && ctx.value > 0) {
+    if (FINANCE_ROUTES.includes(route_type) && !results.payment_id) {
+      if (!(ctx.value > 0)) {
+        // Não finge sucesso: se o valor não foi extraído do documento, PARA aqui
+        // e deixa pendente de revisão manual, em vez de arquivar como concluído
+        // sem nunca ter criado o boleto (bug: documento "sumia" silenciosamente).
+        return pauseForApproval(processId, {
+          reason: "Valor do documento não identificado automaticamente — confirme o valor manualmente para gerar a conta a pagar.",
+          context: ctx,
+          user,
+        });
+      }
       const payment = await base44.entities.Payment.create({
         description: `${ctx.supplier || "Documento"}${ctx.document_number ? ` - ${ctx.document_number}` : ""}`.trim(),
         supplier_name: ctx.supplier || "",
@@ -382,7 +392,7 @@ export async function resumeProcess(processId, user) {
  * Cria o produto pendente e retoma o fluxo automaticamente.
  * productData: { name, unit, category, cost_price, ... }
  */
-export async function approveAndResume(processId, { user, productData } = {}) {
+export async function approveAndResume(processId, { user, productData, contextOverride } = {}) {
   const proc = await base44.entities.DocumentProcess.get(processId);
   if (productData && productData.name) {
     const product = await base44.entities.Product.create({
@@ -398,6 +408,14 @@ export async function approveAndResume(processId, { user, productData } = {}) {
       entity_id: product.id, details: `Produto criado via aprovacao de processo ${proc.process_id}: ${productData.name}`,
     });
     await base44.entities.DocumentProcess.update(processId, {
+      pending: { ...(proc.pending || {}), resolved_by: user?.full_name || "Administrador", resolved_at: new Date().toISOString() },
+    });
+  }
+  // Permite corrigir manualmente dados que a IA não extraiu (ex: valor do
+  // boleto), preenchidos pelo usuário na tela de revisão.
+  if (contextOverride && Object.keys(contextOverride).length > 0) {
+    await base44.entities.DocumentProcess.update(processId, {
+      context: { ...(proc.context || {}), ...contextOverride },
       pending: { ...(proc.pending || {}), resolved_by: user?.full_name || "Administrador", resolved_at: new Date().toISOString() },
     });
   }

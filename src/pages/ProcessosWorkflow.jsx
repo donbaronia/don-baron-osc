@@ -60,6 +60,7 @@ export default function ProcessosWorkflow() {
   const [actionLoading, setActionLoading] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
   const [newProduct, setNewProduct] = useState({ name: "", unit: "un", category: "", cost_price: 0 });
+  const [fixValue, setFixValue] = useState("");
   const [readBack, setReadBack] = useState(null);
 
   const load = useCallback(async () => {
@@ -106,6 +107,25 @@ export default function ProcessosWorkflow() {
       }
       await load();
       await refreshDetail(id);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleFixValueAndResume = async () => {
+    const value = parseFloat(String(fixValue).replace(",", "."));
+    if (!selected || !value || value <= 0) return;
+    setActionLoading(selected);
+    try {
+      const res = await approveAndResume(selected, { user, contextOverride: { value } });
+      if (res.resumed) {
+        toast({ title: "Valor confirmado", description: "Conta a pagar criada e fluxo concluído.", state: "success" });
+      } else if (res.reason) {
+        toast({ title: "Não retomado", description: res.reason, variant: "destructive" });
+      }
+      setFixValue("");
+      await load();
+      await refreshDetail(selected);
     } finally {
       setActionLoading(null);
     }
@@ -303,6 +323,23 @@ export default function ProcessosWorkflow() {
                       <PackagePlus className="h-3.5 w-3.5" />
                       Criar produto e retomar
                     </button>
+                  )}
+                  {selectedDetail.current_state === "AGUARDANDO_APROVACAO" && !(selectedDetail.context?.value > 0) && (
+                    <div className="flex w-full items-center gap-2 rounded-lg border border-baron-yellow/40 bg-baron-yellow/5 p-2.5">
+                      <span className="text-xs text-secondary-info">O valor não foi identificado no documento. Informe manualmente:</span>
+                      <input
+                        type="number" step="0.01" placeholder="R$ 0,00" value={fixValue}
+                        onChange={(e) => setFixValue(e.target.value)}
+                        className="h-8 w-28 rounded-md border border-border bg-card px-2 text-xs"
+                      />
+                      <button
+                        onClick={handleFixValueAndResume}
+                        disabled={actionLoading === selected || !fixValue}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-baron-green px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110 transition-colors disabled:opacity-50"
+                      >
+                        Confirmar valor e concluir
+                      </button>
+                    </div>
                   )}
                   {WAITING_STATES.includes(selectedDetail.current_state) && selectedDetail.current_state !== "ERRO" && (
                     <button
