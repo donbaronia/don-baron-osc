@@ -22,6 +22,7 @@ export default function ProcessamentoUpload({ onProcessed }) {
   const [results, setResults] = useState([]);
   const inputRef = useRef(null);
   const cameraRef = useRef(null);
+  const isBusy = processing.some((f) => !f.done && f.stage !== -1);
 
   const processFile = async (file, source = "upload") => {
     const fileId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -52,6 +53,11 @@ export default function ProcessamentoUpload({ onProcessed }) {
   };
 
   const handleFiles = async (fileList, source = "upload") => {
+    if (processing.some((f) => !f.done && f.stage !== -1)) {
+      // Já tem arquivo em processamento — ignora novo envio para não duplicar
+      // (mesmo arquivo processado 2x com resultados diferentes por IA).
+      return;
+    }
     const files = Array.from(fileList);
     for (const file of files) {
       await processFile(file, source);
@@ -74,12 +80,13 @@ export default function ProcessamentoUpload({ onProcessed }) {
     <div>
       {/* Drop zone */}
       <div
-        onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files, "upload"); }}
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDrop={(e) => { e.preventDefault(); setDragOver(false); if (!isBusy) handleFiles(e.dataTransfer.files, "upload"); }}
+        onDragOver={(e) => { e.preventDefault(); if (!isBusy) setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
-        onClick={() => inputRef.current?.click()}
+        onClick={() => { if (!isBusy) inputRef.current?.click(); }}
         className={cn(
           "cursor-pointer rounded-2xl border-2 border-dashed p-10 text-center transition-all",
+          isBusy && "pointer-events-none opacity-60 cursor-not-allowed",
           dragOver ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/50"
         )}
       >
