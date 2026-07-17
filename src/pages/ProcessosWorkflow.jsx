@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/AuthContext";
@@ -55,7 +56,8 @@ export default function ProcessosWorkflow() {
   const [processes, setProcesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("pausado");
-  const [selected, setSelected] = useState(null);
+  const [searchParams] = useSearchParams();
+  const [selected, setSelected] = useState(() => searchParams.get("open") || null);
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [actionLoading, setActionLoading] = useState(null);
   const [showCreate, setShowCreate] = useState(false);

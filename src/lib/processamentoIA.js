@@ -543,7 +543,7 @@ export async function processDocument(file, user) {
     });
     await Core.audit({ audit_action: "update", module: "documentos", entity_type: "DBDocument", entity_id: doc.id, details: `Falha na extração IA: ${iaError.message} | Confiança: 0%` });
     await transition(proc.id, "ERRO", { actor: user?.full_name || "BARON IA", reason: "Falha na extração IA", errors: [iaError.message] });
-    return { doc: { ...doc, id: doc.id, status: "aguardando_confirmacao" }, extracted: null, route: { routed: "pendencia", auto: false, divergencias: [{ type: "ilegivel", severity: "critica", message: "Documento ilegível" }], alerts: [], confidence }, duplicate: null, processId: proc.process_id };
+    return { doc: { ...doc, id: doc.id, status: "aguardando_confirmacao" }, extracted: null, route: { routed: "pendencia", auto: false, divergencias: [{ type: "ilegivel", severity: "critica", message: "Documento ilegível" }], alerts: [], confidence }, duplicate: null, processId: proc.id, processCode: proc.process_id };
   }
 
   const title = mapped.supplier ? `${mapped.supplier}${mapped.document_date ? ` - ${mapped.document_date}` : ""}` : file.name;
@@ -675,7 +675,7 @@ export async function processDocument(file, user) {
     });
   }
 
-  return { doc: { ...fullDoc, ...route }, extracted, route, duplicate, processId: proc.process_id };
+  return { doc: { ...fullDoc, ...route }, extracted, route, duplicate, processId: proc.id, processCode: proc.process_id };
 }
 
 export async function generateBaronInsights(documents, payments) {

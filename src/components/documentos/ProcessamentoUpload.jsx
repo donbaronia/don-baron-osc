@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { processDocument } from "@/lib/processamentoIA";
 import { ACCEPTED_FILE_TYPES, formatBRL, getCategoryEmoji } from "@/lib/documentUtils";
@@ -17,6 +18,7 @@ const STAGES = [
 
 export default function ProcessamentoUpload({ onProcessed }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [dragOver, setDragOver] = useState(false);
   const [processing, setProcessing] = useState([]);
   const [results, setResults] = useState([]);
@@ -43,6 +45,7 @@ export default function ProcessamentoUpload({ onProcessed }) {
           doc: result.doc,
           route: result.route,
           extracted: result.extracted,
+          processId: result.processId,
         },
         ...prev,
       ]);
@@ -228,6 +231,16 @@ export default function ProcessamentoUpload({ onProcessed }) {
                           </div>
                         ))}
                       </div>
+                    )}
+
+                    {/* Ação direta — não precisa caçar em outra tela */}
+                    {!auto && r.processId && (
+                      <button
+                        onClick={() => navigate(`/processos?open=${r.processId}`)}
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-baron-orange px-3 py-1.5 text-xs font-semibold text-white hover:bg-baron-orange-hover transition-colors"
+                      >
+                        Resolver agora <ArrowRight className="h-3 w-3" />
+                      </button>
                     )}
                   </div>
                 </div>
