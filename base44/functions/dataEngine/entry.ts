@@ -190,28 +190,37 @@ async function handleCalculate(base44, body) {
 // ---------- CALCULATION IMPLEMENTATIONS ----------
 
 async function calcCMV(base44, startDate, endDate) {
-  // CMV baseado em compras e producao no periodo
+  // CMV real: soma o custo das ENTRADAS de estoque no periodo, a partir de
+  // Movement — essa é a fonte que Baron, nota fiscal e cadastro de produto
+  // realmente alimentam. Antes somava só Purchase (pedido de compra formal),
+  // que fica vazio quando a entrada vem de nota fiscal/Baron/cadastro direto.
+  const movements = await base44.asServiceRole.entities.Movement.filter({ deleted_at: null });
   const purchases = await base44.asServiceRole.entities.Purchase.filter({});
   const production = await base44.asServiceRole.entities.ProductionRecord.filter({});
 
+  const periodMovements = movements.filter(function (m) {
+    const d = (m.movement_date || "").slice(0, 10);
+    return d && d >= startDate && d <= endDate && (m.movement_type === "entrada" || m.movement_type === "producao");
+  });
   const periodPurchases = purchases.filter(function (p) {
     return p.order_date && p.order_date >= startDate && p.order_date <= endDate;
   });
-
   const periodProduction = production.filter(function (p) {
     return p.production_date && p.production_date >= startDate && p.production_date <= endDate;
   });
 
+  const totalMovements = periodMovements.reduce(function (s, m) { return s + (m.total_cost || 0); }, 0);
   const totalCompras = periodPurchases.reduce(function (s, p) { return s + (p.total_amount || 0); }, 0);
   const totalProducao = periodProduction.reduce(function (s, p) { return s + (p.quantity || 0); }, 0);
 
-  // CMV estimado = soma das compras do periodo (simplificado)
   return {
     total_compras: totalCompras,
+    total_movimentacoes: totalMovements,
     total_producao_unidades: totalProducao,
-    cmv_estimado: totalCompras,
+    cmv_estimado: totalMovements > 0 ? totalMovements : totalCompras,
     detalhe: {
       compras_no_periodo: periodPurchases.length,
+      movimentacoes_no_periodo: periodMovements.length,
       producoes_no_periodo: periodProduction.length,
     },
   };

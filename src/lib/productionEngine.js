@@ -252,6 +252,17 @@ export const PE = {
       } catch (e) { console.error("Erro entrada produto:", e); }
     }
 
+    // Avisa o barramento de eventos — é isso que permite CMV recalcular
+    // sozinho e os Funcionários Digitais reagirem, em vez de todo módulo
+    // ter que ficar checando ProductionRecord por conta própria.
+    EventBus.emitProductionFinished({
+      entity_type: "ProductionRecord", entity_id: id,
+      production_code: record.production_code, product_id: record.product_id,
+      product_name: record.item, quantity: produced_quantity, unit: record.unit || "un",
+      cost_total: costTotal, cost_per_unit: costPerUnit, efficiency_pct: efficiency,
+      responsible_name: responsible,
+    }).catch((e) => console.error("[ProductionEngine] Falha ao publicar production_finished:", e));
+
     return {
       production_code: record.production_code,
       produced_quantity,
