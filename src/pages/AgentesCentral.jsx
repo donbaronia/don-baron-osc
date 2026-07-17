@@ -23,11 +23,13 @@ export default function AgentesCentral() {
     setLoading(true);
     try {
       // init é idempotente — só semeia os Funcionários Digitais na primeira vez
-      await invoke("init").catch(() => {});
+      const initRes = await invoke("init");
+      console.log("[AgentesCentral] init:", initRes);
       const [w, d] = await Promise.all([invoke("listWorkers"), invoke("getDashboard")]);
-      setWorkers(w?.items || []);
+      setWorkers(w?.items || w?.workers || []);
       setDashboard(d || null);
     } catch (e) {
+      console.error("[AgentesCentral] Falha ao carregar:", e);
       toast({ title: "Erro ao carregar Funcionários Digitais", description: e.message, variant: "destructive" });
     } finally {
       setLoading(false);
