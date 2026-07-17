@@ -205,6 +205,38 @@ async function processarBoleto(doc, extracted, user, config, confidence) {
   return { routed: "contas_pagar", auto: false, divergencias, alerts: allAlerts, confidence: recalc };
 }
 
+// Sincroniza Stock (Estoque Atual) e cria Movement (Movimentações/CMV/DRE)
+// junto de qualquer atualização de Product.stock_quantity feita pela IA —
+// usada por todos os fluxos de processamento de documento, pra não repetir
+// o mesmo bug de "grava no produto mas some do resto do sistema".
+async function syncStockAndMovement({ prod, qty, newQty, unitCost, supplier, docId, user, reason }) {
+  try {
+    const [existing] = await base44.entities.Stock.filter({ product_id: prod.id }, null, 1).catch(() => []);
+    const stockPayload = {
+      product_name: prod.name, quantity: newQty, unit: prod.control_unit || prod.unit || "UN",
+      average_cost: unitCost || 0, total_value: newQty * (unitCost || 0),
+      last_movement_date: new Date().toISOString(), last_movement_type: "entrada", status: "ativo",
+    };
+    if (existing) await base44.entities.Stock.update(existing.id, stockPayload);
+    else await base44.entities.Stock.create({ product_id: prod.id, ...stockPayload });
+  } catch (e) {
+    await Core.audit({ audit_action: "error", module: "estoque", entity_type: "Stock", details: `Falha ao sincronizar Stock via documento: ${e.message}` });
+  }
+  try {
+    await base44.entities.Movement.create({
+      movement_type: "entrada", product_id: prod.id, product_name: prod.name,
+      quantity: qty, unit: prod.control_unit || prod.unit || "UN",
+      unit_cost: unitCost || 0, total_cost: (qty || 0) * (unitCost || 0),
+      reason: reason || "Entrada via documento processado pelo BARON", origin_type: "documento",
+      supplier_name: supplier || "", document_id: docId,
+      responsible_name: user?.full_name || "BARON IA",
+      movement_date: new Date().toISOString(), status: "ativo",
+    });
+  } catch (e) {
+    await Core.audit({ audit_action: "error", module: "estoque", entity_type: "Movement", details: `Falha ao criar Movement via documento: ${e.message}` });
+  }
+}
+
 async function processarNotaFiscal(doc, extracted, user, config) {
   const products = extracted.products || [];
   const allProducts = await base44.entities.Product.filter({ active: true }, "-created_date", 500).catch(() => []);
@@ -233,18 +265,44 @@ async function processarNotaFiscal(doc, extracted, user, config) {
   if (config.auto_update_stock && matched.length > 0) {
     for (const m of matched) {
       const prod = m.match.product;
-      const newQty = (prod.stock_quantity || 0) + (m.noteProduct.quantity || 0);
+      const qty = m.noteProduct.quantity || 0;
+      const newQty = (prod.stock_quantity || 0) + qty;
       const newCost = m.noteProduct.unit_price || prod.cost_price;
       await base44.entities.Product.update(prod.id, {
         stock_quantity: newQty,
         cost_price: newCost,
         primary_supplier_name: extracted.supplier || prod.primary_supplier_name,
       });
+      // Sincroniza Stock (Estoque Atual) + Movement (Movimentações/CMV/DRE) —
+      // sem isso a entrada de nota fiscal fica invisível fora do cadastro
+      // do produto, mesma causa raiz corrigida em outros pontos do sistema.
+      await syncStockAndMovement({ prod, qty, newQty, unitCost: newCost || 0, supplier: extracted.supplier, docId: doc.id, user, reason: "Entrada via nota fiscal processada pelo BARON" });
       if (config.learn_aliases && m.noteProduct.name && m.noteProduct.name.toLowerCase() !== prod.name.toLowerCase()) {
         await learnAlias(prod.id, m.noteProduct.name, extracted.supplier);
       }
       processedProducts.push({ name: prod.name, quantity: m.noteProduct.quantity });
     }
+  }
+
+  // Conta a pagar — a nota fiscal tem valor mesmo sem boleto anexado, e o
+  // financeiro/DRE não deve depender de todo produto já estar cadastrado.
+  let payment = null;
+  if (config.auto_create_accounts && extracted.value > 0) {
+    payment = await base44.entities.Payment.create({
+      description: `${extracted.supplier || "Nota Fiscal"}${extracted.document_number ? ` - ${extracted.document_number}` : ""}`.trim(),
+      supplier_name: extracted.supplier || "",
+      amount: extracted.value,
+      issue_date: extracted.document_date || todayStr(),
+      due_date: extracted.due_date || extracted.document_date || todayStr(),
+      document_number: extracted.document_number || "",
+      document_id: doc.id,
+      payment_method: "nota_fiscal",
+      status: "pendente",
+    });
+    await Core.audit({
+      audit_action: "create", module: "financeiro", entity_type: "Payment",
+      entity_id: payment.id, details: `Conta a pagar criada via nota fiscal: ${payment.description} - R$ ${extracted.value}`,
+    });
   }
 
   // Se todos os produtos foram resolvidos → aprovar automaticamente
@@ -330,13 +388,15 @@ async function processarNotaBoleto(doc, extracted, user, config) {
   if (config.auto_update_stock && matched.length > 0) {
     for (const m of matched) {
       const prod = m.match.product;
-      const newQty = (prod.stock_quantity || 0) + (m.noteProduct.quantity || 0);
+      const qty = m.noteProduct.quantity || 0;
+      const newQty = (prod.stock_quantity || 0) + qty;
       const newCost = m.noteProduct.unit_price || prod.cost_price;
       await base44.entities.Product.update(prod.id, {
         stock_quantity: newQty,
         cost_price: newCost,
         primary_supplier_name: extracted.supplier || prod.primary_supplier_name,
       });
+      await syncStockAndMovement({ prod, qty, newQty, unitCost: newCost || 0, supplier: extracted.supplier, docId: doc.id, user, reason: "Entrada via nota+boleto processado pelo BARON" });
       if (config.learn_aliases && m.noteProduct.name && m.noteProduct.name.toLowerCase() !== prod.name.toLowerCase()) {
         await learnAlias(prod.id, m.noteProduct.name, extracted.supplier);
       }
