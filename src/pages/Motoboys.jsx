@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { AppService } from "@/services";
 import PageHeader from "@/components/shared/PageHeader";
 import DataTable from "@/components/shared/DataTable";
 import { Button } from "@/components/ui/button";
@@ -24,12 +25,21 @@ export default function Motoboys() {
 
   useEffect(() => { load(); }, []);
 
+  const [saving, setSaving] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await base44.entities.Courier.create(form);
-    setOpen(false);
-    setForm({ name: "", phone: "", whatsapp: "", vehicle: "moto", plate: "", commission_pct: 10, status: "ativo" });
-    load();
+    setSaving(true);
+    try {
+      await AppService.create("Courier", form, { module: "logistica", validate: false });
+      setOpen(false);
+      setForm({ name: "", phone: "", whatsapp: "", vehicle: "moto", plate: "", commission_pct: 10, status: "ativo" });
+      load();
+    } catch (err) {
+      alert("Erro ao cadastrar entregador: " + err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const columns = [
@@ -106,7 +116,7 @@ export default function Motoboys() {
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button type="submit">Salvar</Button>
+              <Button type="submit" disabled={saving}>{saving ? "Salvando..." : "Salvar"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

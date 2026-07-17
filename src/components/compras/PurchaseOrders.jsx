@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
+import { AppService } from "@/services";
 import { brl, todayStr } from "@/lib/purchasingCenter";
 import Toolbar from "@/components/shared/Toolbar";
 import DataTable from "@/components/shared/DataTable";
@@ -50,31 +51,29 @@ export default function PurchaseOrders() {
     try {
       const payload = { ...form, total_amount: total };
       if (editing) {
-        await base44.entities.Purchase.update(editing.id, { ...payload, version: (editing.version || 1) + 1 });
-        await Core.audit({ audit_action: "update", module: "compras", entity_type: "Purchase", entity_id: editing.id, details: `Editou pedido: ${form.supplier}` });
+        await AppService.update("Purchase", editing.id, payload, { module: "compras", validate: false });
+        toast({ title: "Pedido atualizado", description: "Persistência confirmada." });
       } else {
         const count = rows.length + 1;
         const code = `PED-${new Date().getFullYear()}-${String(count).padStart(4, "0")}`;
-        const c = await base44.entities.Purchase.create({ ...payload, purchase_code: code, requester_name: user?.full_name || "Sistema" });
-        await Core.audit({ audit_action: "create", module: "compras", entity_type: "Purchase", entity_id: c.id, details: `Criou pedido: ${code} - ${form.supplier} - ${brl(total)}` });
+        const c = await AppService.create("Purchase", { ...payload, purchase_code: code, requester_name: user?.full_name || "Sistema" }, { module: "compras", validate: false });
+        toast({ title: "Pedido criado", description: `${code} — persistência confirmada.` });
       }
-      toast({ title: "Sucesso!" });
       setDialog(false); load();
-    } catch { toast({ title: "Erro", description: "Falha ao salvar", variant: "destructive" }); }
+    } catch (e) { toast({ title: "Erro ao salvar", description: e.message, variant: "destructive" }); }
     setSaving(false);
   };
 
   const approve = async (r) => {
     try {
-      await base44.entities.Purchase.update(r.id, { status: "aprovada", approved_by: user?.full_name, approved_at: new Date().toISOString() });
-      await Core.audit({ audit_action: "confirm", module: "compras", entity_type: "Purchase", entity_id: r.id, details: `Aprovou pedido: ${r.purchase_code}` });
+      await AppService.update("Purchase", r.id, { status: "aprovada", approved_by: user?.full_name, approved_at: new Date().toISOString() }, { module: "compras", validate: false });
       toast({ title: "Pedido aprovado!" }); load();
-    } catch { toast({ title: "Erro", variant: "destructive" }); }
+    } catch (e) { toast({ title: "Erro", description: e.message, variant: "destructive" }); }
   };
 
   const cancel = async (r) => {
-    try { await base44.entities.Purchase.update(r.id, { status: "cancelada" }); await Core.audit({ audit_action: "reject", module: "compras", entity_type: "Purchase", entity_id: r.id, details: `Cancelou: ${r.purchase_code}` }); load(); }
-    catch { toast({ title: "Erro", variant: "destructive" }); }
+    try { await AppService.update("Purchase", r.id, { status: "cancelada" }, { module: "compras", validate: false }); load(); }
+    catch (e) { toast({ title: "Erro", description: e.message, variant: "destructive" }); }
   };
 
   const addItem = () => setForm(f => ({ ...f, items: [...(f.items || []), { name: "", quantity: 0, unit: "un", unit_price: 0, total: 0 }] }));
