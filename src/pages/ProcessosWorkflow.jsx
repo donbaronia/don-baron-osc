@@ -120,6 +120,8 @@ export default function ProcessosWorkflow() {
       const res = await approveAndResume(selected, { user, contextOverride: { value } });
       if (res.resumed) {
         toast({ title: "Valor confirmado", description: "Conta a pagar criada e fluxo concluído.", state: "success" });
+      } else if (res.error) {
+        toast({ title: "Erro ao concluir", description: res.error, variant: "destructive" });
       } else if (res.reason) {
         toast({ title: "Não retomado", description: res.reason, variant: "destructive" });
       }

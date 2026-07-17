@@ -328,9 +328,10 @@ export async function resumeProcess(processId, user) {
     // FINANCEIRO (idempotente: so cria se ainda nao existe)
     if (FINANCE_ROUTES.includes(route_type) && !results.payment_id) {
       if (!(ctx.value > 0)) {
-        // Não finge sucesso: se o valor não foi extraído do documento, PARA aqui
-        // e deixa pendente de revisão manual, em vez de arquivar como concluído
-        // sem nunca ter criado o boleto (bug: documento "sumia" silenciosamente).
+        // Salva o progresso ANTES de pausar — sem isso, ao retomar o processo
+        // reprocessaria o estoque de novo (duplicando quantidade), pois
+        // releria resultados vazios do banco.
+        await recordResults(processId, results);
         return pauseForApproval(processId, {
           reason: "Valor do documento não identificado automaticamente — confirme o valor manualmente para gerar a conta a pagar.",
           context: ctx,
