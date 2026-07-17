@@ -30,6 +30,7 @@ import Inteligencia from '@/pages/Inteligencia';
 import Decisoes from '@/pages/Decisoes';
 import EventBusPage from '@/pages/EventBus';
 import Administracao from '@/pages/Administracao';
+import ResetSistema from '@/pages/ResetSistema';
 import CadastroMestre from '@/pages/CadastroMestre';
 import Integracoes from '@/pages/Integracoes';
 import Kernel from '@/pages/Kernel';
@@ -94,6 +95,7 @@ const AuthenticatedApp = () => {
         <Route path="/decisoes" element={<Decisoes />} />
         <Route path="/event-bus" element={<EventBusPage />} />
         <Route path="/administracao" element={<Administracao />} />
+        <Route path="/reset-sistema" element={<ResetSistema />} />
         <Route path="/cadastro" element={<CadastroMestre />} />
         <Route path="/integracoes" element={<Integracoes />} />
         <Route path="/kernel" element={<Kernel />} />
