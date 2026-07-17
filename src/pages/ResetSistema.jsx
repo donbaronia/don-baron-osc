@@ -6,12 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertTriangle, Trash2, CheckCircle2, Loader2, ShieldOff } from "lucide-react";
 
-// Entidades de DADOS que serão apagadas. Propositalmente FORA desta lista:
-// User, Company, Role, Permission, Module, License, SystemConfig,
-// WhatsAppConfig, Integration, ServiceRegistry, Webhook, RecoveryOperation,
-// SystemLog, AuditLog, TechLog — apagar essas travaria login, configuração
-// de acesso e credenciais de integração, ou destruiria o próprio rastro de
-// auditoria da limpeza.
+// Entidades de DADOS DE TESTE que serão apagadas — só o que o usuário
+// realmente cadastrou manualmente enquanto testava (produtos/notas,
+// fornecedores, funcionários e tudo que deriva disso: estoque, compras,
+// financeiro, documentos). NÃO inclui agentes/IA, planejamento estratégico,
+// configuração de sistema ou credenciais — isso fica intacto.
 const ENTITIES_TO_WIPE = [
   // Cadastro
   "Product", "Supplier", "Customer", "Category", "UnitOfMeasure", "Tag", "CostCenter", "Ingredient", "Recipe",
@@ -25,28 +24,13 @@ const ENTITIES_TO_WIPE = [
   "Employee", "Candidate", "JobOpening", "EmployeeDocument", "TimeRecord", "EmployeeAdvance",
   "PerformanceReview", "Training", "CareerPlan", "Recognition", "Occurrence", "Payroll",
   // Financeiro
-  "Payment", "Receipt", "FinancialTransaction", "FinancialAccount", "FinancialCategory",
-  "IFoodReceipt", "Conciliation", "BudgetItem",
-  // Documentos / Workflow
-  "DBDocument", "DocumentProcess", "WorkflowApproval", "WorkflowDefinition", "WorkflowProcess",
-  "EnterpriseProcess", "DataMapping", "DataQualityAlert",
-  // Motoboys / Logística
-  "Courier", "Sale",
+  "Payment", "Receipt", "FinancialTransaction", "IFoodReceipt", "Conciliation",
+  // Documentos
+  "DBDocument", "DocumentProcess",
+  // Motoboys
+  "Courier",
   // CMV
   "CMVRecord", "CMVGoal",
-  // Agentes / IA (dados gerados, não config — reconstroem sozinhos no próximo "init")
-  "DigitalWorker", "WorkerActivity", "WorkerAlert", "Agent", "AgentConversation", "AgentMessage",
-  "AgentMemory", "AgentLearning", "AIMemory", "BaronAIHistory", "BaronAILearning",
-  "Decision", "KnowledgeEdge", "DataSnapshot",
-  // Planejamento
-  "Goal", "OKR", "StrategicPlan", "StrategicProject", "RoadmapItem", "Scenario", "KPIRecord", "Indicator",
-  // Missões
-  "Mission", "MissionChecklist", "MissionTask",
-  // Notificações / integrações de mensagens (não credenciais)
-  "Notification", "WhatsAppLog", "WhatsAppMessage", "IntegrationLog", "IntegrationQueueItem",
-  // Outros
-  "FileRecord", "TimelineEntry", "SystemTask", "SystemEvent", "SystemHealth", "HealthCheck",
-  "MaintenanceWindow", "TelemetryRecord",
 ];
 
 const CONFIRM_WORD = "RESETAR";
@@ -124,10 +108,10 @@ export default function ResetSistema() {
         </div>
 
         <div className="mt-5 space-y-2 rounded-xl bg-card p-4 text-sm">
-          <p className="font-semibold text-foreground">Vai apagar: {ENTITIES_TO_WIPE.length} tipos de dado</p>
-          <p className="text-muted-foreground">Produtos, Estoque, Movimentações, Funcionários, Financeiro, Compras, Documentos, Fornecedores, Categorias, Unidades, Tags, Vales, Agentes e mais.</p>
+          <p className="font-semibold text-foreground">Vai apagar: {ENTITIES_TO_WIPE.length} tipos de dado (o que você cadastrou testando)</p>
+          <p className="text-muted-foreground">Produtos, Estoque, Movimentações, Funcionários, Financeiro, Compras, Documentos, Fornecedores, Categorias, Unidades, Tags, Vales.</p>
           <p className="mt-2 font-semibold text-foreground">NÃO vai apagar (proteção):</p>
-          <p className="text-muted-foreground">Sua conta de login (User), configuração de acesso (Role/Permission), credenciais de integração (WhatsApp/Webhooks), e os logs de auditoria/sistema.</p>
+          <p className="text-muted-foreground">Sua conta de login, configuração de acesso, credenciais de integração (WhatsApp/Webhooks), logs de auditoria/sistema, os Agentes/Funcionários Digitais e planejamento estratégico.</p>
         </div>
 
         {!running && !done && (
