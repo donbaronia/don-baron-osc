@@ -39,7 +39,10 @@ export const WAITING_STATES = [
 export const TERMINAL_STATES = ["CONCLUIDO", "ERRO"];
 
 const STOCK_ROUTES = ["nota_fiscal", "cupom_fiscal", "xml", "nota_boleto"];
-const FINANCE_ROUTES = ["boleto", "comprovante_pix", "comprovante_bancario", "nota_boleto"];
+// Nota fiscal/cupom/XML também geram conta a pagar quando têm valor —
+// antes só "nota_boleto" fazia isso, deixando nota fiscal comum sem
+// nunca virar lançamento financeiro (item ia pro estoque, valor sumia).
+const FINANCE_ROUTES = ["boleto", "comprovante_pix", "comprovante_bancario", "nota_boleto", "nota_fiscal", "cupom_fiscal", "xml"];
 
 /** Normalizacao de nome para matching fuzzy (copia isolada p/ evitar dependencia circular) */
 function nameSimilarity(a, b) {
