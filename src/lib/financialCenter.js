@@ -1,8 +1,18 @@
 import { base44 } from "@/api/base44Client";
 import { DataEngine } from "@/lib/dataEngine";
+import { daysUntil } from "@/lib/dateUtils";
 
 export const brl = (n = 0) => (Number(n) || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-export const todayStr = () => new Date().toISOString().slice(0, 10);
+// Data local (não UTC) — toISOString() pega a data em UTC, que depois das
+// 21h em Brasília (UTC-3) já mostra o dia seguinte. Isso fazia toda
+// gravação com "hoje" (pagamento, vale, movimentação) datar errado à noite.
+export const todayStr = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
 
 export function weekRange() {
   const now = new Date();
@@ -62,7 +72,7 @@ export const FinancialCenter = {
 
     const alerts = [];
     payments.filter(p => p.status === "pendente" && p.due_date).forEach(p => {
-      const diff = Math.ceil((new Date(p.due_date) - new Date(today)) / (1000 * 60 * 60 * 24));
+      const diff = daysUntil(p.due_date);
       if (diff < 0) alerts.push({ severity: "urgent", message: `Pagamento atrasado: ${p.description || p.supplier_name} — ${brl(p.amount)} (${p.due_date})` });
       else if (diff <= 3) alerts.push({ severity: "warning", message: `Boleto vencendo: ${p.description || p.supplier_name} — ${brl(p.amount)} (${p.due_date})` });
     });

@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/dateUtils";
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
@@ -80,7 +81,7 @@ export default function ContasReceber() {
     { key: "origin", label: "Origem", render: r => (r.origin || "").replace(/_/g, " ") },
     { key: "amount", label: "Valor", render: r => <span className="font-medium">{brl(r.amount)}</span> },
     { key: "net_amount", label: "Líquido", render: r => brl(r.net_amount) },
-    { key: "expected_date", label: "Previsão", render: r => r.expected_date ? new Date(r.expected_date).toLocaleDateString("pt-BR") : "—" },
+    { key: "expected_date", label: "Previsão", render: r => r.expected_date ? formatDateBR(r.expected_date) : "—" },
     { key: "status", label: "Status", render: r => <StatusBadge status={r.status} /> },
     { key: "actions", label: "", render: r => (
       <div className="flex items-center gap-1">

@@ -1,4 +1,5 @@
 import { base44 } from "@/api/base44Client";
+import { daysUntil as calcDaysUntil } from "@/lib/dateUtils";
 
 /**
  * Document Center — Pipeline central de processamento de documentos.
@@ -109,9 +110,7 @@ export function generateAlerts(doc, { duplicate, priceChanges, newProducts }) {
   }
 
   if (doc.due_date) {
-    const due = new Date(doc.due_date);
-    const today = new Date();
-    const daysUntil = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+    const daysUntil = calcDaysUntil(doc.due_date);
     if (daysUntil < 0) {
       alerts.push({
         type: "overdue",

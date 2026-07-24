@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/dateUtils";
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
@@ -93,8 +94,8 @@ export default function ReceiptManagement() {
     { key: "purchase_code", label: "Código", render: r => <span className="font-medium text-neutral-900">{r.purchase_code || "—"}</span> },
     { key: "supplier", label: "Fornecedor" },
     { key: "total_amount", label: "Valor", render: r => brl(r.total_amount) },
-    { key: "expected_delivery_date", label: "Previsto", render: r => r.expected_delivery_date ? new Date(r.expected_delivery_date).toLocaleDateString("pt-BR") : "—" },
-    { key: "received_date", label: "Recebido", render: r => r.received_date ? new Date(r.received_date).toLocaleDateString("pt-BR") : "—" },
+    { key: "expected_delivery_date", label: "Previsto", render: r => r.expected_delivery_date ? formatDateBR(r.expected_delivery_date) : "—" },
+    { key: "received_date", label: "Recebido", render: r => r.received_date ? formatDateBR(r.received_date) : "—" },
     { key: "conference_status", label: "Conferência", render: r => <StatusBadge status={r.conference_status || "pendente"} /> },
     { key: "lead_time_days", label: "Lead Time", render: r => r.lead_time_days ? `${r.lead_time_days}d` : "—" },
     { key: "status", label: "Status", render: r => <StatusBadge status={r.status} /> },

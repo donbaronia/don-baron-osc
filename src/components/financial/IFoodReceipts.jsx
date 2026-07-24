@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/dateUtils";
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
@@ -79,8 +80,8 @@ export default function IFoodReceipts() {
     { key: "campaigns", label: "Campanhas", render: r => brl(r.campaigns) },
     { key: "refunds", label: "Reembolsos", render: r => brl(r.refunds) },
     { key: "net_value", label: "Líquido", render: r => <span className="font-medium">{brl(r.net_value)}</span> },
-    { key: "expected_date", label: "Previsto", render: r => r.expected_date ? new Date(r.expected_date).toLocaleDateString("pt-BR") : "—" },
-    { key: "receipt_date", label: "Realizado", render: r => r.receipt_date ? new Date(r.receipt_date).toLocaleDateString("pt-BR") : "—" },
+    { key: "expected_date", label: "Previsto", render: r => r.expected_date ? formatDateBR(r.expected_date) : "—" },
+    { key: "receipt_date", label: "Realizado", render: r => r.receipt_date ? formatDateBR(r.receipt_date) : "—" },
     { key: "status", label: "Status", render: r => <StatusBadge status={r.status} /> },
     { key: "actions", label: "", render: r => (
       <div className="flex items-center gap-1">

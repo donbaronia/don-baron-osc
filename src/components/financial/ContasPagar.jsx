@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/dateUtils";
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
@@ -100,7 +101,7 @@ export default function ContasPagar() {
     { key: "supplier_name", label: "Fornecedor" },
     { key: "category", label: "Categoria" },
     { key: "amount", label: "Valor", render: r => <span className="font-medium">{brl(r.amount)}</span> },
-    { key: "due_date", label: "Vencimento", render: r => r.due_date ? new Date(r.due_date).toLocaleDateString("pt-BR") : "—" },
+    { key: "due_date", label: "Vencimento", render: r => r.due_date ? formatDateBR(r.due_date) : "—" },
     { key: "payment_method", label: "Forma", render: r => (r.payment_method || "").replace(/_/g, " ") },
     { key: "doc", label: "Boleto", render: r => {
       const doc = getDocFor(r);

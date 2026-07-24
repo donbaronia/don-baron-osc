@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/dateUtils";
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { IE, brl, todayStr } from "@/lib/inventoryEngine";
@@ -170,7 +171,7 @@ export default function InventoryCount() {
   const columns = [
     { key: "inventory_code", label: "Código", render: r => <span className="font-medium text-neutral-900">{r.inventory_code}</span> },
     { key: "inventory_type", label: "Tipo", render: r => <span className="capitalize text-xs text-neutral-500">{(r.inventory_type || "completo").replace(/_/g, " ")}</span> },
-    { key: "inventory_date", label: "Data", render: r => r.inventory_date ? new Date(r.inventory_date).toLocaleDateString("pt-BR") : "—" },
+    { key: "inventory_date", label: "Data", render: r => r.inventory_date ? formatDateBR(r.inventory_date) : "—" },
     { key: "total_items", label: "Itens" },
     { key: "divergence_count", label: "Divergências", render: r => r.divergence_count > 0 ? <span className="text-rose-600 font-medium">{r.divergence_count}</span> : <span className="text-emerald-600">0</span> },
     { key: "total_difference", label: "Diferença Total", render: r => <span className={r.total_difference < 0 ? "text-rose-600" : "text-neutral-900"}>{brl(r.total_difference)}</span> },

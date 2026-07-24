@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/dateUtils";
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { PE, brl, todayStr } from "@/lib/productionEngine";
@@ -101,7 +102,7 @@ export default function ProductionOrders() {
     { key: "produced_quantity", label: "Produzido", render: r => r.produced_quantity > 0 ? <span className="text-emerald-600 font-medium">{r.produced_quantity}</span> : "—" },
     { key: "efficiency_pct", label: "Efic.", render: r => r.efficiency_pct ? `${r.efficiency_pct.toFixed(0)}%` : "—" },
     { key: "responsible", label: "Responsável" },
-    { key: "production_date", label: "Data", render: r => r.production_date ? new Date(r.production_date).toLocaleDateString("pt-BR") : "—" },
+    { key: "production_date", label: "Data", render: r => r.production_date ? formatDateBR(r.production_date) : "—" },
     { key: "priority", label: "Prioridade", render: r => <StatusBadge status={r.priority} /> },
     { key: "status", label: "Status", render: r => <StatusBadge status={r.status} /> },
     { key: "actions", label: "", render: r => (

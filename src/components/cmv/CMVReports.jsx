@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/dateUtils";
 import React, { useEffect, useState } from "react";
 import { CMV, brl } from "@/lib/cmvEngine";
 import { base44 } from "@/api/base44Client";
@@ -63,7 +64,7 @@ export default function CMVReports() {
   const historyColumns = [
     { key: "calculation_code", label: "Código", render: r => <span className="font-medium text-neutral-900">{r.calculation_code}</span> },
     { key: "period_type", label: "Tipo", render: r => <span className="capitalize text-neutral-500">{r.period_type}</span> },
-    { key: "period_date", label: "Período", render: r => r.period_date ? new Date(r.period_date).toLocaleDateString("pt-BR") : "—" },
+    { key: "period_date", label: "Período", render: r => r.period_date ? formatDateBR(r.period_date) : "—" },
     { key: "revenue_net", label: "Receita Líquida", render: r => brl(r.revenue_net) },
     { key: "cost_goods_sold", label: "CMV", render: r => brl(r.cost_goods_sold) },
     { key: "cmv_pct", label: "CMV %", render: r => <span className={r.cmv_pct > 35 ? "font-medium text-rose-600" : "text-neutral-700"}>{r.cmv_pct.toFixed(1)}%</span> },

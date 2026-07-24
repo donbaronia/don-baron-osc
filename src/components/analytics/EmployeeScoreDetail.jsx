@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/dateUtils";
 import React, { useEffect, useState, useCallback } from "react";
 import { PeopleAnalytics, scoreColor, SCORE_DIMENSIONS, RISK_CONFIG, DEPARTMENT_CONFIG, PROMOTION_READINESS_CONFIG, LEADERSHIP_POTENTIAL_CONFIG } from "@/lib/peopleAnalytics";
 import { ArrowLeft, Brain, Loader2, Rocket, TrendingUp } from "lucide-react";
@@ -191,7 +192,7 @@ export default function EmployeeScoreDetail({ employeeId, onBack }) {
               <div key={i} className="rounded-lg border border-neutral-100 p-2">
                 <p className="text-sm font-medium text-neutral-700">{r.title}</p>
                 {r.description && <p className="text-xs text-neutral-500">{r.description}</p>}
-                <p className="text-[10px] text-neutral-400 mt-0.5">{r.awarded_by} · {r.date ? new Date(r.date).toLocaleDateString('pt-BR') : ''}</p>
+                <p className="text-[10px] text-neutral-400 mt-0.5">{r.awarded_by} · {r.date ? formatDateBR(r.date) : ''}</p>
               </div>
             ))}
           </div>

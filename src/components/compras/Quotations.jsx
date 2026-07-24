@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/dateUtils";
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
@@ -101,7 +102,7 @@ export default function Quotations() {
     { key: "freight", label: "Frete", render: r => brl(r.freight) },
     { key: "delivery_days", label: "Prazo", render: r => `${r.delivery_days || 0} dias` },
     { key: "payment_terms", label: "Pagamento" },
-    { key: "validity_date", label: "Validade", render: r => r.validity_date ? new Date(r.validity_date).toLocaleDateString("pt-BR") : "—" },
+    { key: "validity_date", label: "Validade", render: r => r.validity_date ? formatDateBR(r.validity_date) : "—" },
     { key: "supplier_overall_score", label: "Score", render: r => r.supplier_overall_score ? `${r.supplier_overall_score}/100` : "—" },
     { key: "status", label: "Status", render: r => <StatusBadge status={r.status} /> },
     { key: "actions", label: "", render: r => (

@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/dateUtils";
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
@@ -65,7 +66,7 @@ export default function SupplierScorecard() {
       const icon = r.risk_level === "alto" ? <ShieldAlert className="h-4 w-4 text-rose-600" /> : r.risk_level === "medio" ? <AlertTriangle className="h-4 w-4 text-amber-600" /> : <ShieldCheck className="h-4 w-4 text-emerald-600" />;
       return <div className="flex items-center gap-1">{icon}<span className="capitalize">{r.risk_level || "baixo"}</span></div>;
     } },
-    { key: "last_purchase_date", label: "Última Compra", render: r => r.last_purchase_date ? new Date(r.last_purchase_date).toLocaleDateString("pt-BR") : "—" },
+    { key: "last_purchase_date", label: "Última Compra", render: r => r.last_purchase_date ? formatDateBR(r.last_purchase_date) : "—" },
   ];
 
   return (

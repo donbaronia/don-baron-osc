@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/dateUtils";
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
@@ -77,7 +78,7 @@ export default function PurchaseRequests() {
     { key: "quantity", label: "Qtd", render: r => `${r.quantity} ${r.unit || ""}` },
     { key: "priority", label: "Prioridade", render: r => <StatusBadge status={r.priority} /> },
     { key: "requester_name", label: "Solicitante" },
-    { key: "due_date", label: "Prazo", render: r => r.due_date ? new Date(r.due_date).toLocaleDateString("pt-BR") : "—" },
+    { key: "due_date", label: "Prazo", render: r => r.due_date ? formatDateBR(r.due_date) : "—" },
     { key: "quotation_count", label: "Cotações" },
     { key: "status", label: "Status", render: r => <StatusBadge status={r.status} /> },
     { key: "actions", label: "", render: r => (

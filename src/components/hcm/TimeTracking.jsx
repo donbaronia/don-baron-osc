@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/dateUtils";
 import React, { useEffect, useState, useCallback } from "react";
 import { HCM, TIME_RECORD_STATUS_CONFIG, TIME_RECORD_TYPE_CONFIG } from "@/lib/hcmEngine";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -108,7 +109,7 @@ export default function TimeTracking({ refreshKey }) {
                   return (
                     <tr key={r.id} className="border-b border-neutral-100 hover:bg-neutral-50">
                       <td className="p-3 font-medium text-neutral-700">{r.employee_name}</td>
-                      <td className="p-3 text-neutral-500">{r.date ? new Date(r.date).toLocaleDateString('pt-BR') : '—'}</td>
+                      <td className="p-3 text-neutral-500">{r.date ? formatDateBR(r.date) : '—'}</td>
                       <td className="p-3 text-neutral-600">{r.clock_in || '—'}</td>
                       <td className="p-3 text-neutral-600">{r.clock_out || '—'}</td>
                       <td className="p-3 text-neutral-400">{tCfg.emoji} {tCfg.label}</td>

@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/dateUtils";
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
@@ -84,8 +85,8 @@ export default function PurchaseOrders() {
     { key: "purchase_code", label: "Código", render: r => <span className="font-medium text-neutral-900">{r.purchase_code || "—"}</span> },
     { key: "supplier", label: "Fornecedor" },
     { key: "total_amount", label: "Valor", render: r => <span className="font-medium">{brl(r.total_amount)}</span> },
-    { key: "order_date", label: "Data", render: r => r.order_date ? new Date(r.order_date).toLocaleDateString("pt-BR") : "—" },
-    { key: "expected_delivery_date", label: "Previsto", render: r => r.expected_delivery_date ? new Date(r.expected_delivery_date).toLocaleDateString("pt-BR") : "—" },
+    { key: "order_date", label: "Data", render: r => r.order_date ? formatDateBR(r.order_date) : "—" },
+    { key: "expected_delivery_date", label: "Previsto", render: r => r.expected_delivery_date ? formatDateBR(r.expected_delivery_date) : "—" },
     { key: "priority", label: "Prioridade", render: r => <StatusBadge status={r.priority} /> },
     { key: "status", label: "Status", render: r => <StatusBadge status={r.status} /> },
     { key: "actions", label: "", render: r => (

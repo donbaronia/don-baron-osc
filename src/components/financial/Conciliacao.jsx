@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/dateUtils";
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Core } from "@/lib/coreEngine";
@@ -66,7 +67,7 @@ export default function Conciliacao() {
   };
 
   const columns = [
-    { key: "conciliation_date", label: "Data", render: r => r.conciliation_date ? new Date(r.conciliation_date).toLocaleDateString("pt-BR") : "—" },
+    { key: "conciliation_date", label: "Data", render: r => r.conciliation_date ? formatDateBR(r.conciliation_date) : "—" },
     { key: "source", label: "Origem", render: r => <span className="font-medium capitalize">{(r.source || "").replace(/_/g, " ")}</span> },
     { key: "reference", label: "Referência" },
     { key: "expected_value", label: "Esperado", render: r => brl(r.expected_value) },
